@@ -1,0 +1,49 @@
+import { DB, MoneyType } from '../../storage/DB';
+import { StorageHandle } from '../../storage/StorageHandle';
+
+export class Income {
+    storage: StorageHandle;
+    db: DB;
+    allMoney: number = 0;
+
+    constructor(dbName: string) {
+        this.db = new DB(dbName);
+        this.storage = new StorageHandle(this.db);
+    }
+
+    async deleteIncome(name: string) {
+        return await this.storage.deleteFromStorage(name, 'income');
+    }
+
+    async addIncome(name: string, income: MoneyType) {
+        return await this.storage.setToStorage(name, income);
+    }
+
+    async addNewTypeIncome(name: string) {
+        return await this.storage.addNewMoneyStorage(name, 'income');
+    }
+
+    async getIncome(name: string) {
+        return await this.storage.getData('income', name);
+    }
+
+    async getAllIncome(): Promise<MoneyType[]> {
+        const arrayIncome = this.storage.storages['income'];
+        const result: MoneyType[] = [];
+
+        arrayIncome.forEach(async (storageName) => {
+            const data = await this.storage.getData('income', storageName);
+            result.push(data);
+        });
+
+        return result;
+    }
+
+    async changeIncomes(name: string, id: number, data: MoneyType): Promise<boolean> {
+        return await this.storage.updateDateInStorage(name, data, id);
+    }
+
+    getIncomesTypes() {
+        return this.storage.storages.income;
+    }
+}

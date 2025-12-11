@@ -1,20 +1,47 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Pages from './Pages';
+import Home from './pages/HomeHandle';
+import Menu from './pages/MenuHandle';
+import WalletsPage from './pages/WalletsPage';
+import { Money } from './models/Money';
+import IncomeTypePage from './pages/IncomeTypePage';
+import ExpenceTypePage from './pages/ExpenceTypePage';
+import IncomePage from './pages/IncomePage';
+import ExpencePage from './pages/ExpencePage';
+const Stack = createNativeStackNavigator();
+
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+	const money = new Money('mymoney.sqlite');
+	React.useEffect(() => {
+		(async () => {
+			await money.wallet.storage.updateTablesNames();
+		})();
+	}, []);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+	const pagesPropObj = {
+		pages: [
+			new Home(),
+			new Menu(),
+			new WalletsPage(money),
+			new IncomeTypePage(money),
+			new ExpenceTypePage(money),
+			new IncomePage(money),
+			new ExpencePage(money)
+		],
+		money: money
+	}
+
+
+	const pages = new Pages(pagesPropObj);
+	Menu.addPages(pages.pages);
+	return (
+		<NavigationContainer>
+			<Stack.Navigator>
+				{pages.getPages()}
+			</Stack.Navigator>
+		</NavigationContainer>
+	);
+}

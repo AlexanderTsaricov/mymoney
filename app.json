@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.alexvin.mymoney"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,10 +22,19 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.alexvin.mymoney"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-sqlite"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "28b481d0-ebdf-45ca-ad65-a504009d0971"
+      }
     }
   }
 }
