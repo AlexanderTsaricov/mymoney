@@ -20,7 +20,7 @@ export class Money {
     }
 
     async getAllHaveMoney(): Promise<number> {
-        const allWalletsData = await this.wallet.getAllWallet();
+        const allWalletsData = await this.wallet.getAllWallets();
         let result = 0;
 
         allWalletsData.forEach((wallet) => {
@@ -28,6 +28,10 @@ export class Money {
         });
 
         return result;
+    }
+
+    async getAllWallet(): Promise<MoneyType[]> {
+        return await this.wallet.getAllWallets();
     }
 
     async addExpence(walletName: string, expenceName: string, expence: MoneyType): Promise<boolean> {
@@ -54,16 +58,16 @@ export class Money {
         return await this.wallet.changeMoney(walletName, 1, walletData);
     }
 
-    async getIncome(incomeName: string): Promise<MoneyType> {
-        return await this.income.getIncome(incomeName);
+    async getIncome(incomeName: string, id: number): Promise<MoneyType> {
+        return await this.income.getIncome(incomeName, id.toString());
     }
 
     async getExpence(expenceName: string): Promise<MoneyType> {
         return await this.expence.getExpences(expenceName);
     }
 
-    async deleteIncome(incomeName: string): Promise<boolean> {
-        return await this.income.deleteIncome(incomeName);
+    async deleteIncome(incomeName: string, id: number): Promise<boolean> {
+        return await this.income.deleteIncome(incomeName, id);
     }
 
     async deleteExpence(expenceName: string): Promise<boolean> {

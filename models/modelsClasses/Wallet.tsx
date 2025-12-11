@@ -13,24 +13,34 @@ export class Wallet {
         this.storage = new StorageHandle(this.db);
     }
 
-    async deleteWallet(name: string) {
-        return await this.storage.deletStorage(name + '_wallet');
-    }
-    async addWallet(name: string, startMoney: MoneyType): Promise<boolean> {
-        const tableName = name + '_wallet';
-        console.log("до проверки");
-        const tableExist = await this.storage.isStorageExist(tableName);
-
-        if (!tableExist) {
-            const created = await this.storage.addNewMoneyStorage(name, 'wallet');
-            if (!created) {
-                throw new DBException('Не удалось создать таблицу кошелька');
-            }
+    async deleteWallet(name: string, id: number) {
+        try {
+            return await this.storage.deleteFromStorage('wallets', 'wallet', id);
+        } catch (error) {
+            console.error(error);
         }
-        const result = await this.storage.setToStorage(tableName, startMoney);
-        await this.storage.updateTablesNames();
 
-        return result;
+    }
+    async addWallet(startMoney: MoneyType): Promise<boolean> {
+        const tableExist = await this.storage.isStorageExist('wallets');
+        console.log(tableExist);
+        try {
+            if (!tableExist) {
+                const created = await this.storage.addNewMoneyStorage('wallets', 'wallet', startMoney);
+                if (!created) {
+                    throw new DBException('Не удалось создать таблицу кошелька');
+                }
+            }
+            const result = await this.storage.setToStorage('wallets', startMoney);
+            await this.storage.updateTablesNames();
+
+            return result;
+        } catch (error) {
+            console.error(error);
+        }
+
+        return false;
+
     }
 
 
@@ -40,19 +50,13 @@ export class Wallet {
     }
 
     async getWallet(name: string) {
-        return await this.storage.getData('wallet', name);
+        const result = await this.storage.getData('wallet', 'wallets', 'name', name);
+        console.log("res get", result);
+        return result;
     }
 
-    async getAllWallet(): Promise<MoneyType[]> {
-        const arrayIncome = this.storage.storages['wallet'];
-        const result: MoneyType[] = [];
-
-        arrayIncome.forEach(async (storageName) => {
-            const data = await this.storage.getData('wallet', storageName);
-            result.push(data);
-        });
-
-        return result;
+    async getAllWallets(): Promise<MoneyType[]> {
+        return await this.storage.getAllDataByName('wallets');
     }
 
     async changeMoney(name: string, id: number, data: MoneyType): Promise<boolean> {

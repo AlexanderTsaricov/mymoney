@@ -1,7 +1,7 @@
 import { Money } from "../models/Money";
 import Page from "../models/Page";
 import React from "react";
-import { Text, TextInput, View, Button, ScrollView } from "react-native";
+import { Text, TextInput, View, Button, ScrollView, Alert } from "react-native";
 
 class WalletsPage extends Page {
     money: Money;
@@ -15,42 +15,53 @@ class WalletsPage extends Page {
     // showWallets — функциональный компонент с хуками
     static ShowWallets: React.FC<{ money: Money }> = ({ money }) => {
         const [wallets, setWallets] = React.useState<string[]>([]);
-        const [walletData, setWalletData] = React.useState<Record<string, number>>({});
+        const [walletData, setWalletData] = React.useState<Record<string, { money: number; id: number }>>({});
 
         const refresh = async () => {
             await money.wallet.storage.updateTablesNames();
             const names = money.wallet.getWalletsNames();
             setWallets(names);
 
-            const data: Record<string, number> = {};
+            const data: Record<string, { money: number; id: number }> = {};
+
             for (const name of names) {
                 const wallet = await money.wallet.getWallet(name);
-                data[name] = wallet.money;
+                data[name] = { money: wallet.money, id: wallet.id };
             }
+
             setWalletData(data);
         };
 
         React.useEffect(() => {
             refresh();
-        }, []);
+        }, [wallets.length]);
 
         if (wallets.length === 0) return <Text>Нет кошельков</Text>;
 
         return (
             <ScrollView style={{ marginTop: 20 }}>
-                {wallets.map(wallet => (
-                    <View key={wallet} style={{ marginBottom: 10 }}>
-                        <Text>{wallet}</Text>
-                        <Text>{'Сумма на кошельке: ' + (walletData[wallet] ?? 0)}</Text>
-                        <Button
-                            title="Удалить"
-                            onPress={async () => {
-                                await money.wallet.deleteWallet(wallet);
-                                refresh();
-                            }}
-                        />
-                    </View>
-                ))}
+                {wallets.map((wallet, index) => {
+                    const data = walletData[wallet];
+                    if (!data) return null;
+
+                    const key = data.id ? `${data.id}_${wallet}` : index;
+
+                    return (
+                        <View key={key} style={{ marginBottom: 10 }}>
+                            <Text>{wallet}</Text>
+                            <Text>{'Сумма на кошельке: ' + data.money}</Text>
+                            <Button
+                                title="Удалить"
+                                onPress={async () => {
+                                    await money.wallet.deleteWallet(wallet, data.id);
+                                    refresh();
+                                }}
+                            />
+                        </View>
+                    );
+                })}
+
+
             </ScrollView>
         );
     };
@@ -88,11 +99,13 @@ class WalletsPage extends Page {
                         if (!newWalletName) return;
                         const sum = parseFloat(startSumNewWallet);
                         if (isNaN(sum)) return;
-
-                        await money.wallet.addWallet(newWalletName, { id: 0, money: sum, time_data: new Date().toISOString(), comment: null });
+                        const moneyType = { id: 0, money: sum, time_data: new Date().toISOString(), comment: null, name: newWalletName };
+                        console.log(moneyType);
+                        const result = await money.wallet.addWallet(moneyType);
                         setNewWalletName('');
                         setStartSumNewWallet('');
                         refreshWallets();
+                        if (!result) Alert.alert('Не удалось создать кошелек');
                     }}
                 />
 

@@ -11,8 +11,8 @@ export class Income {
         this.storage = new StorageHandle(this.db);
     }
 
-    async deleteIncome(name: string) {
-        return await this.storage.deleteFromStorage(name, 'income');
+    async deleteIncome(name: string, id: number) {
+        return await this.storage.deleteFromStorage(name, 'income', id);
     }
 
     async addIncome(name: string, income: MoneyType) {
@@ -23,8 +23,8 @@ export class Income {
         return await this.storage.addNewMoneyStorage(name, 'income');
     }
 
-    async getIncome(name: string) {
-        return await this.storage.getData('income', name);
+    async getIncome(name: string, id: string) {
+        return await this.storage.getData('income', name, 'id', id);
     }
 
     async getAllIncome(): Promise<MoneyType[]> {
@@ -32,7 +32,7 @@ export class Income {
         const result: MoneyType[] = [];
 
         arrayIncome.forEach(async (storageName) => {
-            const data = await this.storage.getData('income', storageName);
+            const data = await this.storage.getData('income', storageName, '*', '*');
             result.push(data);
         });
 
