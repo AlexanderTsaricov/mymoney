@@ -35,7 +35,6 @@ class IncomeTypePage extends Page {
                         };
                         try {
                             const result = await this.addIncomeType(incomeName);
-                            console.log('addIncomeType result:', result);
 
                             if (result) {
                                 await this.money.wallet.storage.updateTablesNames();

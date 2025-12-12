@@ -35,7 +35,6 @@ class ExpenceTypePage extends Page {
                         };
                         try {
                             const result = await this.addExpenceType(expenceName);
-                            console.log('addIncomeType result:', result);
 
                             if (result) {
                                 await this.money.wallet.storage.updateTablesNames();

@@ -7,12 +7,11 @@ class WalletsPage extends Page {
     money: Money;
 
     constructor(money: Money) {
-        // Конструктор не меняем
         super('Кошельки', 'Wallets', () => <WalletsPage.ScreenComponent money={money} />);
         this.money = money;
     }
 
-    // showWallets — функциональный компонент с хуками
+
     static ShowWallets: React.FC<{ money: Money }> = ({ money }) => {
         const [wallets, setWallets] = React.useState<string[]>([]);
         const [walletData, setWalletData] = React.useState<Record<string, { money: number; id: number }>>({});
@@ -66,7 +65,6 @@ class WalletsPage extends Page {
         );
     };
 
-    // Screen — функциональный компонент с хуками
     static ScreenComponent: React.FC<{ money: Money }> = ({ money }) => {
         const [newWalletName, setNewWalletName] = React.useState('');
         const [startSumNewWallet, setStartSumNewWallet] = React.useState('');
@@ -100,7 +98,6 @@ class WalletsPage extends Page {
                         const sum = parseFloat(startSumNewWallet);
                         if (isNaN(sum)) return;
                         const moneyType = { id: 0, money: sum, time_data: new Date().toISOString(), comment: null, name: newWalletName };
-                        console.log(moneyType);
                         const result = await money.wallet.addWallet(moneyType);
                         setNewWalletName('');
                         setStartSumNewWallet('');

@@ -23,7 +23,6 @@ export class Wallet {
     }
     async addWallet(startMoney: MoneyType): Promise<boolean> {
         const tableExist = await this.storage.isStorageExist('wallets');
-        console.log(tableExist);
         try {
             if (!tableExist) {
                 const created = await this.storage.addNewMoneyStorage('wallets', 'wallet', startMoney);
@@ -51,7 +50,6 @@ export class Wallet {
 
     async getWallet(name: string) {
         const result = await this.storage.getData('wallet', 'wallets', 'name', name);
-        console.log("res get", result);
         return result;
     }
 

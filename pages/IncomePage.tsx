@@ -14,7 +14,6 @@ class IncomePage extends Page {
         this.money.income.storage.updateTablesNames();
         this.incomeTypes = money.income.getIncomesTypes();
         this.wallets = money.wallet.getWalletsNames();
-        console.log(money.income.getIncomesTypes());
     }
 
     ButtonOrError = (walletSelector: Selector, incomeNameSelector: Selector, sumCount: number, comment: string) => {
