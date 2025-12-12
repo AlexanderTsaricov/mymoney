@@ -1,46 +1,53 @@
-import RNPickerSelect from 'react-native-picker-select';
-import { View, Text } from 'react-native';
 import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import RNPickerSelect, { Item } from 'react-native-picker-select';
+import { MoneyType } from '../storage/DB';
+import { pageStyles } from '../Styles/page';
 
-class Selector {
+interface SelectorProps {
     title: string;
     titleDontHave: string;
-    items: string[];
-    private _selected: string;
+    items: MoneyType[];
+    onChange?: (value: string) => void;
+}
 
-    constructor(title: string, titleDontHave: string, items: string[]) {
-        this.title = title;
-        this.titleDontHave = titleDontHave;
-        this.items = items;
-        this._selected = items.length > 0 ? items[0] : 'none';
-    }
+const Selector: React.FC<SelectorProps> = ({ title, titleDontHave, items, onChange }) => {
+    const initialValue = items.length > 0 ? items[0].name || '' : 'none';
+    const [selected, setSelected] = useState<string>(initialValue);
 
-    getSelected(): string {
-        return this._selected;
-    }
+    const handleValueChange = (value: string) => {
+        setSelected(value);
+        if (onChange) onChange(value);
+    };
 
-    Screen = () => {
-        const [item, setItem] = useState<string>(this._selected);
+    const pickerItems: Item[] =
+        items.length > 0
+            ? items.map((w) => ({
+                label: w.name || '',
+                value: w.name || '',
+            }))
+            : [{ label: titleDontHave, value: 'none' }];
 
-        return (
-            <View>
-                <Text>{this.title}</Text>
+    return (
+        <View style={pageStyles.selectorContainer}>
+            <Text style={pageStyles.selectorTitle}>{title}</Text>
+
+            {/* Обёртка с фиолетовым фоном, скруглением и тенью */}
+            <View style={pageStyles.selectorWrapper}>
                 <RNPickerSelect
-                    onValueChange={(value) => setItem(value)}
-                    value={item}
-                    items={
-                        this.items.length > 0
-                            ? this.items.map((w) => ({ label: w, value: w }))
-                            : [{ label: this.titleDontHave, value: 'none' }]
-                    }
+                    onValueChange={handleValueChange}
+                    value={selected}
+                    items={pickerItems}
+                    placeholder={{ label: titleDontHave, value: 'none' }}
                     style={{
-                        inputIOS: { color: 'black', padding: 10 },
-                        inputAndroid: { color: 'black', padding: 10 },
+                        inputIOS: pageStyles.selectorInputInner,
+                        inputAndroid: pageStyles.selectorInputInner,
+                        placeholder: pageStyles.selectorPlaceholder
                     }}
                 />
             </View>
-        );
-    }
-}
+        </View>
+    );
+};
 
 export default Selector;

@@ -25,7 +25,7 @@ export const pageStyles = StyleSheet.create({
 
     headContainer: {
         backgroundColor: '#a68ebf',
-        height: height
+        flex: 1
     },
 
     button: {
@@ -73,6 +73,44 @@ export const pageStyles = StyleSheet.create({
 
     inputTextFocus: {
         borderColor: '#5f348a'
+    },
+
+    // Стили для селекторов
+    selectorContainer: {
+        width: '100%',
+        marginVertical: 8,
+    },
+
+    selectorTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#fff',
+        marginBottom: 5,
+        textShadowColor: '#000',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 2,
+    },
+
+    selectorWrapper: {
+        borderRadius: 8,
+        backgroundColor: '#5f348a',  // фиолетовый фон
+        borderWidth: 1,
+        borderColor: '#7e57c2',      // фиолетовая рамка
+        overflow: 'hidden',           // важно для iOS и Android
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 3,                 // для Android
+    },
+
+    selectorInputInner: {
+        color: '#fff',
+    },
+
+    selectorPlaceholder: {
+        color: '#d1c0eb'
     }
+
 
 });

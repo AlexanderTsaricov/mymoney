@@ -3,38 +3,38 @@ import { Money } from "../models/Money";
 import { MoneyType } from "../storage/DB";
 import { pageStyles } from "../Styles/page";
 
-type WalletsProps = {
+type IncomesProps = {
     money: Money,
-    wallets: MoneyType[],
-    setWallets: React.Dispatch<React.SetStateAction<MoneyType[]>>;
+    incomes: MoneyType[],
+    setIncomeTypes: React.Dispatch<React.SetStateAction<MoneyType[]>>;
     showButton: boolean
 }
 
-export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, showButton }) => {
+export const IncomeTypes: React.FC<IncomesProps> = ({ money, incomes, setIncomeTypes, showButton }) => {
     return (
         <View>
-            {wallets.length === 0 ? (
-                <Text style={pageStyles.text}>У вас нет кошельков</Text>
+            <Text style={pageStyles.text} >
+                Типы доходов
+            </Text>
+            {incomes.length === 0 ? (
+                <Text style={pageStyles.text}>У вас нет типов доходоа</Text>
             ) : (
-                wallets.map((w, index) => (
+                incomes.map((w, index) => (
                     <View key={index}>
                         <Text style={pageStyles.text} >
-                            Название кошелька: {w.name}
-                        </Text>
-                        <Text style={pageStyles.text}>
-                            Баланс: {w.money} RUB
+                            Название типа: {w.name}
                         </Text>
                         {showButton && (
                             <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                                 <TouchableOpacity
                                     style={[pageStyles.button, { width: 160, marginTop: 10 }]}
                                     onPress={async () => {
-                                        await money.wallet.deleteWallet(w.name as string, w.id);
-                                        const wallets = await money.wallet.getAllWallets();
-                                        setWallets(wallets);
+                                        await money.income.deleteIncome(w.name as string, w.id);
+                                        const newIncomes = await money.income.getAllIncome();
+                                        setIncomeTypes(newIncomes);
                                     }}
                                 >
-                                    <Text style={pageStyles.buttonText}>Удалить кошелёк</Text>
+                                    <Text style={pageStyles.buttonText}>Удалить тип</Text>
                                 </TouchableOpacity>
                             </View>
                         )}

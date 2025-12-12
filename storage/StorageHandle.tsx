@@ -76,15 +76,20 @@ export class StorageHandle {
      * @returns 
      */
     async addNewMoneyStorage(name: string, storageType: MoneyStorageType, money: MoneyType | null = null): Promise<boolean> {
-        const tableFullName = `${name}_${storageType}`;
-        let result = null;
-        if (storageType == "expences" || storageType == "income") {
-            result = await this.db.addNewTable(tableFullName, this.templateMoneyChanger);
-        } else {
-            result = await this.db.addNewTable('wallets', this.templateWallet);
+        try {
+            const tableFullName = `${name}_${storageType}`;
+            let result = null;
+            if (storageType == "expences" || storageType == "income") {
+                result = await this.db.addNewTable(tableFullName, this.templateMoneyChanger);
+            } else {
+                result = await this.db.addNewTable('wallets', this.templateWallet);
+            }
+            this.storages[storageType].push(name);
+            return result;
+        } catch (error) {
+            console.error(error);
         }
-        this.storages[storageType].push(name);
-        return result;
+        return false;
     }
 
 

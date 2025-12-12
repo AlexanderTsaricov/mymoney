@@ -9,12 +9,14 @@ import Menu from './pages/Menu'; // новая страница
 import { headerStyles } from './Styles/header';
 import WalletsPage from './pages/WalletsPage';
 import { MoneyType } from './storage/DB';
+import IncomePage from './pages/IncomePage';
 
 const Stack = createNativeStackNavigator();
 
 const screens = [
 	{ name: 'Главная', component: Home },
-	{ name: 'Новый кошелёк', component: WalletsPage }
+	{ name: 'Новый кошелёк', component: WalletsPage },
+	{ name: 'Доходы', component: IncomePage }
 ];
 
 export default function App() {

@@ -28,15 +28,9 @@ export class Income {
     }
 
     async getAllIncome(): Promise<MoneyType[]> {
-        const arrayIncome = this.storage.storages['income'];
-        const result: MoneyType[] = [];
+        const arrayIncome = this.storage.getAllDataByType('income');
 
-        arrayIncome.forEach(async (storageName) => {
-            const data = await this.storage.getData('income', storageName, '*', '*');
-            result.push(data);
-        });
-
-        return result;
+        return arrayIncome;
     }
 
     async changeIncomes(name: string, id: number, data: MoneyType): Promise<boolean> {
