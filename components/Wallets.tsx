@@ -26,16 +26,18 @@ export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, sh
                             Баланс: {w.money} RUB
                         </Text>
                         {showButton && (
-                            <TouchableOpacity
-                                style={pageStyles.button}
-                                onPress={async () => {
-                                    await money.wallet.deleteWallet(w.name as string, w.id);
-                                    const wallets = await money.wallet.getAllWallets();
-                                    setWallets(wallets);
-                                }}
-                            >
-                                <Text style={pageStyles.buttonText}>Удалить кошелёк</Text>
-                            </TouchableOpacity>
+                            <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                                <TouchableOpacity
+                                    style={[pageStyles.button, { width: 160, marginTop: 10 }]}
+                                    onPress={async () => {
+                                        await money.wallet.deleteWallet(w.name as string, w.id);
+                                        const wallets = await money.wallet.getAllWallets();
+                                        setWallets(wallets);
+                                    }}
+                                >
+                                    <Text style={pageStyles.buttonText}>Удалить кошелёк</Text>
+                                </TouchableOpacity>
+                            </View>
                         )}
                     </View>
                 ))
