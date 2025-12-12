@@ -54,7 +54,9 @@ export class Wallet {
     }
 
     async getAllWallets(): Promise<MoneyType[]> {
-        return await this.storage.getAllDataByName('wallets');
+        const result = await this.storage.getAllDataByName('wallets');
+        console.log("allWallets: ", result);
+        return result;
     }
 
     async changeMoney(name: string, id: number, data: MoneyType): Promise<boolean> {
@@ -63,5 +65,9 @@ export class Wallet {
 
     getWalletsNames() {
         return this.storage.storages.wallet;
+    }
+
+    async deletData() {
+        return await this.db.dropTable('wallets');
     }
 }

@@ -27,6 +27,8 @@ export class Money {
             result += wallet.money;
         });
 
+        console.log("allMoney: ", result);
+
         return result;
     }
 
@@ -72,6 +74,10 @@ export class Money {
 
     async deleteExpence(expenceName: string): Promise<boolean> {
         return await this.expence.deleteExpences(expenceName);
+    }
+
+    async deleteDatabase() {
+        await this.wallet.deletData();
     }
 
 }

@@ -1,115 +1,85 @@
-import { Money } from "../models/Money";
-import Page from "../models/Page";
-import React from "react";
-import { Text, TextInput, View, Button, ScrollView, Alert } from "react-native";
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
+import { Money } from '../models/Money';
+import { pageStyles } from '../Styles/page';
+import { MoneyType } from '../storage/DB';
+import { Wallets } from '../components/Wallets';
 
-class WalletsPage extends Page {
-    money: Money;
-
-    constructor(money: Money) {
-        super('Кошельки', 'Wallets', () => <WalletsPage.ScreenComponent money={money} />);
-        this.money = money;
-    }
-
-
-    static ShowWallets: React.FC<{ money: Money }> = ({ money }) => {
-        const [wallets, setWallets] = React.useState<string[]>([]);
-        const [walletData, setWalletData] = React.useState<Record<string, { money: number; id: number }>>({});
-
-        const refresh = async () => {
-            await money.wallet.storage.updateTablesNames();
-            const names = money.wallet.getWalletsNames();
-            setWallets(names);
-
-            const data: Record<string, { money: number; id: number }> = {};
-
-            for (const name of names) {
-                const wallet = await money.wallet.getWallet(name);
-                data[name] = { money: wallet.money, id: wallet.id };
-            }
-
-            setWalletData(data);
-        };
-
-        React.useEffect(() => {
-            refresh();
-        }, [wallets.length]);
-
-        if (wallets.length === 0) return <Text>Нет кошельков</Text>;
-
-        return (
-            <ScrollView style={{ marginTop: 20 }}>
-                {wallets.map((wallet, index) => {
-                    const data = walletData[wallet];
-                    if (!data) return null;
-
-                    const key = data.id ? `${data.id}_${wallet}` : index;
-
-                    return (
-                        <View key={key} style={{ marginBottom: 10 }}>
-                            <Text>{wallet}</Text>
-                            <Text>{'Сумма на кошельке: ' + data.money}</Text>
-                            <Button
-                                title="Удалить"
-                                onPress={async () => {
-                                    await money.wallet.deleteWallet(wallet, data.id);
-                                    refresh();
-                                }}
-                            />
-                        </View>
-                    );
-                })}
-
-
-            </ScrollView>
-        );
-    };
-
-    static ScreenComponent: React.FC<{ money: Money }> = ({ money }) => {
-        const [newWalletName, setNewWalletName] = React.useState('');
-        const [startSumNewWallet, setStartSumNewWallet] = React.useState('');
-
-        const refreshWallets = async () => {
-            await money.wallet.storage.updateTablesNames();
-        };
-
-        return (
-            <View style={{ padding: 10 }}>
-                <Text>Добавить кошелёк</Text>
-                <TextInput
-                    placeholder="Имя кошелька"
-                    value={newWalletName}
-                    onChangeText={setNewWalletName}
-                    style={{ borderWidth: 1, borderColor: 'black', borderRadius: 4, padding: 8, marginVertical: 5 }}
-                    placeholderTextColor='grey'
-                />
-                <TextInput
-                    placeholder="Стартовая сумма"
-                    keyboardType="numeric"
-                    value={startSumNewWallet}
-                    onChangeText={setStartSumNewWallet}
-                    style={{ borderWidth: 1, borderColor: 'black', borderRadius: 4, padding: 8, marginBottom: 10 }}
-                    placeholderTextColor='grey'
-                />
-                <Button
-                    title="Добавить"
-                    onPress={async () => {
-                        if (!newWalletName) return;
-                        const sum = parseFloat(startSumNewWallet);
-                        if (isNaN(sum)) return;
-                        const moneyType = { id: 0, money: sum, time_data: new Date().toISOString(), comment: null, name: newWalletName };
-                        const result = await money.wallet.addWallet(moneyType);
-                        setNewWalletName('');
-                        setStartSumNewWallet('');
-                        refreshWallets();
-                        if (!result) Alert.alert('Не удалось создать кошелек');
-                    }}
-                />
-
-                <WalletsPage.ShowWallets money={money} />
-            </View>
-        );
-    };
+type WalletsPageProps = {
+    money: Money
 }
 
-export default WalletsPage;
+export default function WalletsPage({ money }: WalletsPageProps) {
+    const [newWalletName, onChangeNewWalletName] = React.useState('');
+    const [startSum, onChangeStartSum] = React.useState('');
+    const [isNameFocused, setNameIsFocused] = React.useState(false);
+    const [isSumFocused, setSumIsFocused] = React.useState(false);
+    const [wallets, setWallets] = useState<MoneyType[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadWallets = async () => {
+            const data = await money.wallet.getAllWallets();
+            setWallets(data);
+            setLoading(false);
+        };
+
+        loadWallets();
+    }, [money]);
+
+    const addNewWallet = async (name: string, sum: number) => {
+        const wallet = {
+            id: 1,
+            name: name,
+            money: sum,
+            time_data: new Date().toString(),
+            comment: null
+        }
+        await money.wallet.addWallet(wallet);
+    }
+
+    return (
+        <View style={pageStyles.headContainer}>
+            <View style={pageStyles.block}>
+                <Text style={pageStyles.text}>Новый кошелек</Text>
+                <TextInput
+                    placeholder='Имя нового кошелька'
+                    value={newWalletName}
+                    onChangeText={onChangeNewWalletName}
+                    style={[pageStyles.inputText, isNameFocused && pageStyles.inputTextFocus]}
+                    onFocus={() => setNameIsFocused(true)}
+                    onBlur={() => setNameIsFocused(false)}
+                    placeholderTextColor={'#a68ebf'}
+                />
+                <TextInput
+                    placeholder='Начальная сумма'
+                    keyboardType='numeric'
+                    value={startSum}
+                    onChangeText={onChangeStartSum}
+                    style={[pageStyles.inputText, isSumFocused && pageStyles.inputTextFocus]}
+                    onFocus={() => setSumIsFocused(true)}
+                    onBlur={() => setSumIsFocused(false)}
+                    placeholderTextColor={'#a68ebf'}
+                />
+                <TouchableOpacity
+                    style={pageStyles.button}
+                    onPress={async () => {
+                        await addNewWallet(newWalletName, parseFloat(startSum));
+
+                        const list = await money.wallet.getAllWallets();
+                        setWallets(list);
+                    }}
+                >
+                    <Text style={pageStyles.buttonText}>Создать кошелёк</Text>
+                </TouchableOpacity>
+            </View>
+            <View style={pageStyles.block}>
+                <Text style={pageStyles.text}>Кошльки</Text>
+                <Wallets money={money} wallets={wallets} setWallets={setWallets} showButton={true} />
+            </View>
+        </View>
+    )
+}

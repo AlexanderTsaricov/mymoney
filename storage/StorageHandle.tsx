@@ -82,9 +82,6 @@ export class StorageHandle {
             result = await this.db.addNewTable(tableFullName, this.templateMoneyChanger);
         } else {
             result = await this.db.addNewTable('wallets', this.templateWallet);
-            if (money != null) {
-                await this.setToStorage('wallet', money);
-            }
         }
         this.storages[storageType].push(name);
         return result;
