@@ -2,27 +2,35 @@ import * as SQLite from 'expo-sqlite';
 import DBException from '../exeptions/DBExeption';
 import { SQLiteDatabase } from 'expo-sqlite';
 
-export type MoneyType = {
-    name: string | null,
-    id: number;
-    money: number;
-    time_data: string;
-    comment: string | null;
-};
-
-export type RowType = {
-    name: string;
-    type: 'TEXT' | 'INTEGER';
-};
-
-type typeData = {
+export type typeColumn = {
     name: string,
-    idType: number
-}
+    type:
+    | 'INTEGER'
+    | 'REAL'
+    | 'TEXT'
+    | 'BLOB'
+    | 'NUMERIC'
+    | 'BOOLEAN'
+    | 'DATE'
+    | 'DATETIME'
+    | 'CHAR'
+    | 'VARCHAR'
+    | 'DECIMAL'
+    | 'FLOAT'
+    | 'DOUBLE',
+    notNull: boolean
+};
+
+export type setDataType = {
+    name: string,
+    value: any
+};
+
+export type oreratorType = '>' | '<' | '=' | '>=' | '<=';
 
 declare module 'expo-sqlite' {
     export function openDatabaseAsync(name: string, version?: string, description?: string, size?: number): Promise<SQLiteDatabase>;
-}
+};
 
 export class DB {
     dbName: string;
@@ -32,8 +40,9 @@ export class DB {
         this.dbName = dbName;
     }
 
-
-
+    /**
+     * Проверяет открыта ли БД
+     */
     async open() {
         if (!this.db) {
             const tmp = await SQLite.openDatabaseAsync(this.dbName);
@@ -43,6 +52,12 @@ export class DB {
         }
     }
 
+    /**
+     * 
+     * @param sql - sql строка
+     * @param params - параметры sql строки
+     * @returns 
+     */
     private async execute(sql: string, params: any[] = []): Promise<any[]> {
         if (!this.db) throw new DBException('database not opened');
 
@@ -56,12 +71,24 @@ export class DB {
 
 
 
+    /**
+     * получить данные
+     * @param sqlRequest - sql строка
+     * @param sqlArguments - аргументы sql строкии
+     * @returns 
+     */
     private async get(sqlRequest: string, sqlArguments: any[] = []): Promise<any[]> {
         console.log("sql get: ", sqlRequest);
         await this.open();
         return await this.execute(sqlRequest, sqlArguments);
     }
 
+    /**
+     * Вставить данные
+     * @param sqlRequest - sql строка
+     * @param sqlArguments - аргументы sql строкии
+     * @returns 
+     */
     private async set(sqlRequest: string, sqlArguments: any[] = []): Promise<boolean> {
         console.log("sql set: ", sqlRequest);
         await this.open();
@@ -69,22 +96,11 @@ export class DB {
         return true;
     }
 
-    async getTablesData(): Promise<Record<string, string[]>> {
-        const tables = await this.get(
-            `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';`
-        );
-
-        const result: Record<string, string[]> = {};
-
-        for (const table of tables) {
-            const rows = await this.get(`SELECT name FROM ${table.name}`);
-            // 3️⃣ В массив заносим только поле 'name'
-            result[table.name] = rows.map((r: any) => r.name);
-        }
-
-        return result;
-    }
-
+    /**
+     * Проверяет есть ли таблица в БД
+     * @param tableName - имя таблицы
+     * @returns true - если таблица существует
+     */
     async isTableExists(tableName: string): Promise<boolean> {
         await this.open();
         if (this.db == null) throw new DBException('db is null');
@@ -100,88 +116,83 @@ export class DB {
         }
     }
 
+    /**
+     * Создать таблицу
+     * @param tableName - имя новой таблицы
+     * @param columns - имена колонок и их тип
+     */
+    async createTable(tableName: string, columns: typeColumn[]) {
+        if (await this.isTableExists(tableName)) throw new DBException(`table ${tableName} exist`);
+        let sql = `CREATE TABLE ${tableName} (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,\n
+        `
+        columns.forEach((column) => {
+            sql += `    ${column.name} ${column.type} `;
+            if (column.notNull) {
+                sql += "NOT NULL,\n";
+            } else {
+                sql += ",\n";
+            }
+        });
+        sql = sql.replace(/,\n$/, "\n") + ")";
 
-
-
-
-    async addNewTable(tableName: string, rows: RowType[]): Promise<boolean> {
-        const exist = await this.isTableExists(tableName);
-
-        if (exist) throw new DBException(`Table with name ${tableName} already exists`);
-
-        const hasId = rows.some(r => r.name.toLowerCase() === 'id');
-        const columns = rows.map(r => `${r.name} ${r.type}`).join(', ');
-        console.log("columns new table: ", columns);
-
-        if (!/^[a-zA-Z0-9_]+$/.test(tableName)) throw new DBException('Invalid table name');
-
-
-        const sql = `CREATE TABLE ${tableName} (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ${columns}
-        );`;
-        return await this.set(sql);
+        return await this.set(sql, []);
     }
 
-    async getDataFromTable(tableName: string, selector: string, selectVal: string): Promise<MoneyType> {
-        const exist = await this.isTableExists(tableName);
-        if (!exist) throw new DBException(`table ${tableName} not exist`);
-        console.log("table name, selector, selectVal", `${tableName}, ${selector}, ${selectVal}`);
-        const sql = `SELECT * FROM ${tableName} WHERE ${selector} = ?;`;
-        const rows = await this.get(
-            sql,
-            [selectVal]
-        );
 
-        console.log("rows: ", rows);
-
-        if (!rows || rows.length === 0) {
-            throw new DBException('row not found');
-        }
-
-        return rows[0] as MoneyType;
+    /**
+     * Вставить данные в таблицу
+     * @param tableName - имя таблицы
+     * @param setData - данные для вставки
+     * @returns true
+     */
+    async setToTable(tableName: string, setData: setDataType[]) {
+        if (!await this.isTableExists(tableName)) throw new DBException(`table ${tableName} not exist`);
+        let sql = `INSERT INTO ${tableName}\n (`;
+        const insertData: string[] = [];
+        setData.forEach(data => {
+            sql += `${data.name}, `;
+        });
+        sql += ")\n VALUES (";
+        setData.forEach(data => {
+            sql += `?, `;
+            insertData.push(data.value);
+        });
+        sql = sql.replace(/,\n$/, "\n") + ")";
+        return await this.set(sql, insertData);
     }
 
-    async getAllDataFromTable(tableName: string): Promise<any[]> {
-        const exist = await this.isTableExists(tableName);
-        if (!exist) throw new DBException(`table ${tableName} not exist`);
-        console.log("table name", `${tableName}`);
 
-        const sql = `SELECT * FROM ${tableName};`;
-        const rows = await this.get(sql, []);
-
-        return rows;
+    /**
+     * Получить все данные из таблицы
+     * @param tableName - имя таблицы
+     * @returns 
+     */
+    async getAllFromTable(tableName: string) {
+        if (!await this.isTableExists(tableName)) throw new DBException(`table ${tableName} not exist`);
+        let sql = `SELECT * FROM ${tableName}`;
+        return await this.get(sql, []);
     }
 
-    async setDataToTable(tableName: string, data: MoneyType): Promise<boolean> {
-        if (!(await this.isTableExists(tableName))) throw new DBException(`table ${tableName} not exist`);
-
-        const sql = `INSERT INTO "${tableName}" (name, money, time_data, comment) VALUES (?, ?, ?, ?);`;
-        return await this.set(sql, [data.name, data.money, data.time_data, data.comment]);
+    /**
+     * Получить данные по свойству
+     * @param tableName - имя таблицы
+     * @param propName - имя свойства
+     * @param prop - значение свойства
+     * @param operator - оператор сравнения (>, <, =, >=, <=)
+     * @returns 
+     */
+    async getFromTableByProp(tableName: string, propName: string, prop: string, operator: oreratorType) {
+        if (!await this.isTableExists(tableName)) throw new DBException(`table ${tableName} not exist`);
+        const sql = `SELECT * FROM ${tableName} WHERE ${propName} ${operator} ?`;
+        return await this.get(sql, [prop]);
     }
 
-    async setTypeDataToTable(tableName: string, data: typeData) {
-        if (!(await this.isTableExists(tableName))) throw new DBException(`table ${tableName} not exist`);
-
-        const sql = `INSERT INTO "${tableName}" (name, id_type) VALUES (?, ?)`;
-        return await this.set(sql, [data.name, data.idType]);
-    }
-
-    async deleteDateFromTable(tableName: string, id: number): Promise<boolean> {
+    async deleteDataFromTable(tableName: string, id: number): Promise<boolean> {
         if (!(await this.isTableExists(tableName))) throw new DBException(`table ${tableName} not exist`);
 
         const sql = `DELETE FROM "${tableName}" WHERE id = ?;`;
         return this.set(sql, [id]);
-    }
-
-    async changeDataInTable(tableName: string, id: number, data: MoneyType): Promise<boolean> {
-        if (!(await this.isTableExists(tableName))) throw new DBException(`table ${tableName} not exist`);
-
-        const rows = await this.get(`SELECT EXISTS(SELECT 1 FROM ${tableName} WHERE id=?) as exist;`, [id]);
-        if (!rows[0]?.exist) throw new DBException('id not exist');
-
-        const sql = `UPDATE "${tableName}" SET money=?, time_data=?, comment=? WHERE id=?;`;
-        return this.set(sql, [data.money, data.time_data, data.comment, id]);
     }
 
     async dropTable(tableName: string): Promise<boolean> {
@@ -213,15 +224,6 @@ export class DB {
             console.error('Error while dropping tables:', error);
             throw error; // пробрасываем дальше
         }
-    }
-
-
-
-
-    async getAllData(tableName: string) {
-        if (!(await this.isTableExists(tableName))) throw new DBException(`table ${tableName} not exist`);
-        const sql = `SELECT * FROM ${tableName}`;
-        return this.get(sql);
     }
 
 }

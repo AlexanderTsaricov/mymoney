@@ -1,24 +1,32 @@
 import DBException from "../exeptions/DBExeption";
-import { DB, RowType, MoneyType } from "./DB";
-
-export type Result = {
-    result: boolean,
-    message: string | null
-}
-
-export type MoneyResultType = Result & MoneyType;
+import { DB } from "./DB";
 
 export type MoneyStorageType = 'expences' | 'income' | 'wallet' | 'incomeType' | 'expenceType';
-
-
 export type Storages = {
     [key in MoneyStorageType]: Record<string, string>;
 };
 
-type typeData = {
+export type MoneyType = {
+    id: number;
+    money: number;
+    time_data: string;
+    comment: string | null;
+    type: number,
+    walletHashName: string,
+    moneyMovementType: 'income' | 'expences'
+};
+
+export type RowType = {
+    name: string;
+    type: 'TEXT' | 'INTEGER';
+};
+
+type WalletType = {
     name: string,
-    idType: number
+    moneyCount: number
 }
+
+
 
 /**
  * Класс обработки хранилища
@@ -26,32 +34,9 @@ type typeData = {
 export class StorageHandle {
     private db: DB;
 
-    storages: Storages = {
-        expences: {},
-        income: {},
-        wallet: {},
-        incomeType: {},
-        expenceType: {}
-    };
-
-    private templateMoneyChanger: RowType[] = [
-        { name: 'name', type: 'TEXT' },
-        { name: 'money', type: 'INTEGER' },
-        { name: 'comment', type: 'TEXT' },
-        { name: 'time_data', type: 'TEXT' }
-    ];
-
-    private templateWallet: RowType[] = [
-        { name: 'name', type: 'TEXT' },
-        { name: 'money', type: 'INTEGER' },
-        { name: 'time_data', type: 'TEXT' },
-        { name: 'comment', type: 'TEXT' }
-    ];
-
-    private templateType: RowType[] = [
-        { name: 'name', type: 'TEXT' },
-        { name: 'id_type', type: 'INTEGER' }
-    ];
+    constructor(db: DB) {
+        this.db = db;
+    }
 
     private generateSafeId(length = 6) {
         const letters = 'abcdefghijklmnopqrstuvwxyz';
@@ -63,190 +48,6 @@ export class StorageHandle {
         return id;
     }
 
-    constructor(db: DB) {
-        this.db = db;
-    }
-
-    /**
-     * Обновляет данные о хранилищах
-     */
-    async updateTablesNames() {
-        const tables = await this.db.getTablesData();
-
-        // очищение перед обновлением
-        this.storages.expences = {};
-        this.storages.income = {};
-        this.storages.wallet = {};
-
-        // обновление
-        for (const [tableName, idRaw] of Object.entries(tables)) {
-            const parts = tableName.split("_");
-            const storageName = parts[0];
-            if (storageName == 'wallets') {
-                const type = 'wallet';
-                const id = String(idRaw);
-                this.storages[type][storageName] = id;
-            } else {
-                const type = parts[1] as MoneyStorageType;
-                console.log("type", type);
-                console.log("storageName", storageName);
-                const id = String(idRaw);
-                this.storages[type][storageName] = id;
-            }
-
-        }
-
-        console.log("Обновились хранилища: ", this.storages);
-    }
-
-    /**
-     * 
-     * @param name - имя хранилища
-     * @param storageType - тип хранилища: кошелек, расходы, доходы (wallet, expences, income)
-     * @returns 
-     */
-    async addNewMoneyStorage(name: string, storageType: MoneyStorageType, storage_id: number | null = null): Promise<any> {
-        try {
-            let result = null;
-            const id = this.generateSafeId();
-            switch (storageType) {
-                case 'expences':
-                case 'income':
-                    const tableFullName = `${id}_${storageType}`;
-                    console.log("save new table with name: ", tableFullName);
-                    await this.db.addNewTable(tableFullName, this.templateMoneyChanger);
-                    break;
-                case 'wallet':
-                    await this.db.addNewTable('wallets', this.templateWallet);
-                    break;
-                case 'incomeType':
-                    const incomeTypeTableExist = await this.db.isTableExists('incomeTypes');
-                    if (!incomeTypeTableExist) {
-                        await this.db.addNewTable('incomeTypes', this.templateType);
-                    }
-                    const typeData = { ''}
-                    await this.db.setTypeDataToTable('incomeTypes',)
-                default:
-                    throw new DBException('Incorrect storage type');
-            }
-            this.storages[storageType][name] = id;
-            console.log("addNewMoneyStorage result: ", result);
-            return await this.getData(storageType, id);
-        } catch (error) {
-            console.error(error);
-            return false;
-        }
-    }
-
-
-    /**
-     * 
-     * @param typeName - тип хранилища: кошелек, расходы, доходы (wallet, expences, income)
-     * @param storageName - имя хранилища
-     * @returns 
-     */
-    async getData(
-        typeName: MoneyStorageType,
-        storageName: string,
-        selector: string,
-        selectVal: string
-    ): Promise<MoneyResultType> {
-        try {
-            let data: MoneyType;
-
-            if (typeName === 'wallet') {
-                data = await this.db.getDataFromTable('wallets', selector, selectVal);
-            } else {
-                data = await this.db.getDataFromTable(`${storageName}_${typeName}`, selector, selectVal);
-            }
-
-            return {
-                ...data,
-                result: true,
-                message: 'Ok'
-            };
-        } catch (e) {
-            if (e instanceof DBException) {
-                return {
-                    result: false,
-                    message: e.message,
-                    id: 0,
-                    money: 0,
-                    time_data: '',
-                    comment: '',
-                    name: null
-                };
-            }
-            throw e;
-        }
-    }
-
-
-
-    /**
-     * Возвращает все данные по типу
-     * @param typeName - тип хранилища: кошелек, расходы, доходы (wallet, expences, income)
-     * @returns 
-     */
-    async getAllDataByType(typeName: MoneyStorageType): Promise<MoneyType[]> {
-        const result: MoneyType[] = [];
-        console.log("getAllDataByType search by type: ", typeName);
-
-        const typeData = this.storages[typeName];
-        console.log('typeData', typeData);
-        try {
-            const data = await this.db.getAllDataFromTable(typeName);
-            console.log("getAllDataByType result: ", data);
-            return data;
-        } catch (error) {
-            console.error(error);
-            return [];
-        }
-    }
-
-
-    async getAllDataByName(tableName: string): Promise<MoneyType[]> {
-        return await this.db.getAllData(tableName);
-    }
-
-    /**
-     * Добавить данные в хранилище
-     * @param name - имя хранилища
-     * @param data - объект данных хранилища
-     */
-    async setToStorage(name: string, data: MoneyType): Promise<boolean> {
-        return this.db.setDataToTable(name, data);
-    }
-
-    /**
-     * Удалить данные из хранилища
-     * @param name - имя хранилища
-     * @param id - ID трат или доходов
-     * @returns - boolean удалось удалить или нет
-     */
-    async deleteFromStorage(name: string, type: MoneyStorageType, id: number): Promise<boolean> {
-        const data = await this.getData(type, name, 'id', id.toString()) as MoneyResultType;
-        if (data.result) {
-            return await this.db.deleteDateFromTable(name, data.id);
-        } else {
-            return false;
-        }
-    }
-
-
-    /**
-     * Изменяет данные в хранилище
-     * @param name - имя хранилища
-     * @param data - данные (вставятся все)
-     * @param id - ID данных в хранилище
-     * @returns 
-     */
-    async updateDateInStorage(name: string, data: MoneyType, id: number): Promise<boolean> {
-        const result = await this.db.changeDataInTable(name, id, data);
-
-        return result
-    }
-
     /**
      * Проверяет наличие хранилища по имени
      * @param name - имя хранилища
@@ -255,6 +56,96 @@ export class StorageHandle {
     async isStorageExist(name: string): Promise<boolean> {
         return await this.db.isTableExists(name);
     }
+
+
+    /**
+     * Создать хранилище
+     * @param storageName - имя нового хранилища
+     * @param storageType - тип нового хранилища
+     * @param id - ID типа данных при создании хранилища трат или доходов (default = null)
+     */
+    async createStorage(storageName: string, storageType: MoneyStorageType, id: number | null = null) {
+        const result = {
+            reuslt: false,
+            message: ''
+        };
+
+        try {
+            switch (storageType) {
+                case 'wallet':
+                    const wallet: WalletType = {
+                        name: storageName,
+                        moneyCount: 0.00
+                    };
+
+                    if (!await this.isStorageExist("wallets")) {
+                        await this.db.createTable(
+                            'wallets',
+                            [
+                                { name: 'name', type: 'TEXT', notNull: true },
+                                { name: 'moneyCount', type: 'FLOAT', notNull: true }
+                            ]
+                        );
+                    }
+
+                    result.reuslt = await this.db.setToTable(
+                        'wallets',
+                        [
+                            { name: 'name', value: wallet.name },
+                            { name: 'moneyCount', value: wallet.moneyCount }
+                        ]
+                    );
+                    break;
+                case 'incomeType':
+                case 'expenceType':
+                    const tableName = storageType + 's';
+                    if (!await this.isStorageExist(tableName)) {
+                        await this.db.createTable(tableName, [{ name: 'name', type: 'TEXT', notNull: true }]);
+                    }
+
+                    result.reuslt = await this.db.setToTable(tableName, [{ name: 'name', value: storageName }]);
+                    break;
+                case 'income':
+                case 'expences':
+                    if (!await this.isStorageExist('moneyMovement')) {
+                        await this.db.createTable('moneyMovement',
+                            [
+                                { name: 'money', type: 'FLOAT', notNull: true },
+                                { name: 'time_data', type: 'DATETIME', notNull: true },
+                                { name: 'comment', type: 'TEXT', notNull: false },
+                                { name: 'type', type: 'INTEGER', notNull: true },
+                                { name: 'walletHashName', type: 'TEXT', notNull: true },
+                                { name: 'moneyMovmentType', type: 'TEXT', notNull: true }
+                            ]
+                        );
+                    }
+                    break;
+                default:
+                    result.message = 'Не верный тип хранилища';
+                    return result;
+
+            }
+        } catch (error) {
+            result.message = error as string;
+            return result;
+        }
+    }
+
+    /**
+     * Добавляет денежный поток в хранилище
+     * @param data - денежные данные
+     * @returns 
+     */
+    async setMoneyToStorage(data: MoneyType) {
+        if (!await this.isStorageExist("moneyMovement")) throw new DBException('table wallets not exist');
+        const entries = Object.entries(data) as [keyof MoneyType, MoneyType[keyof MoneyType]][];
+        const setData = []
+        for (const [key, value] of entries) {
+            setData.push({ name: key, value: value });
+        }
+        return await this.db.setToTable('moneyMovement', setData);
+    }
+
 
 
     /**
