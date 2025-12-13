@@ -8,11 +8,16 @@ export type Result = {
 
 export type MoneyResultType = Result & MoneyType;
 
-export type MoneyStorageType = 'expences' | 'income' | 'wallet';
+export type MoneyStorageType = 'expences' | 'income' | 'wallet' | 'incomeType' | 'expenceType';
 
 
 export type Storages = {
-    [key in MoneyStorageType]: string[];
+    [key in MoneyStorageType]: Record<string, string>;
+};
+
+type typeData = {
+    name: string,
+    idType: number
 }
 
 /**
@@ -22,12 +27,15 @@ export class StorageHandle {
     private db: DB;
 
     storages: Storages = {
-        expences: [],
-        income: [],
-        wallet: []
-    }
+        expences: {},
+        income: {},
+        wallet: {},
+        incomeType: {},
+        expenceType: {}
+    };
 
     private templateMoneyChanger: RowType[] = [
+        { name: 'name', type: 'TEXT' },
         { name: 'money', type: 'INTEGER' },
         { name: 'comment', type: 'TEXT' },
         { name: 'time_data', type: 'TEXT' }
@@ -40,6 +48,21 @@ export class StorageHandle {
         { name: 'comment', type: 'TEXT' }
     ];
 
+    private templateType: RowType[] = [
+        { name: 'name', type: 'TEXT' },
+        { name: 'id_type', type: 'INTEGER' }
+    ];
+
+    private generateSafeId(length = 6) {
+        const letters = 'abcdefghijklmnopqrstuvwxyz';
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let id = letters.charAt(Math.floor(Math.random() * letters.length));
+        for (let i = 1; i < length; i++) {
+            id += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return id;
+    }
+
     constructor(db: DB) {
         this.db = db;
     }
@@ -48,25 +71,32 @@ export class StorageHandle {
      * Обновляет данные о хранилищах
      */
     async updateTablesNames() {
-        const tablesNames = await this.db.getTablesNames();
+        const tables = await this.db.getTablesData();
 
         // очищение перед обновлением
-        Object.keys(this.storages).forEach(key => this.storages[key as MoneyStorageType] = []);
+        this.storages.expences = {};
+        this.storages.income = {};
+        this.storages.wallet = {};
 
-        for (const tableName of tablesNames) {
-            if (tableName === 'wallets') {
-                const wallets = await this.getAllDataByName('wallets');
-                this.storages.wallet = wallets.map(money => money.name) as unknown as string[];
+        // обновление
+        for (const [tableName, idRaw] of Object.entries(tables)) {
+            const parts = tableName.split("_");
+            const storageName = parts[0];
+            if (storageName == 'wallets') {
+                const type = 'wallet';
+                const id = String(idRaw);
+                this.storages[type][storageName] = id;
             } else {
-                const parts = tableName.split("_").filter(Boolean);
-                if (parts.length < 2) continue;
-                const [storageName, typeName] = parts;
-                if (this.storages[typeName as MoneyStorageType]) {
-                    this.storages[typeName as MoneyStorageType].push(storageName);
-                }
+                const type = parts[1] as MoneyStorageType;
+                console.log("type", type);
+                console.log("storageName", storageName);
+                const id = String(idRaw);
+                this.storages[type][storageName] = id;
             }
+
         }
 
+        console.log("Обновились хранилища: ", this.storages);
     }
 
     /**
@@ -75,21 +105,37 @@ export class StorageHandle {
      * @param storageType - тип хранилища: кошелек, расходы, доходы (wallet, expences, income)
      * @returns 
      */
-    async addNewMoneyStorage(name: string, storageType: MoneyStorageType, money: MoneyType | null = null): Promise<boolean> {
+    async addNewMoneyStorage(name: string, storageType: MoneyStorageType, storage_id: number | null = null): Promise<any> {
         try {
-            const tableFullName = `${name}_${storageType}`;
             let result = null;
-            if (storageType == "expences" || storageType == "income") {
-                result = await this.db.addNewTable(tableFullName, this.templateMoneyChanger);
-            } else {
-                result = await this.db.addNewTable('wallets', this.templateWallet);
+            const id = this.generateSafeId();
+            switch (storageType) {
+                case 'expences':
+                case 'income':
+                    const tableFullName = `${id}_${storageType}`;
+                    console.log("save new table with name: ", tableFullName);
+                    await this.db.addNewTable(tableFullName, this.templateMoneyChanger);
+                    break;
+                case 'wallet':
+                    await this.db.addNewTable('wallets', this.templateWallet);
+                    break;
+                case 'incomeType':
+                    const incomeTypeTableExist = await this.db.isTableExists('incomeTypes');
+                    if (!incomeTypeTableExist) {
+                        await this.db.addNewTable('incomeTypes', this.templateType);
+                    }
+                    const typeData = { ''}
+                    await this.db.setTypeDataToTable('incomeTypes',)
+                default:
+                    throw new DBException('Incorrect storage type');
             }
-            this.storages[storageType].push(name);
-            return result;
+            this.storages[storageType][name] = id;
+            console.log("addNewMoneyStorage result: ", result);
+            return await this.getData(storageType, id);
         } catch (error) {
             console.error(error);
+            return false;
         }
-        return false;
     }
 
 
@@ -109,7 +155,6 @@ export class StorageHandle {
             let data: MoneyType;
 
             if (typeName === 'wallet') {
-                // просто вызываем метод, который уже умеет работать с транзакцией
                 data = await this.db.getDataFromTable('wallets', selector, selectVal);
             } else {
                 data = await this.db.getDataFromTable(`${storageName}_${typeName}`, selector, selectVal);
@@ -139,20 +184,26 @@ export class StorageHandle {
 
 
     /**
-     * 
+     * Возвращает все данные по типу
      * @param typeName - тип хранилища: кошелек, расходы, доходы (wallet, expences, income)
      * @returns 
      */
     async getAllDataByType(typeName: MoneyStorageType): Promise<MoneyType[]> {
-        const typeDataArray = this.storages[typeName];
-        const data = await Promise.all(
-            typeDataArray.map(name =>
-                this.db.getDataFromTable(`${name}_${typeName}`, 'name', name)
-            )
-        );
-        return data;
+        const result: MoneyType[] = [];
+        console.log("getAllDataByType search by type: ", typeName);
 
+        const typeData = this.storages[typeName];
+        console.log('typeData', typeData);
+        try {
+            const data = await this.db.getAllDataFromTable(typeName);
+            console.log("getAllDataByType result: ", data);
+            return data;
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
+
 
     async getAllDataByName(tableName: string): Promise<MoneyType[]> {
         return await this.db.getAllData(tableName);

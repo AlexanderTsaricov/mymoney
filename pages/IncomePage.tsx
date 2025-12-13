@@ -15,7 +15,7 @@ type IncomeProps = {
 }
 
 export default function IncomePage({ money }: IncomeProps) {
-    const [startSum, onChangeStartSum] = React.useState('');
+    const [sum, onChangeSum] = React.useState('');
     const [isCommentFocused, setNameIsFocused] = React.useState(false);
     const [isSumFocused, setSumIsFocused] = React.useState(false);
     const [wallets, setWallets] = useState<MoneyType[]>([]);
@@ -39,8 +39,21 @@ export default function IncomePage({ money }: IncomeProps) {
 
     useEffect(() => {
         const loadIncomeTypes = async () => {
-            const data = await money.income.getAllIncome();
-            setIncomeTypes(data);
+            const data = await money.income.getIncomesTypes();
+            console.log("Loaded income types: ", data);
+            const incomeTypes = [];
+            for (const key in data) {
+                console.log('key:', key);
+                incomeTypes.push({
+                    id: -1,
+                    name: key,
+                    time_data: '',
+                    money: -1,
+                    comment: ''
+
+                });
+            }
+            setIncomeTypes(incomeTypes);
             setLoadingIncomeTypes(false);
         };
 
@@ -62,8 +75,8 @@ export default function IncomePage({ money }: IncomeProps) {
                     <TextInput
                         placeholder='Сумма'
                         keyboardType='numeric'
-                        value={startSum}
-                        onChangeText={onChangeStartSum}
+                        value={sum}
+                        onChangeText={onChangeSum}
                         style={[pageStyles.inputText, isSumFocused && pageStyles.inputTextFocus]}
                         onFocus={() => setSumIsFocused(true)}
                         onBlur={() => setSumIsFocused(false)}
@@ -83,7 +96,7 @@ export default function IncomePage({ money }: IncomeProps) {
                     <TouchableOpacity
                         style={pageStyles.button}
                         onPress={async () => {
-                            console.log("press add income");
+                            console.log(`Добавляется доход: ${sum} р. Коммент: ${comment}`);
                         }}
                     >
                         <Text style={pageStyles.buttonText}>Добавить доход</Text>
@@ -104,8 +117,21 @@ export default function IncomePage({ money }: IncomeProps) {
                         style={pageStyles.button}
                         onPress={async () => {
                             await money.income.addNewTypeIncome(newIncomeName);
-                            const newIncomeTypes = await money.income.getAllIncome();
-                            setIncomeTypes(newIncomeTypes);
+                            const newIncomeTypesObj = await money.income.getIncomesTypes();
+                            const newIncomeTypesArr = [];
+                            for (const key in newIncomeTypesObj) {
+                                console.log('key:', key);
+                                newIncomeTypesArr.push({
+                                    id: -1,
+                                    name: key,
+                                    time_data: '',
+                                    money: -1,
+                                    comment: ''
+
+                                });
+                            }
+
+                            setIncomeTypes(newIncomeTypesArr);
                         }}
                     >
                         <Text style={pageStyles.buttonText}>Добавить тип дохода</Text>

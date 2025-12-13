@@ -25,7 +25,7 @@ export class Wallet {
         const tableExist = await this.storage.isStorageExist('wallets');
         try {
             if (!tableExist) {
-                const created = await this.storage.addNewMoneyStorage('wallets', 'wallet', startMoney);
+                const created = await this.storage.addNewMoneyStorage('wallets', 'wallet');
                 if (!created) {
                     throw new DBException('Не удалось создать таблицу кошелька');
                 }
@@ -35,7 +35,12 @@ export class Wallet {
 
             return result;
         } catch (error) {
-            console.error(error);
+            if (error instanceof Error) {
+                console.error('Ошибка:', error.message);
+                console.error(error.stack);
+            } else {
+                console.error(error);
+            }
         }
 
         return false;
@@ -68,6 +73,10 @@ export class Wallet {
     }
 
     async deletData() {
-        return await this.db.dropTable('wallets');
+        try {
+            return await this.db.dropAllTables();
+        } catch (error) {
+            console.error(error);
+        }
     }
 }

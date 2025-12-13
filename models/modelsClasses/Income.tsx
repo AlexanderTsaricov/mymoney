@@ -29,7 +29,7 @@ export class Income {
 
     async getAllIncome(): Promise<MoneyType[]> {
         const arrayIncome = this.storage.getAllDataByType('income');
-
+        console.log("getAllIncome result: ", arrayIncome);
         return arrayIncome;
     }
 
@@ -37,7 +37,8 @@ export class Income {
         return await this.storage.updateDateInStorage(name, data, id);
     }
 
-    getIncomesTypes() {
+    async getIncomesTypes() {
+        await this.storage.updateTablesNames();
         return this.storage.storages.income;
     }
 }
