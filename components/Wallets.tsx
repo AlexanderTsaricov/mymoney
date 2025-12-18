@@ -1,19 +1,20 @@
 import { View, Text, Button, TouchableOpacity } from "react-native";
 import { Money } from "../models/Money";
-import { MoneyType } from "../storage/DB";
 import { pageStyles } from "../Styles/page";
+import { WalletType } from "../storage/StorageHandle";
 
 type WalletsProps = {
     money: Money,
-    wallets: MoneyType[],
-    setWallets: React.Dispatch<React.SetStateAction<MoneyType[]>>;
+    wallets: WalletType[],
+    setWallets: React.Dispatch<React.SetStateAction<WalletType[]>>;
     showButton: boolean
 }
 
 export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, showButton }) => {
+    console.log(wallets);
     return (
         <View>
-            {wallets.length === 0 ? (
+            {wallets == null || wallets.length === 0 ? (
                 <Text style={pageStyles.text}>У вас нет кошельков</Text>
             ) : (
                 wallets.map((w, index) => (
@@ -22,16 +23,22 @@ export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, sh
                             Название кошелька: {w.name}
                         </Text>
                         <Text style={pageStyles.text}>
-                            Баланс: {w.money} RUB
+                            Баланс: {w.moneyCount} RUB
                         </Text>
                         {showButton && (
                             <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                                 <TouchableOpacity
                                     style={[pageStyles.button, { width: 160, marginTop: 10 }]}
                                     onPress={async () => {
-                                        await money.wallet.deleteWallet(w.name as string, w.id);
-                                        const wallets = await money.wallet.getAllWallets();
-                                        setWallets(wallets);
+                                        if (w.id != undefined) {
+                                            try {
+                                                await money.wallet.deleteWallet(w.id);
+                                            } catch (error) {
+                                                console.error(error);
+                                            }
+                                            const wallets = await money.wallet.getAllWallets();
+                                            setWallets(wallets.value as WalletType[]);
+                                        }
                                     }}
                                 >
                                     <Text style={pageStyles.buttonText}>Удалить кошелёк</Text>

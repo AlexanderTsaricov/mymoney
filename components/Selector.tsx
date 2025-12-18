@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import RNPickerSelect, { Item } from 'react-native-picker-select';
-import { MoneyType } from '../storage/DB';
 import { pageStyles } from '../Styles/page';
 
 interface SelectorProps {
     title: string;
     titleDontHave: string;
-    items: MoneyType[];
+    items: string[];
     onChange?: (value: string) => void;
 }
 
 const Selector: React.FC<SelectorProps> = ({ title, titleDontHave, items, onChange }) => {
-    const initialValue = items.length > 0 ? items[0].name || '' : 'none';
+    const initialValue = items.length > 0 ? items[0] || '' : 'none';
     const [selected, setSelected] = useState<string>(initialValue);
 
     const handleValueChange = (value: string) => {
@@ -23,16 +22,14 @@ const Selector: React.FC<SelectorProps> = ({ title, titleDontHave, items, onChan
     const pickerItems: Item[] =
         items.length > 0
             ? items.map((w) => ({
-                label: w.name || '',
-                value: w.name || '',
+                label: w || '',
+                value: w || '',
             }))
             : [{ label: titleDontHave, value: 'none' }];
 
     return (
         <View style={pageStyles.selectorContainer}>
             <Text style={pageStyles.selectorTitle}>{title}</Text>
-
-            {/* Обёртка с фиолетовым фоном, скруглением и тенью */}
             <View style={pageStyles.selectorWrapper}>
                 <RNPickerSelect
                     onValueChange={handleValueChange}

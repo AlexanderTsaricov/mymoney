@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { pageStyles } from '../Styles/page';
 import { Money } from '../models/Money';
-import { MoneyType } from '../storage/DB';
+import { MoneyType, WalletType } from '../storage/StorageHandle';
 import { Wallets } from '../components/Wallets';
 
 type HomeProps = {
@@ -15,13 +15,13 @@ type WalletsProps = {
 
 
 const Home: React.FC<HomeProps> = ({ money }) => {
-    const [wallets, setWallets] = useState<MoneyType[]>([]);
+    const [wallets, setWallets] = useState<WalletType[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadWallets = async () => {
             const data = await money.wallet.getAllWallets();
-            setWallets(data);
+            setWallets(data.value as unknown as WalletType[]);
             setLoading(false);
         };
 

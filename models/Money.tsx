@@ -1,7 +1,8 @@
-import { MoneyType } from '../storage/DB';
+import { MoneyType, WalletType } from '../storage/StorageHandle';
 import { Expence } from './modelsClasses/Expence';
 import { Income } from './modelsClasses/Income';
 import { Wallet } from './modelsClasses/Wallet';
+import { returnOjb } from '../storage/StorageHandle';
 
 export class Money {
     allMoney: number = 0;
@@ -20,11 +21,12 @@ export class Money {
     }
 
     async getAllHaveMoney(): Promise<number> {
-        const allWalletsData = await this.wallet.getAllWallets();
+        const resultRequest = await this.wallet.getAllWallets() as unknown as returnOjb;
+        const allWalletsData = resultRequest.value as WalletType[];
         let result = 0;
 
-        allWalletsData.forEach((wallet) => {
-            result += wallet.money;
+        allWalletsData.forEach((wallet: WalletType) => {
+            result += wallet.moneyCount;
         });
 
         console.log("allMoney: ", result);
@@ -32,52 +34,17 @@ export class Money {
         return result;
     }
 
-    async getAllWallet(): Promise<MoneyType[]> {
-        return await this.wallet.getAllWallets();
-    }
-
-    async addExpence(walletName: string, expenceName: string, expence: MoneyType): Promise<boolean> {
-        const walletData = await this.wallet.getWallet(walletName);
-        if (walletData.money > expence.money) {
-            this.allMoney -= expence.money;
-            this.expence.addExpences(expenceName, expence);
-            walletData.money = walletData.money - expence.money;
-            walletData.time_data = new Date().toUTCString();
-
-            return await this.wallet.changeMoney(walletName, 1, walletData)
+    async getAllWallet(): Promise<void | WalletType[]> {
+        const resultRequest = await this.wallet.getAllWallets();
+        if (resultRequest.result) {
+            return resultRequest.value as WalletType[];
         } else {
-            return false;
+            console.error(resultRequest.message);
         }
     }
 
-    async addIncome(walletName: string, incomeName: string, income: MoneyType): Promise<boolean> {
-        const walletData = await this.wallet.getWallet(walletName);
-        this.allMoney += income.money;
-        this.income.addIncome(incomeName, income);
-        walletData.money += income.money;
-        walletData.time_data = new Date().toUTCString();
-
-        return await this.wallet.changeMoney(walletName, 1, walletData);
-    }
-
-    async getIncome(incomeName: string, id: number): Promise<MoneyType> {
-        return await this.income.getIncome(incomeName, id.toString());
-    }
-
-    async getExpence(expenceName: string): Promise<MoneyType> {
-        return await this.expence.getExpences(expenceName);
-    }
-
-    async deleteIncome(incomeName: string, id: number): Promise<boolean> {
-        return await this.income.deleteIncome(incomeName, id);
-    }
-
-    async deleteExpence(expenceName: string): Promise<boolean> {
-        return await this.expence.deleteExpences(expenceName);
-    }
-
     async deleteDatabase() {
-        await this.wallet.deletData();
+        await this.wallet.storage.deleteAllData();
     }
 
 }

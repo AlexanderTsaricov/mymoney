@@ -1,44 +1,51 @@
-import { DB, MoneyType } from '../../storage/DB';
+import { MoneyType } from '../../storage/StorageHandle';
 import { StorageHandle } from '../../storage/StorageHandle';
 
 export class Income {
     storage: StorageHandle;
-    db: DB;
     allMoney: number = 0;
 
     constructor(dbName: string) {
-        this.db = new DB(dbName);
-        this.storage = new StorageHandle(this.db);
+        this.storage = new StorageHandle(dbName);
     }
 
-    async deleteIncome(name: string, id: number) {
-        return await this.storage.deleteFromStorage(name, 'income', id);
+    async deleteIncome(id: number) {
+        return await this.storage.deleteDataFromTable('moneyMovement', id);
     }
 
-    async addIncome(name: string, income: MoneyType) {
-        return await this.storage.setToStorage(name, income);
+    async addIncome(income: MoneyType) {
+        return await this.storage.setMoneyToStorage(income);
     }
 
     async addNewTypeIncome(name: string) {
-        return await this.storage.addNewMoneyStorage(name, 'income');
+        return await this.storage.createStorage(name, 'incomeType');
     }
 
-    async getIncome(name: string, id: string) {
-        return await this.storage.getData('income', name, 'id', id);
+    async getIncome(id: number) {
+        return await this.storage.getDataFromStorage('moneyMovement', id)
+    }
+
+    async getIncomeByName(name: string) {
+        return await this.storage.getDataFromStorageByName('moneyMovement', name);
     }
 
     async getAllIncome(): Promise<MoneyType[]> {
-        const arrayIncome = this.storage.getAllDataByType('income');
-        console.log("getAllIncome result: ", arrayIncome);
+        const arrayMoneyMoovment = await this.storage.getAllDataFromStorage('moneyMovement') as MoneyType[];
+        const arrayIncome: MoneyType[] = [];
+        arrayMoneyMoovment.forEach(moneyMoovment => {
+            if (moneyMoovment.moneyMovementType == 'income') {
+                arrayIncome.push(moneyMoovment);
+            }
+        });
         return arrayIncome;
     }
 
-    async changeIncomes(name: string, id: number, data: MoneyType): Promise<boolean> {
-        return await this.storage.updateDateInStorage(name, data, id);
+    async changeIncomes(id: number, propName: string, propValue: any) {
+        return await this.storage.updateMoneyData(id, propName, propValue);
     }
 
     async getIncomesTypes() {
-        await this.storage.updateTablesNames();
-        return this.storage.storages.income;
+        const  result = await this.storage.getAllDataFromStorage('incomeTypes');
+        return result;
     }
 }

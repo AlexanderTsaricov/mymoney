@@ -8,7 +8,7 @@ import Home from './pages/Home';
 import Menu from './pages/Menu'; // новая страница
 import { headerStyles } from './Styles/header';
 import WalletsPage from './pages/WalletsPage';
-import { MoneyType } from './storage/DB';
+import { MoneyType } from './storage/StorageHandle';
 import IncomePage from './pages/IncomePage';
 
 const Stack = createNativeStackNavigator();

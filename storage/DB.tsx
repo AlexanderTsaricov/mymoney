@@ -150,15 +150,28 @@ export class DB {
         if (!await this.isTableExists(tableName)) throw new DBException(`table ${tableName} not exist`);
         let sql = `INSERT INTO ${tableName}\n (`;
         const insertData: string[] = [];
-        setData.forEach(data => {
-            sql += `${data.name}, `;
-        });
+
+        for (let index = 0; index < setData.length; index++) {
+            if (index != setData.length - 1) {
+                sql += `${setData[index].name}, `;
+            } else {
+                sql += `${setData[index].name}`;
+            }        
+        }
+
         sql += ")\n VALUES (";
-        setData.forEach(data => {
-            sql += `?, `;
-            insertData.push(data.value);
-        });
-        sql = sql.replace(/,\n$/, "\n") + ")";
+
+        for (let index = 0; index < setData.length; index++) {
+            if (index != setData.length - 1) {
+                sql += `'${setData[index].value}', `;
+            } else {
+                sql += `'${setData[index].value}'`;
+            }        
+        }
+
+        sql += ')';
+
+
         return await this.set(sql, insertData);
     }
 
@@ -186,6 +199,22 @@ export class DB {
         if (!await this.isTableExists(tableName)) throw new DBException(`table ${tableName} not exist`);
         const sql = `SELECT * FROM ${tableName} WHERE ${propName} ${operator} ?`;
         return await this.get(sql, [prop]);
+    }
+
+    /**
+     * Изменяет данные в таблице
+     * @param tableName - имя таблицы
+     * @param propName - имя свойства которое нужно изменить
+     * @param prop - новое значение свойства
+     * @param propSelectName - имя селектора строки (например name)
+     * @param propSelectValue - значение селектора строки
+     * @param operator - оператор сравнения (>, <, =, >=, <=) 
+     * @returns 
+     */
+    async updateDataInTable(tableName: string, propName: string, prop: string, propSelectName: string, propSelectValue: string, operator: oreratorType) {
+        if (!await this.isTableExists(tableName)) throw new DBException(`table ${tableName} not exist`);
+        const sql = `UPDATE ${tableName} SET ${propName} = ? WHERE ${propSelectName} ${operator} ?`;
+        return await this.set(sql, [prop, propSelectValue]);
     }
 
     async deleteDataFromTable(tableName: string, id: number): Promise<boolean> {

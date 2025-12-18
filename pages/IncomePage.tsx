@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { Money } from '../models/Money';
 import { pageStyles } from '../Styles/page';
-import { MoneyType } from '../storage/DB';
+import { MoneyType, WalletType } from '../storage/StorageHandle';
 import { Wallets } from '../components/Wallets';
 import Selector from '../components/Selector';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -18,7 +18,7 @@ export default function IncomePage({ money }: IncomeProps) {
     const [sum, onChangeSum] = React.useState('');
     const [isCommentFocused, setNameIsFocused] = React.useState(false);
     const [isSumFocused, setSumIsFocused] = React.useState(false);
-    const [wallets, setWallets] = useState<MoneyType[]>([]);
+    const [wallets, setWallets] = useState<WalletType[]>([]);
     const [loading, setLoading] = useState(true);
     const [incomeTypes, setIncomeTypes] = useState<MoneyType[]>([]);
     const [loadingIncomeTypes, setLoadingIncomeTypes] = useState(true);
@@ -30,7 +30,7 @@ export default function IncomePage({ money }: IncomeProps) {
     useEffect(() => {
         const loadWallets = async () => {
             const data = await money.wallet.getAllWallets();
-            setWallets(data);
+            setWallets(data.value as WalletType[]);
             setLoading(false);
         };
 

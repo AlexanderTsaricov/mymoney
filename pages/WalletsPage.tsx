@@ -5,8 +5,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { Money } from '../models/Money';
 import { pageStyles } from '../Styles/page';
-import { MoneyType } from '../storage/DB';
+import { MoneyType, returnOjb } from '../storage/StorageHandle';
 import { Wallets } from '../components/Wallets';
+import { WalletType } from '../storage/StorageHandle';
 
 type WalletsPageProps = {
     money: Money
@@ -17,13 +18,14 @@ export default function WalletsPage({ money }: WalletsPageProps) {
     const [startSum, onChangeStartSum] = React.useState('');
     const [isNameFocused, setNameIsFocused] = React.useState(false);
     const [isSumFocused, setSumIsFocused] = React.useState(false);
-    const [wallets, setWallets] = useState<MoneyType[]>([]);
+    const [wallets, setWallets] = useState<WalletType[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadWallets = async () => {
             const data = await money.wallet.getAllWallets();
-            setWallets(data);
+            console.log(data.message);
+            setWallets(data.value as WalletType[]);
             setLoading(false);
         };
 
@@ -31,14 +33,20 @@ export default function WalletsPage({ money }: WalletsPageProps) {
     }, [money]);
 
     const addNewWallet = async (name: string, sum: number) => {
-        const wallet = {
-            id: 1,
-            name: name,
-            money: sum,
-            time_data: new Date().toString(),
-            comment: null
+        try {
+            await money.wallet.addWallet(name);
+            const returnRequest = await money.wallet.getWalletByName(name) as unknown as returnOjb;
+            if (returnRequest.value != null) {
+                const newWallet = (returnRequest.value as WalletType[])[0];
+                if (sum != 0 && newWallet.id != undefined) {
+                    await money.wallet.changeMoney(newWallet.id, sum);
+                }
+            }
+
+        } catch (error) {
+            console.error(error);
         }
-        await money.wallet.addWallet(wallet);
+
     }
 
     return (
@@ -69,15 +77,16 @@ export default function WalletsPage({ money }: WalletsPageProps) {
                     onPress={async () => {
                         await addNewWallet(newWalletName, parseFloat(startSum));
 
-                        const list = await money.wallet.getAllWallets();
-                        setWallets(list);
+                        const result = await money.wallet.getAllWallets();
+                        console.log(result.value);
+                        setWallets(result.value as WalletType[]);
                     }}
                 >
                     <Text style={pageStyles.buttonText}>Создать кошелёк</Text>
                 </TouchableOpacity>
             </View>
             <View style={pageStyles.block}>
-                <Text style={pageStyles.text}>Кошльки</Text>
+                <Text style={pageStyles.text}>Кошельки</Text>
                 <Wallets money={money} wallets={wallets} setWallets={setWallets} showButton={true} />
             </View>
         </View>
