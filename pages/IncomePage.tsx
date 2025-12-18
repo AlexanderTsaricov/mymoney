@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import { Money } from '../models/Money';
 import { pageStyles } from '../Styles/page';
-import { MoneyType, WalletType } from '../storage/StorageHandle';
+import { MoneyMoovmentType, MoneyType, WalletType } from '../storage/StorageHandle';
 import { Wallets } from '../components/Wallets';
 import Selector from '../components/Selector';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -20,7 +20,7 @@ export default function IncomePage({ money }: IncomeProps) {
     const [isSumFocused, setSumIsFocused] = React.useState(false);
     const [wallets, setWallets] = useState<WalletType[]>([]);
     const [loading, setLoading] = useState(true);
-    const [incomeTypes, setIncomeTypes] = useState<MoneyType[]>([]);
+    const [incomeTypes, setIncomeTypes] = useState<MoneyMoovmentType[]>([]);
     const [loadingIncomeTypes, setLoadingIncomeTypes] = useState(true);
     const [newIncomeName, setNewIncome] = useState('');
     const [isIncomeNameFocused, setIncomeNameIsFocused] = React.useState(false);
@@ -41,19 +41,7 @@ export default function IncomePage({ money }: IncomeProps) {
         const loadIncomeTypes = async () => {
             const data = await money.income.getIncomesTypes();
             console.log("Loaded income types: ", data);
-            const incomeTypes = [];
-            for (const key in data) {
-                console.log('key:', key);
-                incomeTypes.push({
-                    id: -1,
-                    name: key,
-                    time_data: '',
-                    money: -1,
-                    comment: ''
-
-                });
-            }
-            setIncomeTypes(incomeTypes);
+            setIncomeTypes(data);
             setLoadingIncomeTypes(false);
         };
 

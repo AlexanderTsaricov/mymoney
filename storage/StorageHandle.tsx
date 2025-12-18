@@ -34,6 +34,11 @@ export type returnOjb = {
     value: MoneyType | WalletType | null | MoneyType[] | WalletType[]
 }
 
+export type MoneyMoovmentType = {
+    id: number,
+    name: string
+}
+
 
 
 /**

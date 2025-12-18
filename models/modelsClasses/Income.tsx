@@ -1,4 +1,4 @@
-import { MoneyType } from '../../storage/StorageHandle';
+import { MoneyMoovmentType, MoneyType } from '../../storage/StorageHandle';
 import { StorageHandle } from '../../storage/StorageHandle';
 
 export class Income {
@@ -45,7 +45,7 @@ export class Income {
     }
 
     async getIncomesTypes() {
-        const  result = await this.storage.getAllDataFromStorage('incomeTypes');
+        const  result = await this.storage.getAllDataFromStorage('incomeTypes') as MoneyMoovmentType[];
         return result;
     }
 }
