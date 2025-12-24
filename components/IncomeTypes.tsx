@@ -1,12 +1,12 @@
 import { View, Text, Button, TouchableOpacity } from "react-native";
 import { Money } from "../models/Money";
-import { MoneyType } from "../storage/DB";
+import { MoneyMoovmentType } from "../storage/StorageHandle";
 import { pageStyles } from "../Styles/page";
 
 type IncomesProps = {
     money: Money,
-    incomes: MoneyType[],
-    setIncomeTypes: React.Dispatch<React.SetStateAction<MoneyType[]>>;
+    incomes: MoneyMoovmentType[],
+    setIncomeTypes: React.Dispatch<React.SetStateAction<MoneyMoovmentType[]>>;
     showButton: boolean
 }
 
@@ -29,8 +29,8 @@ export const IncomeTypes: React.FC<IncomesProps> = ({ money, incomes, setIncomeT
                                 <TouchableOpacity
                                     style={[pageStyles.button, { width: 160, marginTop: 10 }]}
                                     onPress={async () => {
-                                        await money.income.deleteIncome(w.name as string, w.id);
-                                        const newIncomes = await money.income.getAllIncome();
+                                        await money.income.deleteIncomeType(w.id);
+                                        const newIncomes = await money.income.getIncomesTypes();
                                         setIncomeTypes(newIncomes);
                                     }}
                                 >

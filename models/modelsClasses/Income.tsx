@@ -13,6 +13,10 @@ export class Income {
         return await this.storage.deleteDataFromTable('moneyMovement', id);
     }
 
+    async deleteIncomeType(id: number) {
+        return await this.storage.deleteDataFromTable('incomeTypes', id);
+    }
+
     async addIncome(income: MoneyType) {
         return await this.storage.setMoneyToStorage(income);
     }

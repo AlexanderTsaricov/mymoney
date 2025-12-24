@@ -9,6 +9,7 @@ import { MoneyMoovmentType, MoneyType, WalletType } from '../storage/StorageHand
 import { Wallets } from '../components/Wallets';
 import Selector from '../components/Selector';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { IncomeTypes } from '../components/IncomeTypes';
 
 type IncomeProps = {
     money: Money
@@ -124,6 +125,7 @@ export default function IncomePage({ money }: IncomeProps) {
                     >
                         <Text style={pageStyles.buttonText}>Добавить тип дохода</Text>
                     </TouchableOpacity>
+                    <IncomeTypes money={money} incomes={incomeTypes} setIncomeTypes={setIncomeTypes} showButton={true}/>
                 </View>
             </ScrollView>
         </KeyboardAwareScrollView>

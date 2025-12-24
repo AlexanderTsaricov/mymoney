@@ -1,49 +1,58 @@
-import { DB, MoneyType } from '../../storage/DB';
 import { StorageHandle } from '../../storage/StorageHandle';
+import { MoneyType } from '../../storage/StorageHandle';
+
+export type MoneyProp = 'money' | 'comment' | 'type'
 
 export class Expence {
     storage: StorageHandle;
-    db: DB;
     allMoney: number = 0;
 
     constructor(dbName: string) {
-        this.db = new DB(dbName);
-        this.storage = new StorageHandle(this.db);
+        this.storage = new StorageHandle(dbName);
     }
 
-    async deleteExpences(name: string) {
-        return await this.storage.deleteFromStorage(name, 'expences');
+    async deleteExpences(id: number) {
+        return await this.storage.deleteDataFromTable('moneyMovement', id)
     }
 
-    async addExpences(name: string, expences: MoneyType) {
-        return await this.storage.setToStorage(name, expences);
+    async addExpences(expences: MoneyType) {
+        return await this.storage.setMoneyToStorage(expences)
     }
 
     async addNewTypeExpences(name: string) {
-        return await this.storage.addNewMoneyStorage(name, 'expences');
+        return await this.storage.createStorage(name, 'expenceType');
     }
 
-    async getExpences(name: string) {
-        return await this.storage.getData('expences', name);
+    async getExpencesByName(name: string) {
+        return await this.storage.getDataFromStorageByName('moneyMovement', name);
+    }
+
+    async getExpencesById(id: number) {
+        return await this.storage.getDataFromStorage('moneyMovement', id);
     }
 
     async getAllExpences(): Promise<MoneyType[]> {
-        const arrayExpences = this.storage.storages['expences'];
+        const allData = await this.storage.getAllDataFromStorage('moneyMovement');
         const result: MoneyType[] = [];
-
-        arrayExpences.forEach(async (storageName) => {
-            const data = await this.storage.getData('expences', storageName);
-            result.push(data);
+        allData.forEach(data => {
+            if (data.moneyMovementType == "expences") {
+                result.push(data);
+            }
         });
 
         return result;
     }
 
-    async changeExpences(name: string, id: number, data: MoneyType): Promise<boolean> {
-        return await this.storage.updateDateInStorage(name, data, id);
+    async changeExpences(id: number, changeedNameProp: MoneyProp, changedValueProp: any): Promise<boolean> {
+        const result = await this.storage.updateMoneyData(id, changeedNameProp, changedValueProp);
+        if (result != undefined) {
+            return result;
+        } else {
+            return false;
+        }
     }
 
     getExpencesTypes() {
-        return this.storage.storages.expences;
+        return this.storage.getAllDataFromStorage('expenceTypes');
     }
 }
