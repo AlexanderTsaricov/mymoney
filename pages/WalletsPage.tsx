@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { Money } from '../models/Money';
 import { pageStyles } from '../Styles/page';
-import { MoneyType, returnOjb } from '../storage/StorageHandle';
+import { returnOjb } from '../storage/StorageHandle';
 import { Wallets } from '../components/Wallets';
 import { WalletType } from '../storage/StorageHandle';
 
@@ -20,6 +18,7 @@ export default function WalletsPage({ money }: WalletsPageProps) {
     const [isSumFocused, setSumIsFocused] = React.useState(false);
     const [wallets, setWallets] = useState<WalletType[]>([]);
     const [loading, setLoading] = useState(true);
+    const [enterError, setEnterError] = useState(false);
 
     useEffect(() => {
         const loadWallets = async () => {
@@ -57,7 +56,7 @@ export default function WalletsPage({ money }: WalletsPageProps) {
                     placeholder='Имя нового кошелька'
                     value={newWalletName}
                     onChangeText={onChangeNewWalletName}
-                    style={[pageStyles.inputText, isNameFocused && pageStyles.inputTextFocus]}
+                    style={[pageStyles.inputText, enterError && pageStyles.inputError, isNameFocused && pageStyles.inputTextFocus]}
                     onFocus={() => setNameIsFocused(true)}
                     onBlur={() => setNameIsFocused(false)}
                     placeholderTextColor={'#a68ebf'}
@@ -75,11 +74,14 @@ export default function WalletsPage({ money }: WalletsPageProps) {
                 <TouchableOpacity
                     style={pageStyles.button}
                     onPress={async () => {
-                        await addNewWallet(newWalletName, parseFloat(startSum));
-
-                        const result = await money.wallet.getAllWallets();
-                        console.log(result.value);
-                        setWallets(result.value as WalletType[]);
+                        if (newWalletName == '' || newWalletName == null) {
+                            setEnterError(true);
+                        } else {
+                            setEnterError(false);
+                            await addNewWallet(newWalletName, parseFloat(startSum));
+                            const result = await money.wallet.getAllWallets();
+                            setWallets(result.value as WalletType[]);
+                        }
                     }}
                 >
                     <Text style={pageStyles.buttonText}>Создать кошелёк</Text>

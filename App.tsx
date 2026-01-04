@@ -10,13 +10,15 @@ import { headerStyles } from './Styles/header';
 import WalletsPage from './pages/WalletsPage';
 import { MoneyType } from './storage/StorageHandle';
 import IncomePage from './pages/IncomePage';
+import ExpencesPage from './pages/ExpencesPage';
 
 const Stack = createNativeStackNavigator();
 
 const screens = [
 	{ name: 'Главная', component: Home },
 	{ name: 'Новый кошелёк', component: WalletsPage },
-	{ name: 'Доходы', component: IncomePage }
+	{ name: 'Доходы', component: IncomePage },
+	{ name: 'Расходы', component: ExpencesPage}
 ];
 
 export default function App() {

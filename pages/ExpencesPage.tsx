@@ -8,23 +8,25 @@ import Selector from '../components/Selector';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MoneyMoovmentTypes } from '../components/MoneyMoovmentTypes';
 
-type IncomeProps = {
+type moneyMoovmentProps = {
     money: Money
 }
 
-export default function IncomePage({ money }: IncomeProps) {
+export default function ExpencesPage({ money }: moneyMoovmentProps) {
     const [sum, onChangeSum] = React.useState('');
     const [isCommentFocused, setNameIsFocused] = React.useState(false);
     const [isSumFocused, setSumIsFocused] = React.useState(false);
     const [wallets, setWallets] = useState<WalletType[]>([]);
     const [loading, setLoading] = useState(true);
-    const [incomeTypes, setIncomeTypes] = useState<MoneyMoovmentType[]>([]);
-    const [loadingIncomeTypes, setLoadingIncomeTypes] = useState(true);
-    const [newIncomeName, setNewIncome] = useState('');
-    const [isIncomeNameFocused, setIncomeNameIsFocused] = React.useState(false);
+    const [expenceTypes, setExpenceTypes] = useState<MoneyMoovmentType[]>([]);
+    const [loadingExpenceTypes, setLoadingExpenceTypes] = useState(true);
+    const [newExpenceName, setNewExpence] = useState('');
+    const [isExpenceNameFocused, setExpenceNameIsFocused] = React.useState(false);
     const [comment, onChangeComment] = React.useState('');
+    const [isInputExpenceError, setInputExpenceError] = useState(false);
+    const [isInputTypeError, setInputTypeError] = useState(false);
     const [selectWallet, setSelectWallet] = useState<MoneyMoovmentType | WalletType | null>(null);
-    const [selectIncomeType, setSelectIncomeType] = useState<MoneyMoovmentType | WalletType | null>(null);
+    const [selectExpenceType, setSelectExpenceType] = useState<MoneyMoovmentType | WalletType | null>(null);
 
 
     useEffect(() => {
@@ -38,15 +40,14 @@ export default function IncomePage({ money }: IncomeProps) {
     }, [money]);
 
     useEffect(() => {
-        const loadIncomeTypes = async () => {
-            console.log("Start load income types...");
-            const data = await money.income.getIncomesTypes();
-            console.log("Loaded income types: ", data);
-            setIncomeTypes(data);
-            setLoadingIncomeTypes(false);
+        const loadExpenceTypes = async () => {
+            const data = await money.expence.getExpencesTypes();
+            console.log("Loaded expence types: ", data);
+            setExpenceTypes(data);
+            setLoadingExpenceTypes(false);
         };
 
-        loadIncomeTypes();
+        loadExpenceTypes();
     }, [money]);
 
     return (
@@ -60,13 +61,13 @@ export default function IncomePage({ money }: IncomeProps) {
         >
             <ScrollView>
                 <View style={pageStyles.block}>
-                    <Text style={pageStyles.text}>Доходы</Text>
+                    <Text style={pageStyles.text}>Расходы</Text>
                     <TextInput
                         placeholder='Сумма'
                         keyboardType='numeric'
                         value={sum}
                         onChangeText={onChangeSum}
-                        style={[pageStyles.inputText, isSumFocused && pageStyles.inputTextFocus]}
+                        style={[pageStyles.inputText, isSumFocused && pageStyles.inputTextFocus, isInputExpenceError && pageStyles.inputError]}
                         onFocus={() => setSumIsFocused(true)}
                         onBlur={() => setSumIsFocused(false)}
                         placeholderTextColor={'#a68ebf'}
@@ -80,42 +81,52 @@ export default function IncomePage({ money }: IncomeProps) {
                         onBlur={() => setNameIsFocused(false)}
                         placeholderTextColor={'#a68ebf'}
                     />
-                    <Selector title='Тип доходов' titleDontHave='Нет типов' items={incomeTypes} onChange={setSelectIncomeType} />
-                    <Selector title='Кошелек' titleDontHave='Нет типов' items={wallets} onChange={setSelectWallet} />
+                    <Selector title='Тип расходов' titleDontHave='Нет типов' items={expenceTypes} onChange={setSelectExpenceType} />
+                    <Selector title='Кошелек' titleDontHave='Нет типов' items={wallets} onChange={setSelectWallet}/>
                     <TouchableOpacity
                         style={pageStyles.button}
                         onPress={async () => {
-                            console.log(`Добавляется доход: ${sum} р. Коммент: ${comment}`);
+                            if (sum == '')  {
+                                setInputExpenceError(true);
+                            } else {
+                                setInputExpenceError(false);
+                                console.log(`Добавляется расход: ${sum} р. Коммент: ${comment}, кошелек ${selectWallet?.name}, тип ${selectExpenceType?.name}`);
+                            }
                         }}
                     >
-                        <Text style={pageStyles.buttonText}>Добавить доход</Text>
+                        <Text style={pageStyles.buttonText}>Добавить расход</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={pageStyles.block}>
-                    <Text style={pageStyles.text}>Типы доходов</Text>
+                    <Text style={pageStyles.text}>Типы расходов</Text>
                     <View style={pageStyles.blockAtRow}>
                         <TextInput
                             placeholder='Название типа'
-                            value={newIncomeName}
-                            onChangeText={setNewIncome}
-                            style={[pageStyles.inputText, pageStyles.flexChild, isIncomeNameFocused && pageStyles.inputTextFocus]}
-                            onFocus={() => setIncomeNameIsFocused(true)}
-                            onBlur={() => setIncomeNameIsFocused(false)}
+                            value={newExpenceName}
+                            onChangeText={setNewExpence}
+                            style={[pageStyles.inputText, pageStyles.flexChild, isExpenceNameFocused && pageStyles.inputTextFocus, isInputTypeError && pageStyles.inputError]}
+                            onFocus={() => setExpenceNameIsFocused(true)}
+                            onBlur={() => setExpenceNameIsFocused(false)}
                             placeholderTextColor={'#a68ebf'}
                         />
                         <TouchableOpacity
                             style={[pageStyles.button, pageStyles.flexChild, { maxWidth: 50, height: 38 }]}
                             onPress={async () => {
-                                await money.income.addNewTypeIncome(newIncomeName);
-                                const newIncomeTypes = await money.income.getIncomesTypes();
-
-                                setIncomeTypes(newIncomeTypes);
+                                if (newExpenceName == '') {
+                                    setInputTypeError(true);
+                                } else {
+                                    setInputTypeError(false);
+                                    await money.expence.addNewTypeExpences(newExpenceName);
+                                    const newExpenceTypes = await money.expence.getExpencesTypes();
+                                    setExpenceTypes(newExpenceTypes);
+                                }
                             }}
                         >
                             <Text style={pageStyles.buttonText}>✚</Text>
                         </TouchableOpacity>
                     </View>
-                    <MoneyMoovmentTypes money={money} moov={incomeTypes} setMoovTypes={setIncomeTypes} showButton={true} type='income' />
+
+                    <MoneyMoovmentTypes money={money} moov={expenceTypes} setMoovTypes={setExpenceTypes} showButton={true} type='expence' />
                 </View>
             </ScrollView>
         </KeyboardAwareScrollView>

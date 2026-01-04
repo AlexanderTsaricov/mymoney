@@ -1,5 +1,5 @@
 import { StorageHandle } from '../../storage/StorageHandle';
-import { MoneyType } from '../../storage/StorageHandle';
+import { MoneyType, MoneyMoovmentType } from '../../storage/StorageHandle';
 
 export type MoneyProp = 'money' | 'comment' | 'type'
 
@@ -13,6 +13,10 @@ export class Expence {
 
     async deleteExpences(id: number) {
         return await this.storage.deleteDataFromTable('moneyMovement', id)
+    }
+
+    async deleteExpenceType(id: number) {
+        await this.storage.deleteDataFromTable('expenceTypes', id);
     }
 
     async addExpences(expences: MoneyType) {
@@ -52,7 +56,7 @@ export class Expence {
         }
     }
 
-    getExpencesTypes() {
-        return this.storage.getAllDataFromStorage('expenceTypes');
+    async getExpencesTypes(): Promise<MoneyMoovmentType[]> {
+        return await this.storage.getAllDataFromStorage('expenceTypes');
     }
 }

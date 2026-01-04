@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import RNPickerSelect, { Item } from 'react-native-picker-select';
 import { pageStyles } from '../Styles/page';
@@ -7,8 +7,8 @@ import { MoneyMoovmentType, MoneyType, WalletType } from '../storage/StorageHand
 interface SelectorProps {
     title: string;
     titleDontHave: string;
-    items: string[] | MoneyMoovmentType[] | WalletType[];
-    onChange?: (value: string) => void;
+    items: MoneyMoovmentType[] | WalletType[];
+    onChange: (value: MoneyMoovmentType | WalletType | null) => void;
 }
 
 function isStringArray(arg: unknown): arg is string[] {
@@ -19,14 +19,22 @@ function isObjectArray(arg: unknown): arg is object[] {
     return Array.isArray(arg) && arg.every(item => typeof item === "object" && item !== null);
 }
 
-const Selector: React.FC<SelectorProps> = ({ title, titleDontHave, items, onChange }) => {
-    const initialValue = items.length > 0 ? items[0] || '' : 'none';
-    const [selected, setSelected] = useState<string | object>(initialValue);
 
-    const handleValueChange = (value: string) => {
+
+const Selector: React.FC<SelectorProps> = ({ title, titleDontHave, items, onChange }) => {
+    const initialValue = items.length > 0 ? items[0] || '' : null;
+    const [selected, setSelected] = useState<string | object | null>(initialValue);
+
+    const handleValueChange = (value: MoneyMoovmentType | WalletType | null) => {
         setSelected(value);
         if (onChange) onChange(value);
     };
+
+    useEffect(() => {
+        if (initialValue !== null) {
+            onChange(initialValue);
+        }
+    }, [initialValue]);
 
     const hasItems = items.length > 0;
 

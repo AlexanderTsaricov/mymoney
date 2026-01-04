@@ -42,12 +42,15 @@ export const pageStyles = StyleSheet.create({
 
         // для Android
         elevation: 5,
+        alignContent: 'center',
+        justifyContent: 'center'
     },
 
     buttonText: {
         color: '#fff',
         fontSize: 18,
-        fontWeight: '700'
+        fontWeight: '700',
+        textAlign: 'center'
     },
 
     inputText: {
@@ -93,10 +96,10 @@ export const pageStyles = StyleSheet.create({
 
     selectorWrapper: {
         borderRadius: 8,
-        backgroundColor: '#5f348a',  // фиолетовый фон
-        borderWidth: 1,
-        borderColor: '#7e57c2',      // фиолетовая рамка
-        overflow: 'hidden',           // важно для iOS и Android
+        backgroundColor: '#5f348a', 
+        borderWidth: 2,
+        borderColor: '#7e57c2',     
+        overflow: 'hidden',           
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
@@ -110,6 +113,30 @@ export const pageStyles = StyleSheet.create({
 
     selectorPlaceholder: {
         color: '#d1c0eb'
+    },
+
+    listWithButton: {
+        display: 'flex',
+        gap: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+
+    blockAtRow: {
+        display: 'flex',
+        flexDirection: 'row',
+        boxSizing: 'border-box',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+
+    flexChild: {
+        flex: 1
+    },
+
+    inputError: {
+        borderColor: '#c25757ff'
     }
 
 
