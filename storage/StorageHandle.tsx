@@ -2,7 +2,8 @@ import DBException from "../exeptions/DBExeption";
 import { DB } from "./DB";
 
 export type MoneyStorageType = 'expences' | 'income' | 'wallet' | 'incomeType' | 'expenceType';
-export type tableNameType = 'wallets' | 'incomeTypes' | 'expenceTypes' | 'moneyMovement';
+export type CurrenciesType = 'currencies' | 'head_currency';
+export type tableNameType = 'wallets' | 'incomeTypes' | 'expenceTypes' | 'moneyMovement' | 'currencies' | 'head_currency';
 export type Storages = {
     [key in MoneyStorageType]: Record<string, string>;
 };
@@ -39,7 +40,16 @@ export type MoneyMoovmentType = {
     name: string
 }
 
+export type Currency = {
+    id: number | null, 
+    name: string,
+    course_to_head: number
+}
 
+export type HeadCurrency = {
+    id: number | null,
+    name: string
+}
 
 /**
  * Класс обработки хранилища
@@ -71,6 +81,28 @@ export class StorageHandle {
     }
 
     async createHeadStorages() {
+        // Создание таблицы главной валюты
+        if (!await this.isStorageExist('head_currency')) {
+            await this.db.createTable(
+                'head_currency',
+                [
+                    { name: 'name', type: 'TEXT', notNull: true }
+                ]
+            );
+        }
+
+        // Создание таблицы валют
+        if (!await this.isStorageExist('currencies')) {
+            await this.db.createTable(
+                'currencies',
+                [
+                    { name: 'name', type: 'TEXT', notNull: true },
+                    { name: 'course_to_head', type: 'FLOAT', notNull: true }
+                ]
+            );
+        }
+
+        // Создание таблицы кошельков
         if (!await this.isStorageExist("wallets")) {
             await this.db.createTable(
                 'wallets',
@@ -81,6 +113,7 @@ export class StorageHandle {
             );
         }
 
+        // Создание таблицы денежных потоков
         if (!await this.isStorageExist('moneyMovement')) {
             await this.db.createTable('moneyMovement',
                 [
@@ -94,10 +127,12 @@ export class StorageHandle {
             );
         }
 
+        // Создание таблицы типов доходов
         if (!await this.isStorageExist('incomeTypes')) {
             await this.db.createTable('incomeTypes', [{ name: 'name', type: 'TEXT', notNull: true }]);
         }
 
+        // Создание таблицы типов расходов
         if (!await this.isStorageExist('expenceTypes')) {
             await this.db.createTable('expenceTypes', [{ name: 'name', type: 'TEXT', notNull: true }]);
         }
@@ -152,6 +187,47 @@ export class StorageHandle {
             return result;
         }
         return result;
+    }
+
+    /**
+     * Метод создает новую валюту
+     * @param storageCyrrencyType - тип валюты главная/обычная (currencies/head_currecny)
+     * @param storageName - имя валюты
+     * @param course_to_head - курс по отношению к главной валюте
+     */
+    async createCurrencyStorage(storageCyrrencyType: CurrenciesType, storageName: string, course_to_head: number = 0) {
+        await this.createHeadStorages();
+
+        switch (storageCyrrencyType) {
+            case 'currencies':
+                const newCurrenciesStorage: Currency = {
+                    id: null,
+                    name: storageName,
+                    course_to_head: course_to_head
+                };
+                this.db.setToTable(
+                    'currencies', 
+                    [
+                        { name: 'name', value: newCurrenciesStorage.name }, 
+                        { name: 'course_to_head', value: newCurrenciesStorage.course_to_head }
+                    ]
+                );
+                break;
+            case 'head_currency':
+                const newHeadCurrency: HeadCurrency = {
+                    id: null,
+                    name: storageName
+                };
+                this.db.setToTable(
+                    'head_currency',
+                    [
+                        {name: 'name', value: newHeadCurrency.name}
+                    ]
+                );
+                break;
+            default:
+                throw new DBException(`${storageCyrrencyType} не является валидным типом для создания валюты`);
+        }
     }
 
     /**
