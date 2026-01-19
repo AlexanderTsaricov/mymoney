@@ -117,6 +117,76 @@ export class DB {
     }
 
     /**
+     * Проверяет, существует ли строка с указанным id в заданной таблице.
+     *
+     * Выполняет SQL-запрос вида:
+     *   SELECT EXISTS(SELECT 1 FROM <tableName> WHERE id = ?) AS is_exists;
+     *
+     * Если запись найдена — возвращает true, если нет — false.
+     *
+     * @param tableName Имя таблицы, в которой выполняется поиск.
+     *                  Должна существовать и содержать колонку `id`.
+     * @param id Значение первичного ключа, которое нужно проверить.
+     *
+     * @returns Promise<boolean>
+     *          true  — если строка с таким id существует,
+     *          false — если строки нет или результат запроса некорректный.
+     *
+     * @throws DBException
+     *          Выбрасывается, если база данных не открыта
+     *          или если произошла ошибка выполнения SQL-запроса.
+     *
+     * @example
+     * const exists = await db.isRowExists('users', 5);
+     * if (exists) {
+     *   console.log('Строка существует');
+     * } else {
+     *   console.log('Строки нет');
+     * }
+     *
+     * @notes
+     * - Метод предполагает, что в таблице есть колонка `id`.
+     * - Имя таблицы подставляется напрямую в SQL.
+     * - Значение `id` передаётся через плейсхолдер `?`.
+     */
+    async isRowExists(tableName: string, id: number): Promise<boolean> {
+        await this.open();
+        if (this.db == null) throw new DBException('db is null');
+
+        const sql = `
+        SELECT EXISTS(
+            SELECT 1 FROM ${tableName} WHERE id = ?
+        ) as is_exists;
+    `;
+
+        try {
+            const rows = await this.db.getAllAsync(sql, [id]);
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+                return false;
+            }
+
+            const first = rows[0];
+
+            if (typeof first !== 'object' || first === null) {
+                return false;
+            }
+
+            if (!('is_exists' in first)) {
+                return false;
+            }
+
+            const value = (first as any).is_exists;
+
+            return value === 1 || value === true;
+        } catch (err: any) {
+            throw new DBException(`SQL error: ${err.message || err}`);
+        }
+    }
+
+
+
+    /**
      * Создать таблицу
      * @param tableName - имя новой таблицы
      * @param columns - имена колонок и их тип
@@ -156,7 +226,7 @@ export class DB {
                 sql += `${setData[index].name}, `;
             } else {
                 sql += `${setData[index].name}`;
-            }        
+            }
         }
 
         sql += ")\n VALUES (";
@@ -166,7 +236,7 @@ export class DB {
                 sql += `'${setData[index].value}', `;
             } else {
                 sql += `'${setData[index].value}'`;
-            }        
+            }
         }
 
         sql += ')';

@@ -41,14 +41,16 @@ export type MoneyMoovmentType = {
 }
 
 export type Currency = {
-    id: number | null, 
+    id: number | null,
     name: string,
+    shortName: string,
     course_to_head: number
 }
 
 export type HeadCurrency = {
     id: number | null,
-    name: string
+    name: string,
+    shortName: string
 }
 
 /**
@@ -86,7 +88,8 @@ export class StorageHandle {
             await this.db.createTable(
                 'head_currency',
                 [
-                    { name: 'name', type: 'TEXT', notNull: true }
+                    { name: 'name', type: 'TEXT', notNull: true },
+                    { name: 'short_name', type: 'TEXT', notNull: true }
                 ]
             );
         }
@@ -97,6 +100,7 @@ export class StorageHandle {
                 'currencies',
                 [
                     { name: 'name', type: 'TEXT', notNull: true },
+                    { name: 'short_name', type: 'TEXT', notNull: true },
                     { name: 'course_to_head', type: 'FLOAT', notNull: true }
                 ]
             );
@@ -193,41 +197,68 @@ export class StorageHandle {
      * Метод создает новую валюту
      * @param storageCyrrencyType - тип валюты главная/обычная (currencies/head_currecny)
      * @param storageName - имя валюты
+     * @param shortName - сокращенное имя валюты (например, RUB)
      * @param course_to_head - курс по отношению к главной валюте
      */
-    async createCurrencyStorage(storageCyrrencyType: CurrenciesType, storageName: string, course_to_head: number = 0) {
+    async createCurrencyStorage(storageCyrrencyType: CurrenciesType, storageName: string, shortName: string, course_to_head: number = 0) {
         await this.createHeadStorages();
 
         switch (storageCyrrencyType) {
+
             case 'currencies':
-                const newCurrenciesStorage: Currency = {
-                    id: null,
-                    name: storageName,
-                    course_to_head: course_to_head
-                };
                 this.db.setToTable(
-                    'currencies', 
+                    'currencies',
                     [
-                        { name: 'name', value: newCurrenciesStorage.name }, 
-                        { name: 'course_to_head', value: newCurrenciesStorage.course_to_head }
+                        { name: 'name', value: storageName },
+                        { name: 'short_name', value: shortName },
+                        { name: 'course_to_head', value: course_to_head }
                     ]
                 );
                 break;
+
             case 'head_currency':
-                const newHeadCurrency: HeadCurrency = {
-                    id: null,
-                    name: storageName
-                };
                 this.db.setToTable(
                     'head_currency',
                     [
-                        {name: 'name', value: newHeadCurrency.name}
+                        { name: 'name', value: storageName },
+                        { name: 'short_name', value: shortName }
                     ]
                 );
                 break;
+
             default:
                 throw new DBException(`${storageCyrrencyType} не является валидным типом для создания валюты`);
         }
+    }
+
+    /**
+     * Изменяет значение курса (course_to_head) для валюты с указанным id.
+     *
+     * Сначала проверяет, существует ли строка с таким id в таблице `currencies`.
+     * Если строки нет — выбрасывает исключение.
+     * Если строка есть — обновляет поле `course_to_head`.
+     *
+     * @param id Идентификатор строки в таблице `currencies`.
+     * @param course_to_head Новое значение курса.
+     *
+     * @throws DBException
+     *         Если строка с таким id не существует в таблице `currencies`.
+     *         Если произошла ошибка при выполнении SQL-запроса.
+     *
+     * @example
+     * await changeCourse(3, 1.25);
+     *
+     * @notes
+     * - Таблица `currencies` должна существовать.
+     * - В таблице должно быть поле `id` и поле `course_to_head`.
+     * - Значение курса приводится к строке перед сохранением.
+     */
+    async changeCourse(id: number, course_to_head: number) {
+        if (!await this.db.isRowExists('currencies', id)) {
+            throw new DBException(`Row whith id=${id} not exists in table currencies`);
+        }
+
+        await this.db.updateDataInTable('currencies', 'course_to_head', `${course_to_head}`, 'id', `${id}`, '=');
     }
 
     /**
