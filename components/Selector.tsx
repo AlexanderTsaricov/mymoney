@@ -4,7 +4,7 @@ import RNPickerSelect, { Item } from 'react-native-picker-select';
 import { pageStyles } from '../Styles/page';
 import { MoneyMoovmentType, MoneyType, WalletType } from '../storage/StorageHandle';
 
-interface SelectorProps {
+export interface SelectorProps {
     title: string;
     titleDontHave: string;
     items: MoneyMoovmentType[] | WalletType[];

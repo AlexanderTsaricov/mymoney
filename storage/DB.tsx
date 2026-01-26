@@ -184,6 +184,64 @@ export class DB {
         }
     }
 
+    /**
+     * Проверяет, существует ли строка с указанным значением в заданной колонке таблицы.
+     * Если запись найдена — возвращает true, если нет — false.
+     *
+     * @param tableName Имя таблицы, в которой выполняется поиск.
+     * @param columnName Имя колонки, по которой производится поиск.
+     * @param value Значение, которое ищется в колонке.
+     *
+     * @returns Promise<boolean>
+     *          true  — если строка с таким значением существует,
+     *          false — если строки нет или результат запроса некорректный.
+     *
+     * @throws DBException
+     *          Выбрасывается, если база данных не открыта
+     *          или если произошла ошибка выполнения SQL-запроса.
+     *
+     * @example
+     * const exists = await db.isRowExistsByColumn('users', 'name', 'aleksy');
+     * if (exists) {
+     *   console.log('Строка существует');
+     * } else {
+     *   console.log('Строки нет');
+     * }
+     */
+    async isRowExistsByColumn(tableName: string, columnName: string, value: any): Promise<boolean> {
+        await this.open();
+        if (this.db == null) throw new DBException('db is null');
+
+        const sql = `
+        SELECT EXISTS(
+            SELECT 1 FROM ${tableName} WHERE ${columnName} = ?
+        ) as is_exists;
+    `;
+
+        try {
+            const rows = await this.db.getAllAsync(sql, [value]);
+
+            if (!Array.isArray(rows) || rows.length === 0) {
+                return false;
+            }
+
+            const first = rows[0];
+
+            if (typeof first !== 'object' || first === null) {
+                return false;
+            }
+
+            if (!('is_exists' in first)) {
+                return false;
+            }
+
+            const result = (first as any).is_exists;
+            return result === 1 || result === true;
+        } catch (err: any) {
+            throw new DBException(`SQL error: ${err.message || err}`);
+        }
+    }
+
 
 
     /**

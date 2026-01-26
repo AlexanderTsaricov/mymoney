@@ -234,10 +234,6 @@ export class StorageHandle {
     /**
      * Изменяет значение курса (course_to_head) для валюты с указанным id.
      *
-     * Сначала проверяет, существует ли строка с таким id в таблице `currencies`.
-     * Если строки нет — выбрасывает исключение.
-     * Если строка есть — обновляет поле `course_to_head`.
-     *
      * @param id Идентификатор строки в таблице `currencies`.
      * @param course_to_head Новое значение курса.
      *
@@ -247,18 +243,68 @@ export class StorageHandle {
      *
      * @example
      * await changeCourse(3, 1.25);
-     *
-     * @notes
-     * - Таблица `currencies` должна существовать.
-     * - В таблице должно быть поле `id` и поле `course_to_head`.
-     * - Значение курса приводится к строке перед сохранением.
      */
     async changeCourse(id: number, course_to_head: number) {
+        await this.createHeadStorages();
+
         if (!await this.db.isRowExists('currencies', id)) {
             throw new DBException(`Row whith id=${id} not exists in table currencies`);
         }
 
         await this.db.updateDataInTable('currencies', 'course_to_head', `${course_to_head}`, 'id', `${id}`, '=');
+    }
+
+    /**
+     * Возвращает дополнительную валюту Currency по ID
+     * @param id - ID валюты
+     * @returns Promise<Currency>
+     */
+    async getCurrency(id:number):Promise<Currency> {
+        await this.createHeadStorages();
+
+        return await this.db.getFromTableByProp('currencies', 'id', `${id}`, '=') as unknown as Currency;
+    }
+
+    /**
+     * Возвращает все дополнительные валюты
+     * @returns Promise<Currency[]>
+     */
+    async getAllCurrency():Promise<Currency[]> {
+        await this.createHeadStorages();
+
+        return await this.db.getAllFromTable('currencies') as unknown[] as Currency[];
+    }
+
+    /**
+     * Возвращает основную валюту
+     * @returns Promise<HeadCurrency>
+     */
+    async getHeadCurrency():Promise<HeadCurrency | null> {
+        await this.createHeadStorages();
+        const result = await this.db.getFromTableByProp('head_currency', 'id', '1', '=');
+        if (result.length == 0) {
+            return null
+        } else {
+            return result[0] as unknown as HeadCurrency;
+        }
+        
+    }
+
+    /**
+     * Проверяет наличие валюты в таблице основной валюты и таблице простых валют
+     * @param name - имя валюты
+     * @returns Promise<boolean>
+     *          true - если есть хотя бы в одной таблице валют
+     *          false - если нет не в одной таблице валют
+     */
+    async isHaveCurrency(name: string):Promise<boolean> {
+        await this.createHeadStorages();
+
+        if (await this.db.isRowExistsByColumn('currencies', 'name', name) || await this.db.isRowExistsByColumn('head_currency', 'name', name)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

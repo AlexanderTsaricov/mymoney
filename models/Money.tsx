@@ -3,17 +3,20 @@ import { Expence } from './modelsClasses/Expence';
 import { Income } from './modelsClasses/Income';
 import { Wallet } from './modelsClasses/Wallet';
 import { returnOjb } from '../storage/StorageHandle';
+import { Currencies } from './modelsClasses/Currencies';
 
 export class Money {
     allMoney: number = 0;
     expence: Expence;
     income: Income;
     wallet: Wallet;
+    currencies: Currencies;
 
     constructor(dbName: string) {
         this.expence = new Expence(dbName);
         this.income = new Income(dbName);
         this.wallet = new Wallet(dbName);
+        this.currencies = new Currencies(dbName);
     }
 
     async init() {
