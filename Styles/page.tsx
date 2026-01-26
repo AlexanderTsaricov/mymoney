@@ -1,6 +1,10 @@
 import { Dimensions, StyleSheet } from "react-native";
 const { height } = Dimensions.get('window');
 export const pageStyles = StyleSheet.create({
+    borderRedDebug: {
+        borderWidth: 1, borderColor: 'red'
+    },
+
     text: {
         color: '#fff',                // белый цвет
         fontSize: 19,                 // размер текста
@@ -62,7 +66,8 @@ export const pageStyles = StyleSheet.create({
         fontSize: 16,
         backgroundColor: '#fff',
         width: '100%',
-        margin: 7,
+        padding: 7,
+        marginVertical: 6,
 
         // тень для iOS
         shadowColor: "#000",

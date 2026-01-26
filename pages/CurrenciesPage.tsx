@@ -1,11 +1,19 @@
 import { Currency, HeadCurrency } from "../storage/StorageHandle";
 import { CurrecyCourse } from "../components/CurrecyCourse";
-import { Text, TextInput, View, TouchableOpacity } from "react-native";
+import {
+	Text,
+	TextInput,
+	View,
+	TouchableOpacity,
+	GestureResponderEvent,
+} from "react-native";
 import { useEffect, useState } from "react";
 import { Money } from "../models/Money";
 import Form from "../components/Form";
 import { InputByText } from "../components/Form";
 import { FormProps } from "../components/Form";
+import { pageStyles } from "../Styles/page";
+import ModelParamsExeption from "../exeptions/ModelExeprion";
 
 type CurrenciesPageProps = {
 	money: Money;
@@ -15,48 +23,115 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 	const [headCurrency, setHeadCurrency] = useState<HeadCurrency | null>(null);
 	const [currencies, setCurrencies] = useState<Currency[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [name, setName] = useState("");
-	const [wordCode, setWordCode] = useState("");
-	const [errorText, setErrorText] = useState("");
 
-	const inputsFormProps: InputByText[] = [
+	// Форма основной валюты (начало) --------------------------------
+	const [nameHeadCurrecy, setNameHeadCurrecy] = useState("");
+	const [wordCodeHeadCurrency, setWordCodeHeadCurrency] = useState("");
+	const inputsHeadCurrecyFormProps: InputByText[] = [
 		{
 			labelText: "Название валюты",
 			placeholder: "Рубль",
 			keyboardType: undefined,
-			value: name,
-			onChangeText: setName,
+			value: nameHeadCurrecy,
+			onChangeText: setNameHeadCurrecy,
 		},
 		{
 			labelText: "Буквенный код",
 			placeholder: "RUB",
 			keyboardType: undefined,
-			value: wordCode,
-			onChangeText: setWordCode,
+			value: wordCodeHeadCurrency,
+			onChangeText: setWordCodeHeadCurrency,
 		},
 	];
-
 	const formHeadSubmitCallback = async () => {
-		if (name.length !== 0 && wordCode.length !== 0) {
-			await money.currencies.createHeadCurrency(name, wordCode);
+		setErrorText("");
+		if (nameHeadCurrecy.length !== 0 && wordCodeHeadCurrency.length !== 0) {
+			await money.currencies.createHeadCurrency(
+				nameHeadCurrecy,
+				wordCodeHeadCurrency,
+			);
 			await updateCurrencies();
 		} else {
 			let errorInputs = "";
-			if (name.length !== 0) errorInputs += "Необходимо ввести имя валюты\n";
-			if (wordCode.length !== 0) errorInputs += "Необходимо ввести буквенный код валюты\n";
+			if (nameHeadCurrecy.length !== 0)
+				errorInputs += "Необходимо ввести имя валюты\n";
+			if (wordCodeHeadCurrency.length !== 0)
+				errorInputs += "Необходимо ввести буквенный код валюты\n";
+			setErrorText(errorInputs);
 		}
-
 	};
-
-	const formProps: FormProps = {
-		inputs: inputsFormProps,
+	const formHeadCurrencyProps: FormProps = {
+		inputs: inputsHeadCurrecyFormProps,
 		submitTextButton: "Создать валюту",
-		submitOnPress: formHeadSubmitCallback
+		submitOnPress: formHeadSubmitCallback,
 	};
+	// Форма основной валюты (конец) --------------------------------------------------
+
+	// Форма дополнительной валюты (начало) -------------------------------------------
+	const [newCurrencyName, setNewCurrencyName] = useState("");
+	const [newCurrencyWordCode, setNewCurrencyWordCode] = useState("");
+	const [newCurrencyCourse, setNewCurrencyCourse] = useState("");
+	const inputsNewCurrencyFormProps: InputByText[] = [
+		{
+			labelText: "Название валюты",
+			placeholder: "Рубль",
+			keyboardType: undefined,
+			value: newCurrencyName,
+			onChangeText: setNewCurrencyName,
+		},
+		{
+			labelText: "Буквенный код",
+			placeholder: "RUB",
+			keyboardType: undefined,
+			value: newCurrencyWordCode,
+			onChangeText: setNewCurrencyWordCode,
+		},
+		{
+			labelText: "Курс к основной валюте",
+			placeholder: "80.06",
+			keyboardType: "number-pad",
+			value: newCurrencyCourse,
+			onChangeText: setNewCurrencyCourse,
+		},
+	];
+	const submitFormNewCurrency = async () => {
+		setErrorText("");
+		if (
+			newCurrencyName.length != 0 &&
+			newCurrencyWordCode.length != 0 &&
+			newCurrencyCourse.length != 0
+		) {
+			await money.currencies.createCurrency(
+				newCurrencyName,
+				newCurrencyWordCode,
+				parseFloat(newCurrencyCourse),
+			);
+			await updateCurrencies();
+		} else {
+			let errorInputs = "";
+			if (newCurrencyName.length != 0)
+				errorInputs += "Необходимо ввести имя валюты\n";
+			if (newCurrencyWordCode.length != 0)
+				errorInputs += "Необходимо ввести буквенный код\n";
+			if (newCurrencyCourse.length != 0)
+				errorInputs += "Необходимо ввести курс\n";
+			setErrorText(errorInputs);
+		}
+	};
+	const formNewCurrencyProps: FormProps = {
+		inputs: inputsNewCurrencyFormProps,
+		submitTextButton: "Добавить валюту",
+		submitOnPress: submitFormNewCurrency,
+	};
+	// Форма дополнительной валюты (конец) --------------------------------------------
+
+	// Вывод ошибок
+	const [errorText, setErrorText] = useState("");
 
 	const updateCurrencies = async () => {
 		const head = await money.currencies.getHeadCurrency();
 		const all = await money.currencies.getAllCurrencies();
+		console.log(all);
 		setHeadCurrency(head);
 		setCurrencies(all);
 	};
@@ -70,40 +145,64 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 		load();
 	}, []);
 
+	const deleteCurrency = async (id: number) => {
+		await money.currencies.deleteCurrency(id);
+		await updateCurrencies();
+	}
+
 	return (
-		<View>
-			<Text>Валюты</Text>
+		<View style={pageStyles.headContainer}>
 			{loading ? (
-				<View>
-					<Text>Загрузка...</Text>
+				<View style={pageStyles.block}>
+					<Text style={pageStyles.text}>Загрузка...</Text>
 				</View>
 			) : (
 				<View>
 					{headCurrency == null ? (
-						<View>
-							<Text>Необходимо создать основную валюту</Text>
-							<Text>{errorText}</Text>
-							<Form {...formProps} />
+						<View style={pageStyles.block}>
+							<Text style={pageStyles.text}>
+								Необходимо создать основную валюту
+							</Text>
+							<Text style={[pageStyles.text, { color: "red" }]}>
+								{errorText}
+							</Text>
+							<Form {...formHeadCurrencyProps} />
 						</View>
 					) : (
 						<View>
-							<Text>Основная валюта</Text>
-							<Text>
-								<Text>{headCurrency.name}</Text>{" "}
-								<Text>{headCurrency.shortName}</Text>
-							</Text>
-							<Text>Дополнительные валюты</Text>
-							<View>
-								{currencies.length == 0 ? (
-									<Text>У вас нет дополнительных валют</Text>
-								) : (
-									currencies.map((currency) => (
-										<CurrecyCourse
-											currency={currency}
-											headCurrency={headCurrency}
-										/>
-									))
-								)}
+							<View style={pageStyles.block}>
+								
+								<Text style={pageStyles.text}>
+									<Text>Основная валюта:</Text>{" "}
+									<Text style={{color: "blue"}}>{headCurrency.name}</Text>{" "}
+									<Text style={{color: "green"}}>{headCurrency.short_name}</Text>
+								</Text>
+							</View>
+							<View style={pageStyles.block}>
+								<Text style={pageStyles.text}>Дополнительные валюты</Text>
+								<Form {...formNewCurrencyProps} />
+								<View>
+									{currencies.length == 0 ? (
+										<Text style={[pageStyles.text, {color: 'red'}]}>
+											У вас нет дополнительных валют
+										</Text>
+									) : (
+										currencies.map((currency) => (
+											<CurrecyCourse
+												key={currency.id}
+												currency={currency}
+												headCurrency={headCurrency}
+												deleteCurrency={() => {
+													if (currency.id) {
+														deleteCurrency(currency.id);
+													} else {
+														throw new ModelParamsExeption(`Некорректный ID валюты ${currency.short_name}`);
+													}
+												}}
+											/>
+										))
+									)}
+								</View>
 							</View>
 						</View>
 					)}

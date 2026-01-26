@@ -90,15 +90,15 @@ function isSelector(
  */
 export default function Form(formProps: FormProps) {
 	return (
-		<View style={pageStyles.block}>
+		<View style={{ width: "100%" }}>
 			{formProps.inputs.map((input, index) =>
 				isSelector(input) ? (
-					<View key={index}>
+					<View key={index} style={[{ width: "100%" }]}>
 						<Text style={pageStyles.text}>{input.labelText}</Text>
 						<Selector {...input.selectorProps} />
 					</View>
 				) : (
-					<View key={index}>
+					<View key={index} style={[{ width: "100%" }]}>
 						<Text style={pageStyles.text}>{input.labelText}</Text>
 						<TextInput
 							placeholder={input.placeholder}
@@ -106,6 +106,7 @@ export default function Form(formProps: FormProps) {
 							value={input.value}
 							onChangeText={input.onChangeText}
 							style={[pageStyles.inputText]}
+							placeholderTextColor={'#a68ebf'}
 						/>
 					</View>
 				),

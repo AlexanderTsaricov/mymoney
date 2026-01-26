@@ -75,4 +75,11 @@ export class Currencies {
     public async getAllCurrencies():Promise<Currency[]> {
         return await this.storage.getAllCurrency();
     }
+
+    /**
+     * Удаляет дополнительную валюту
+     */
+    public async deleteCurrency(id: number) {
+        await this.storage.deleteDataFromTable('currencies', id);
+    }
 }

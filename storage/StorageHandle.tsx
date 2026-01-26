@@ -43,14 +43,14 @@ export type MoneyMoovmentType = {
 export type Currency = {
     id: number | null,
     name: string,
-    shortName: string,
+    short_name: string,
     course_to_head: number
 }
 
 export type HeadCurrency = {
     id: number | null,
     name: string,
-    shortName: string
+    short_name: string
 }
 
 /**
