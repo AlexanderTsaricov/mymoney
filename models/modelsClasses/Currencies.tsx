@@ -1,5 +1,5 @@
 import ModelParamsExeption from "../../exeptions/ModelExeprion";
-import { StorageHandle, Currency, HeadCurrency } from "../../storage/StorageHandle";
+import { StorageHandle, Currency, HeadCurrency, CurrencyChangeProp, HeadCurrencyChangeProp } from "../../storage/StorageHandle";
 
 export class Currencies {
     storage: StorageHandle;
@@ -72,5 +72,24 @@ export class Currencies {
      */
     public async deleteCurrency(id: number) {
         await this.storage.deleteDataFromTable('currencies', id);
+    }
+
+    /**
+     * Изменяет свойство дополнительной валюты
+     * @param id - id валюты
+     * @param prop - свойство валюты
+     * @param value - новое значение свойства валюты
+     */
+    public async changeCurrency(id: number, prop: CurrencyChangeProp, value: string) {
+        await this.storage.updateCurrencyData(id, prop, value);
+    }
+
+    /**
+     * Изменяет свойство основной валюты
+     * @param prop - свойство валюты
+     * @param value - новое значение свойства валюты
+     */
+    public async changeHeadCurrency(prop: HeadCurrencyChangeProp, value: string) {
+        await this.storage.updateHeadCurrencyData(prop, value);
     }
 }
