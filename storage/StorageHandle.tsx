@@ -53,6 +53,9 @@ export type HeadCurrency = {
     short_name: string
 }
 
+export type CurrencyChangeProp = 'name' | 'short_name' | 'course_to_head';
+export type HeadCurrencyChangeProp = 'name' | 'short_name';
+
 /**
  * Класс обработки хранилища
  */
@@ -324,6 +327,34 @@ export class StorageHandle {
             return await this.db.updateDataInTable('moneyMovement', channgedProp, propValue, 'id', id.toString(), '=');
         } catch (error) {
             console.error("Error in method updateMoneyData: ", error);
+        }
+    }
+
+
+    /**
+     * Меняет значение свойства у дополнительной валюты
+     * @param id - id валюты
+     * @param prop - Свойство валюты требующее изменения
+     * @param value  - Новое значение свойства валюты
+     */
+    async updateCurrencyData(id:number, prop: CurrencyChangeProp, value: string) {
+        if (await this.db.isRowExists('currencies', id)) {
+            await this.db.updateDataInTable('currencies', prop, value, 'id', id.toString(), '=');
+        } else {
+            throw new DBException('Отсутствует валюта с таким id');
+        }
+    }
+
+    /**
+     * Изменяет значение свойства основной валюты
+     * @param prop - Свойство валюты
+     * @param value - Новое значение валюты
+     */
+    async updateHeadCurrencyData(prop: HeadCurrencyChangeProp, value: string) {
+        if (await this.db.isRowExists('head_currency', 1)) {
+            await this.db.updateDataInTable('head_currency', prop, value, 'id', '1', '=');
+        } else {
+            throw new DBException('Отсутствует основная валюта');
         }
     }
 
