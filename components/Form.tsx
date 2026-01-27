@@ -1,13 +1,7 @@
-import {
-	GestureResponderEvent,
-	KeyboardTypeOptions,
-	View,
-	TextInput,
-	Text,
-	TouchableOpacity,
-} from "react-native";
+import { GestureResponderEvent, KeyboardTypeOptions, View, TextInput, Text, TouchableOpacity } from "react-native";
 import Selector, { SelectorProps } from "./Selector";
 import { pageStyles } from "../Styles/page";
+import { useEffect, useState } from "react";
 
 /**
  * Универсальный компонент формы для React Native.
@@ -28,6 +22,8 @@ export type InputByText = {
 	keyboardType: KeyboardTypeOptions | undefined;
 	value: any;
 	onChangeText: React.Dispatch<React.SetStateAction<any>>;
+	required?: boolean;
+	textError?: string;
 };
 
 /**
@@ -58,9 +54,7 @@ export type FormProps = {
  *
  * Если у элемента есть selectorProps — это InputBySelector.
  */
-function isSelector(
-	item: InputByText | InputBySelector,
-): item is InputBySelector {
+function isSelector(item: InputByText | InputBySelector): item is InputBySelector {
 	return "selectorProps" in item;
 }
 
@@ -89,6 +83,20 @@ function isSelector(
  *   отправки формы. Получает GestureResponderEvent.
  */
 export default function Form(formProps: FormProps) {
+	const [errors, setErrors] = useState<boolean[]>([]);
+
+	useEffect(() => {
+		const inputsError = [];
+		for (let index = 0; index < formProps.inputs.length; index++) {
+			const input = formProps.inputs[index];
+
+			if (!isSelector(input)) {
+				inputsError.push(false);
+			}
+		}
+		setErrors(inputsError);
+	}, []);
+
 	return (
 		<View style={{ width: "100%" }}>
 			{formProps.inputs.map((input, index) =>
@@ -105,20 +113,43 @@ export default function Form(formProps: FormProps) {
 							keyboardType={input.keyboardType}
 							value={input.value}
 							onChangeText={input.onChangeText}
-							style={[pageStyles.inputText]}
-							placeholderTextColor={'#a68ebf'}
+							style={[pageStyles.inputText, errors[index] ? pageStyles.inputError : {}]}
+							placeholderTextColor={"#a68ebf"}
 						/>
+						{errors[index] && (
+							<Text style={{color: "#8B0000", marginTop: -7, paddingLeft: 12}}>{input.textError ? input.textError : "Поле не должно быть пустым"}</Text>
+						)}
 					</View>
 				),
 			)}
 
 			<TouchableOpacity
 				style={pageStyles.button}
-				onPress={formProps.submitOnPress}
+				onPress={(event) => {
+					let emptyError = false;
+					const inputErrors: boolean[] = [];
+
+					for (let index = 0; index < formProps.inputs.length; index++) {
+						const input = formProps.inputs[index];
+
+						if (!isSelector(input)) {
+							if (input.value.length == 0 && input.required) {
+								emptyError = true;
+								inputErrors.push(true);
+							} else {
+								inputErrors.push(false);
+							}
+						}
+					}
+
+					setErrors(inputErrors);
+
+					if (!emptyError) {
+						formProps.submitOnPress(event);
+					}
+				}}
 			>
-				<Text style={pageStyles.buttonText}>
-					{formProps.submitTextButton}
-				</Text>
+				<Text style={pageStyles.buttonText}>{formProps.submitTextButton}</Text>
 			</TouchableOpacity>
 		</View>
 	);
