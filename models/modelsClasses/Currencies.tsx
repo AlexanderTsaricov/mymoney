@@ -34,15 +34,6 @@ export class Currencies {
     }
 
     /**
-     * Изменяет курс валюты по отношению к основной валюте
-     * @param currencyId - ID валюты
-     * @param course_to_head - новое значение курса по отношению к основной валюте
-     */
-    public async changeCourse (currencyId: number, course_to_head: number) {
-        await this.storage.changeCourse(currencyId, course_to_head);
-    }
-
-    /**
      * Проверяет наличие валюты
      * @param currencyName - имя валюты
      * @returns Promise<boolean>

@@ -232,29 +232,6 @@ export class StorageHandle {
     }
 
     /**
-     * Изменяет значение курса (course_to_head) для валюты с указанным id.
-     *
-     * @param id Идентификатор строки в таблице `currencies`.
-     * @param course_to_head Новое значение курса.
-     *
-     * @throws DBException
-     *         Если строка с таким id не существует в таблице `currencies`.
-     *         Если произошла ошибка при выполнении SQL-запроса.
-     *
-     * @example
-     * await changeCourse(3, 1.25);
-     */
-    async changeCourse(id: number, course_to_head: number) {
-        await this.createHeadStorages();
-
-        if (!await this.db.isRowExists('currencies', id)) {
-            throw new DBException(`Row whith id=${id} not exists in table currencies`);
-        }
-
-        await this.db.updateDataInTable('currencies', 'course_to_head', `${course_to_head}`, 'id', `${id}`, '=');
-    }
-
-    /**
      * Возвращает дополнительную валюту Currency по ID
      * @param id - ID валюты
      * @returns Promise<Currency>
