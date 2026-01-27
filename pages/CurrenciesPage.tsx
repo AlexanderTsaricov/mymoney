@@ -1,12 +1,6 @@
 import { Currency, HeadCurrency } from "../storage/StorageHandle";
 import { CurrecyCourse } from "../components/CurrecyCourse";
-import {
-	Text,
-	TextInput,
-	View,
-	TouchableOpacity,
-	GestureResponderEvent,
-} from "react-native";
+import { Text, TextInput, View, TouchableOpacity, GestureResponderEvent } from "react-native";
 import { useEffect, useState } from "react";
 import { Money } from "../models/Money";
 import Form from "../components/Form";
@@ -46,18 +40,8 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 	const formHeadSubmitCallback = async () => {
 		setErrorText("");
 		if (nameHeadCurrecy.length !== 0 && wordCodeHeadCurrency.length !== 0) {
-			await money.currencies.createHeadCurrency(
-				nameHeadCurrecy,
-				wordCodeHeadCurrency,
-			);
+			await money.currencies.createHeadCurrency(nameHeadCurrecy, wordCodeHeadCurrency);
 			await updateCurrencies();
-		} else {
-			let errorInputs = "";
-			if (nameHeadCurrecy.length !== 0)
-				errorInputs += "Необходимо ввести имя валюты\n";
-			if (wordCodeHeadCurrency.length !== 0)
-				errorInputs += "Необходимо ввести буквенный код валюты\n";
-			setErrorText(errorInputs);
 		}
 	};
 	const formHeadCurrencyProps: FormProps = {
@@ -96,26 +80,9 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 	];
 	const submitFormNewCurrency = async () => {
 		setErrorText("");
-		if (
-			newCurrencyName.length != 0 &&
-			newCurrencyWordCode.length != 0 &&
-			newCurrencyCourse.length != 0
-		) {
-			await money.currencies.createCurrency(
-				newCurrencyName,
-				newCurrencyWordCode,
-				parseFloat(newCurrencyCourse),
-			);
+		if (newCurrencyName.length != 0 && newCurrencyWordCode.length != 0 && newCurrencyCourse.length != 0) {
+			await money.currencies.createCurrency(newCurrencyName, newCurrencyWordCode, parseFloat(newCurrencyCourse));
 			await updateCurrencies();
-		} else {
-			let errorInputs = "";
-			if (newCurrencyName.length != 0)
-				errorInputs += "Необходимо ввести имя валюты\n";
-			if (newCurrencyWordCode.length != 0)
-				errorInputs += "Необходимо ввести буквенный код\n";
-			if (newCurrencyCourse.length != 0)
-				errorInputs += "Необходимо ввести курс\n";
-			setErrorText(errorInputs);
 		}
 	};
 	const formNewCurrencyProps: FormProps = {
@@ -148,7 +115,7 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 	const deleteCurrency = async (id: number) => {
 		await money.currencies.deleteCurrency(id);
 		await updateCurrencies();
-	}
+	};
 
 	return (
 		<View style={pageStyles.headContainer}>
@@ -160,32 +127,25 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 				<View>
 					{headCurrency == null ? (
 						<View style={pageStyles.block}>
-							<Text style={pageStyles.text}>
-								Необходимо создать основную валюту
-							</Text>
-							<Text style={[pageStyles.text, { color: "red" }]}>
-								{errorText}
-							</Text>
+							<Text style={pageStyles.text}>Необходимо создать основную валюту</Text>
+							<Text style={[pageStyles.text, { color: "red" }]}>{errorText}</Text>
 							<Form {...formHeadCurrencyProps} />
 						</View>
 					) : (
 						<View>
 							<View style={pageStyles.block}>
-								
 								<Text style={pageStyles.text}>
-									<Text>Основная валюта:</Text>{" "}
-									<Text style={{color: "blue"}}>{headCurrency.name}</Text>{" "}
-									<Text style={{color: "green"}}>{headCurrency.short_name}</Text>
+									<Text>Основная валюта:</Text> <Text style={{ color: "blue" }}>{headCurrency.name}</Text>{" "}
+									<Text style={{ color: "green" }}>{headCurrency.short_name}</Text>
 								</Text>
 							</View>
 							<View style={pageStyles.block}>
 								<Text style={pageStyles.text}>Дополнительные валюты</Text>
+								<Text style={[pageStyles.text, { color: "red" }]}>{errorText}</Text>
 								<Form {...formNewCurrencyProps} />
 								<View>
 									{currencies.length == 0 ? (
-										<Text style={[pageStyles.text, {color: 'red'}]}>
-											У вас нет дополнительных валют
-										</Text>
+										<Text style={[pageStyles.text, { color: "red" }]}>У вас нет дополнительных валют</Text>
 									) : (
 										currencies.map((currency) => (
 											<CurrecyCourse
