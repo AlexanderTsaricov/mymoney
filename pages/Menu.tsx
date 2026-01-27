@@ -3,6 +3,7 @@ import * as React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
+import { pageStyles } from '../Styles/page';
 
 type Screen = {
     name: string;
@@ -16,7 +17,7 @@ type MenuProps = {
 
 export default function Menu({ navigation, screens }: MenuProps) {
     return (
-        <ScrollView contentContainerStyle={{ padding: 20 }}>
+        <ScrollView contentContainerStyle={[{ padding: 20 }, pageStyles.headContainer]}>
             {screens.map(screen => (
                 <TouchableOpacity
                     key={screen.name}
