@@ -40,7 +40,6 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 		},
 	];
 	const formHeadSubmitCallback = async () => {
-		setErrorText("");
 		if (nameHeadCurrecy.length !== 0 && wordCodeHeadCurrency.length !== 0) {
 			await money.currencies.createHeadCurrency(nameHeadCurrecy, wordCodeHeadCurrency);
 			await updateCurrencies();
@@ -84,7 +83,6 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 		},
 	];
 	const submitFormNewCurrency = async () => {
-		setErrorText("");
 		if (newCurrencyName.length != 0 && newCurrencyWordCode.length != 0 && newCurrencyCourse.length != 0) {
 			await money.currencies.createCurrency(newCurrencyName, newCurrencyWordCode, parseFloat(newCurrencyCourse));
 			await updateCurrencies();
@@ -96,9 +94,6 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 		submitOnPress: submitFormNewCurrency,
 	};
 	// Форма дополнительной валюты (конец) --------------------------------------------
-
-	// Вывод ошибок
-	const [errorText, setErrorText] = useState("");
 
 	const updateCurrencies = async () => {
 		const head = await money.currencies.getHeadCurrency();
@@ -133,7 +128,6 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 					{headCurrency == null ? (
 						<View style={pageStyles.block}>
 							<Text style={pageStyles.text}>Необходимо создать основную валюту</Text>
-							<Text style={[pageStyles.text, { color: "red" }]}>{errorText}</Text>
 							<Form {...formHeadCurrencyProps} />
 						</View>
 					) : (
@@ -146,7 +140,6 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 							</View>
 							<View style={pageStyles.block}>
 								<Text style={pageStyles.text}>Дополнительные валюты</Text>
-								<Text style={[pageStyles.text, { color: "red" }]}>{errorText}</Text>
 								<Form {...formNewCurrencyProps} />
 								<View>
 									{currencies.length == 0 ? (
