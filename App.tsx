@@ -12,7 +12,7 @@ import { Currency, MoneyType } from "./storage/StorageHandle";
 import IncomePage from "./pages/IncomePage";
 import ExpencesPage from "./pages/ExpencesPage";
 import CurrenciesPage from "./pages/CurrenciesPage";
-import CurrencyManage from "./components/CurrencyManage";
+import CurrencyManage from "./pages/CurrencyManage";
 
 const Stack = createNativeStackNavigator();
 

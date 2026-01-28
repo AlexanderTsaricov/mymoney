@@ -5,7 +5,7 @@ import { useState } from "react"
 import { pageStyles } from "../Styles/page"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { ParamListBase } from "@react-navigation/native"
-import Form, { FormProps, InputByText } from "./Form"
+import Form, { FormProps, InputByText } from "../components/Form"
 
 type CurrencyManageProps = {
     money: Money,
