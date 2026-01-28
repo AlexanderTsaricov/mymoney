@@ -1,4 +1,4 @@
-import { GestureResponderEvent, Text, View } from "react-native"
+import { GestureResponderEvent, Text, TouchableOpacity, View } from "react-native"
 import { Money } from "../models/Money"
 import { Currency } from "../storage/StorageHandle"
 import { useState } from "react"
@@ -16,7 +16,9 @@ type CurrencyManageProps = {
 export default function CurrencyManage ({money, currency, navigation}: CurrencyManageProps) {
     const [currencyName, setCurrencyName] = useState(currency.name);
     const [currencyWordCode, setCurrencyWordCode] = useState(currency.short_name);
+    console.log("До useState", currency.course_to_head);
     const [currencyCourse, setCurrencyCourse] = useState(currency.course_to_head);
+    console.log("После useState", currencyCourse);
 
     const submitChangeCurrency = async () => {
         if (currency.id == null) throw new Error('id не может быть null');
@@ -54,8 +56,10 @@ export default function CurrencyManage ({money, currency, navigation}: CurrencyM
             labelText: "Курс к основной валюте",
             placeholder: "20.00",
             keyboardType: 'number-pad',
-            value: currencyCourse,
-            onChangeText: setCurrencyCourse
+            value: currencyCourse.toString(),
+            onChangeText: function (value: any): void {
+                setCurrencyCourse(Number(value));
+            }
         }
     ];
     
@@ -67,8 +71,13 @@ export default function CurrencyManage ({money, currency, navigation}: CurrencyM
     
     return (
         <View style={pageStyles.headContainer}>
-            <Text>Изменить валюту: {currency.name}</Text>
+            <Text style={[pageStyles.text, {color: "#ffd700"}]}>Изменить валюту: {currency.name}</Text>
             <Form {...formProps}/>
+            <TouchableOpacity style={[pageStyles.button, {marginTop: 10}]} onPress={() => {
+                navigation.navigate("Валюты");
+            }}>
+                <Text style={pageStyles.buttonText}>Назад</Text>
+            </TouchableOpacity>
         </View>
     )
 }

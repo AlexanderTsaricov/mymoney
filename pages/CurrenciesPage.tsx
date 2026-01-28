@@ -8,6 +8,8 @@ import { InputByText } from "../components/Form";
 import { FormProps } from "../components/Form";
 import { pageStyles } from "../Styles/page";
 import ModelParamsExeption from "../exeptions/ModelExeprion";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 type CurrenciesPageProps = {
 	money: Money;
@@ -17,6 +19,7 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 	const [headCurrency, setHeadCurrency] = useState<HeadCurrency | null>(null);
 	const [currencies, setCurrencies] = useState<Currency[]>([]);
 	const [loading, setLoading] = useState(true);
+	const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
 	// Форма основной валюты (начало) --------------------------------
 	const [nameHeadCurrecy, setNameHeadCurrecy] = useState("");
@@ -150,6 +153,7 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 												key={currency.id}
 												currency={currency}
 												headCurrency={headCurrency}
+												navigation={navigation}
 												deleteCurrency={() => {
 													if (currency.id) {
 														deleteCurrency(currency.id);
