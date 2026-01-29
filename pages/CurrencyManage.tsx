@@ -43,14 +43,16 @@ export default function CurrencyManage ({money, currency, navigation}: CurrencyM
             placeholder: "Рубль",
             keyboardType: undefined,
             value: currencyName,
-            onChangeText: setCurrencyName
+            onChangeText: setCurrencyName,
+            required: true
         },
         {
             labelText: "Буквенный код",
             placeholder: "RUB",
             keyboardType: undefined,
             value: currencyWordCode,
-            onChangeText: setCurrencyWordCode
+            onChangeText: setCurrencyWordCode,
+            required: true
         },
         {
             labelText: "Курс к основной валюте",
@@ -59,7 +61,8 @@ export default function CurrencyManage ({money, currency, navigation}: CurrencyM
             value: currencyCourse.toString(),
             onChangeText: function (value: any): void {
                 setCurrencyCourse(Number(value));
-            }
+            },
+            required: true
         }
     ];
     
