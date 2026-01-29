@@ -13,6 +13,7 @@ import IncomePage from "./pages/IncomePage";
 import ExpencesPage from "./pages/ExpencesPage";
 import CurrenciesPage from "./pages/CurrenciesPage";
 import CurrencyManage from "./pages/CurrencyManage";
+import HeadCurrencyManage from "./pages/HeadCurrencyManage";
 
 const Stack = createNativeStackNavigator();
 
@@ -81,6 +82,23 @@ export default function App() {
 					{({ navigation, route }) => {
 						const { currency } = route.params as { currency: Currency };
 						return <CurrencyManage money={money} currency={currency} navigation={navigation} />;
+					}}
+				</Stack.Screen>
+				<Stack.Screen
+					name="Управление основной валютой"
+					options={{
+						header: ({ navigation }) => (
+							<View style={headerStyles.container}>
+								<Text style={headerStyles.text}>MyMoney</Text>
+								<TouchableOpacity onPress={() => navigation.navigate("Меню")}>
+									<Image source={require("./storage/icons/menu.png")} style={{ width: 30, height: 30 }} />
+								</TouchableOpacity>
+							</View>
+						),
+					}}
+				>
+					{({ navigation }) => {
+						return <HeadCurrencyManage money={money} navigation={navigation} />;
 					}}
 				</Stack.Screen>
 			</Stack.Navigator>

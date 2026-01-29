@@ -31,7 +31,7 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 			keyboardType: undefined,
 			value: nameHeadCurrecy,
 			onChangeText: setNameHeadCurrecy,
-			required: true
+			required: true,
 		},
 		{
 			labelText: "Буквенный код",
@@ -39,7 +39,7 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 			keyboardType: undefined,
 			value: wordCodeHeadCurrency,
 			onChangeText: setWordCodeHeadCurrency,
-			required: true
+			required: true,
 		},
 	];
 	const formHeadSubmitCallback = async () => {
@@ -66,7 +66,7 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 			keyboardType: undefined,
 			value: newCurrencyName,
 			onChangeText: setNewCurrencyName,
-			required: true
+			required: true,
 		},
 		{
 			labelText: "Буквенный код",
@@ -74,7 +74,7 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 			keyboardType: undefined,
 			value: newCurrencyWordCode,
 			onChangeText: setNewCurrencyWordCode,
-			required: true
+			required: true,
 		},
 		{
 			labelText: "Курс к основной валюте",
@@ -82,7 +82,7 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 			keyboardType: "number-pad",
 			value: newCurrencyCourse,
 			onChangeText: setNewCurrencyCourse,
-			required: true
+			required: true,
 		},
 	];
 	const submitFormNewCurrency = async () => {
@@ -136,10 +136,16 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 					) : (
 						<View>
 							<View style={pageStyles.block}>
-								<Text style={pageStyles.text}>
-									<Text>Основная валюта:</Text> <Text style={{ color: "blue" }}>{headCurrency.name}</Text>{" "}
-									<Text style={{ color: "green" }}>{headCurrency.short_name}</Text>
-								</Text>
+								<TouchableOpacity
+									onPress={() => {
+										navigation.navigate("Управление основной валютой");
+									}}
+								>
+									<Text style={pageStyles.text}>
+										<Text>Основная валюта:</Text> <Text style={{ color: "blue" }}>{headCurrency.name}</Text>{" "}
+										<Text style={{ color: "green" }}>{headCurrency.short_name}</Text>
+									</Text>
+								</TouchableOpacity>
 							</View>
 							<View style={pageStyles.block}>
 								<Text style={pageStyles.text}>Дополнительные валюты</Text>
