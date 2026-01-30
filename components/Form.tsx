@@ -84,17 +84,29 @@ function isSelector(item: InputByText | InputBySelector): item is InputBySelecto
  */
 export default function Form(formProps: FormProps) {
 	const [errors, setErrors] = useState<boolean[]>([]);
+	const [textInputsFocus, setInputsFocus] = useState<boolean[]>([]);
+
+	const changeFocuse = (index: number, val: boolean) => {
+		setInputsFocus((prev) => {
+			const newFocus = [...prev];
+			newFocus[index] = val;
+			return newFocus;
+		});
+	};
 
 	useEffect(() => {
 		const inputsError = [];
+		const focusArr = [];
 		for (let index = 0; index < formProps.inputs.length; index++) {
 			const input = formProps.inputs[index];
 
 			if (!isSelector(input)) {
 				inputsError.push(false);
+				focusArr.push(false);
 			}
 		}
 		setErrors(inputsError);
+		setInputsFocus(focusArr);
 	}, []);
 
 	return (
@@ -113,11 +125,23 @@ export default function Form(formProps: FormProps) {
 							keyboardType={input.keyboardType}
 							value={input.value}
 							onChangeText={input.onChangeText}
-							style={[pageStyles.inputText, errors[index] ? pageStyles.inputError : {}]}
+							style={[
+								pageStyles.inputText,
+								errors[index] ? pageStyles.inputError : {},
+								textInputsFocus[index] ? pageStyles.inputTextFocus : {},
+							]}
 							placeholderTextColor={"#a68ebf"}
+							onFocus={() => {
+								changeFocuse(index, true);
+							}}
+							onBlur={() => {
+								changeFocuse(index, false);
+							}}
 						/>
 						{errors[index] && (
-							<Text style={{color: "#8B0000", marginTop: -7, paddingLeft: 12}}>{input.textError ? input.textError : "Поле не должно быть пустым"}</Text>
+							<Text style={{ color: "#8B0000", marginTop: -7, paddingLeft: 12 }}>
+								{input.textError ? input.textError : "Поле не должно быть пустым"}
+							</Text>
 						)}
 					</View>
 				),
