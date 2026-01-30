@@ -15,7 +15,8 @@ export type MoneyType = {
     comment: string | null;
     type: number,
     walletHashName: string,
-    moneyMovementType: 'income' | 'expences'
+    moneyMovementType: 'income' | 'expences',
+    currency_id: number
 };
 
 export type RowType = {
@@ -26,7 +27,8 @@ export type RowType = {
 export type WalletType = {
     id?: number,
     name: string,
-    moneyCount: number
+    moneyCount: number,
+    currency_id: number
 }
 
 export type returnOjb = {
@@ -44,7 +46,7 @@ export type Currency = {
     id: number | null,
     name: string,
     short_name: string,
-    course_to_head: number
+    course_to_head: number,
 }
 
 export type HeadCurrency = {
@@ -92,7 +94,8 @@ export class StorageHandle {
                 'head_currency',
                 [
                     { name: 'name', type: 'TEXT', notNull: true },
-                    { name: 'short_name', type: 'TEXT', notNull: true }
+                    { name: 'short_name', type: 'TEXT', notNull: true },
+                    { name: 'currency_id', type: 'INTEGER', notNull: true }
                 ]
             );
         }
@@ -115,7 +118,8 @@ export class StorageHandle {
                 'wallets',
                 [
                     { name: 'name', type: 'TEXT', notNull: true },
-                    { name: 'moneyCount', type: 'FLOAT', notNull: true }
+                    { name: 'moneyCount', type: 'FLOAT', notNull: true },
+                    { name: 'currency_id', type: 'INTEGER', notNull: true }
                 ]
             );
         }
@@ -129,7 +133,8 @@ export class StorageHandle {
                     { name: 'comment', type: 'TEXT', notNull: false },
                     { name: 'type', type: 'INTEGER', notNull: true },
                     { name: 'walletHashName', type: 'TEXT', notNull: true },
-                    { name: 'moneyMovmentType', type: 'TEXT', notNull: true }
+                    { name: 'moneyMovmentType', type: 'TEXT', notNull: true },
+                    { name: 'currency_id', type: 'INTEGER', notNull: true }
                 ]
             );
         }
@@ -151,8 +156,9 @@ export class StorageHandle {
      * @param storageName - имя нового хранилища
      * @param storageType - тип нового хранилища
      * @param id - ID типа данных при создании хранилища трат или доходов (default = null)
+     * @param currency_id=null - ID валюты
      */
-    async createStorage(storageName: string, storageType: MoneyStorageType, id: number | null = null): Promise<returnOjb> {
+    async createStorage(storageName: string, storageType: MoneyStorageType, id: number | null = null, currency_id: number | null = null): Promise<returnOjb> {
         const result: returnOjb = {
             result: false,
             message: '',
@@ -164,16 +170,19 @@ export class StorageHandle {
         try {
             switch (storageType) {
                 case 'wallet':
+                    if (!currency_id) throw new DBException('currency_id не может быть null');
                     const wallet: WalletType = {
                         name: storageName,
-                        moneyCount: 0.00
+                        moneyCount: 0.00,
+                        currency_id: currency_id
                     };
 
                     result.result = await this.db.setToTable(
                         'wallets',
                         [
                             { name: 'name', value: wallet.name },
-                            { name: 'moneyCount', value: wallet.moneyCount }
+                            { name: 'moneyCount', value: wallet.moneyCount },
+                            { name: 'currency_id', value: wallet.currency_id }
                         ]
                     );
                     break;

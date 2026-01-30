@@ -33,7 +33,7 @@ export type InputByText = {
  */
 export type InputBySelector = {
 	labelText: string;
-	selectorProps: SelectorProps;
+	selectorProps: SelectorProps<any>;
 };
 
 /**
@@ -114,12 +114,12 @@ export default function Form(formProps: FormProps) {
 			{formProps.inputs.map((input, index) =>
 				isSelector(input) ? (
 					<View key={index} style={[{ width: "100%" }]}>
-						<Text style={pageStyles.text}>{input.labelText}</Text>
+						{input.labelText != '' && (<Text style={pageStyles.text}>{input.labelText}</Text>)}
 						<Selector {...input.selectorProps} />
 					</View>
 				) : (
 					<View key={index} style={[{ width: "100%" }]}>
-						<Text style={pageStyles.text}>{input.labelText}</Text>
+						{input.labelText != '' && (<Text style={pageStyles.text}>{input.labelText}</Text>)}
 						<TextInput
 							placeholder={input.placeholder}
 							keyboardType={input.keyboardType}

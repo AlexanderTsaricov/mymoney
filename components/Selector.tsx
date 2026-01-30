@@ -2,83 +2,58 @@ import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import RNPickerSelect, { Item } from 'react-native-picker-select';
 import { pageStyles } from '../Styles/page';
-import { MoneyMoovmentType, MoneyType, WalletType } from '../storage/StorageHandle';
 
-export interface SelectorProps {
+export interface SelectorProps<T> {
     title: string;
     titleDontHave: string;
-    items: MoneyMoovmentType[] | WalletType[];
-    onChange: (value: MoneyMoovmentType | WalletType | null) => void;
+    items: T[];
+    onChange: (value: T | null) => void;
 }
 
-function isStringArray(arg: unknown): arg is string[] {
-    return Array.isArray(arg) && arg.every(item => typeof item === "string");
-}
-
-function isObjectArray(arg: unknown): arg is object[] {
-    return Array.isArray(arg) && arg.every(item => typeof item === "object" && item !== null);
-}
-
-
-
-const Selector: React.FC<SelectorProps> = ({ title, titleDontHave, items, onChange }) => {
-    const initialValue = items.length > 0 ? items[0] || '' : null;
-    const [selected, setSelected] = useState<string | object | null>(initialValue);
-
-    const handleValueChange = (value: MoneyMoovmentType | WalletType | null) => {
-        setSelected(value);
-        if (onChange) onChange(value);
-    };
+function Selector<T extends { name?: string } | string>({
+    title,
+    titleDontHave,
+    items,
+    onChange,
+}: SelectorProps<T>) {
+    const initialValue = items.length > 0 ? items[0] : null;
+    const [selected, setSelected] = useState<T | null>(initialValue);
 
     useEffect(() => {
-        if (initialValue !== null) {
-            onChange(initialValue);
-        }
+        if (initialValue !== null) onChange(initialValue);
     }, [initialValue]);
 
-    const hasItems = items.length > 0;
+    const handleValueChange = (value: T | null) => {
+        setSelected(value);
+        onChange(value);
+    };
 
-    let pickerItems: Item[] = [];
-
-    if (hasItems && isStringArray(items)) {
-        pickerItems = items.map((w) => ({
-            label: w,
-            value: w,
-        }));
-    } else if (hasItems) {
-        pickerItems = items.map((w: any) => ({
-            label: w.name,
-            value: w,
-        }));
-    } else {
-        pickerItems = [
-            { label: titleDontHave, value: 'none' }
-        ];
-    }
-
+    const pickerItems: Item[] = items.length > 0
+        ? items.map((item) => ({
+            label: typeof item === 'string' ? item : item.name ?? 'unknown',
+            value: item,
+        }))
+        : [{ label: titleDontHave, value: null }]; // появляется только если items пустой
 
     return (
         <View style={pageStyles.selectorContainer}>
-            <Text style={pageStyles.selectorTitle}>{title}</Text>
+            {title !== '' && <Text style={pageStyles.selectorTitle}>{title}</Text>}
             <View style={pageStyles.selectorWrapper}>
                 <RNPickerSelect
                     onValueChange={handleValueChange}
                     value={selected}
                     items={pickerItems}
-                    placeholder={
-                        hasItems
-                            ? {}
-                            : { label: titleDontHave, value: 'none' }
-                    }
+                    placeholder={items.length === 0 ? { label: titleDontHave, value: null } : {}}
                     style={{
                         inputIOS: pageStyles.selectorInputInner,
                         inputAndroid: pageStyles.selectorInputInner,
-                        placeholder: pageStyles.selectorPlaceholder
+                        placeholder: pageStyles.selectorPlaceholder,
                     }}
+                    disabled={items.length === 0} // можно сделать disabled, если нужно
                 />
             </View>
         </View>
     );
-};
+}
 
 export default Selector;

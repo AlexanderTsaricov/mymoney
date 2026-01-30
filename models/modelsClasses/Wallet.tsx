@@ -14,11 +14,11 @@ export class Wallet {
      * Добавляет новый кошелёк
      * @param walletName - имя нового кошелька
      */
-    async addWallet(walletName: string): Promise<returnOjb> {
+    async addWallet(walletName: string, currency_id: number): Promise<returnOjb> {
         const tableExist = await this.storage.isStorageExist('wallets');
         if (tableExist) {
             try {
-                return await this.storage.createStorage(walletName, 'wallet');
+                return await this.storage.createStorage(walletName, 'wallet', currency_id);
             } catch (error) {
                 console.error(error);
                 return {
