@@ -16,9 +16,7 @@ type CurrencyManageProps = {
 export default function CurrencyManage ({money, currency, navigation}: CurrencyManageProps) {
     const [currencyName, setCurrencyName] = useState(currency.name);
     const [currencyWordCode, setCurrencyWordCode] = useState(currency.short_name);
-    console.log("До useState", currency.course_to_head);
     const [currencyCourse, setCurrencyCourse] = useState(currency.course_to_head);
-    console.log("После useState", currencyCourse);
 
     const submitChangeCurrency = async () => {
         if (currency.id == null) throw new Error('id не может быть null');
