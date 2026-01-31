@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, TextInput, GestureResponderEvent } from "react-native";
 import { Money } from "../models/Money";
 import { pageStyles } from "../Styles/page";
-import { Currency, HeadCurrency, MoneyMoovmentType, MoneyType, WalletType } from "../storage/StorageHandle";
+import { Currency, MoneyMoovmentType, MoneyType, WalletType } from "../storage/StorageHandle";
 import Selector, { SelectorProps } from "../components/Selector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { MoneyMoovmentTypes } from "../components/MoneyMoovmentTypes";
@@ -26,10 +26,10 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 	const [comment, onChangeComment] = React.useState("");
 	const [isInputExpenceError, setInputExpenceError] = useState(false);
 	const [isInputTypeError, setInputTypeError] = useState(false);
-	const [selectWallet, setSelectWallet] = useState<MoneyMoovmentType | WalletType | null>(null);
-	const [selectExpenceType, setSelectExpenceType] = useState<MoneyMoovmentType | WalletType | null>(null);
-    const [currencies, setCurrencies] = useState<(Currency | HeadCurrency)[]>([]);
-    const [selectCurrency, setSelectCurrency] = useState<Currency | HeadCurrency | null>(null);
+	const [selectWallet, setSelectWallet] = useState<WalletType | null>(null);
+	const [selectExpenceType, setSelectExpenceType] = useState<MoneyMoovmentType | null>(null);
+    const [currencies, setCurrencies] = useState<Currency[]>([]);
+    const [selectCurrency, setSelectCurrency] = useState<Currency | null>(null);
 
 	useEffect(() => {
 		const loadWallets = async () => {
@@ -40,7 +40,7 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 
         const loadCurrencies = async () => {
             const data: Currency[] = await money.currencies.getAllCurrencies();
-            const headCurrency: HeadCurrency | null = await money.currencies.getHeadCurrency();
+            const headCurrency: Currency | null = await money.currencies.getHeadCurrency();
 
             if (headCurrency) {
                 setCurrencies([headCurrency, ...data]);
@@ -54,7 +54,6 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 	useEffect(() => {
 		const loadExpenceTypes = async () => {
 			const data = await money.expence.getExpencesTypes();
-			console.log("Loaded expence types: ", data);
 			setExpenceTypes(data);
 			setLoadingExpenceTypes(false);
 		};
@@ -77,7 +76,7 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 		onChange: setSelectWallet,
 	};
 
-    const currenciesSelectorProps: SelectorProps<Currency | HeadCurrency> = {
+    const currenciesSelectorProps: SelectorProps<Currency> = {
         title: "",
         titleDontHave: "Нет валют",
         items: currencies,
@@ -116,19 +115,41 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 	];
 
 	const formProps: FormProps = {
-		inputs: inputs,
-		submitTextButton: "Добавить расход",
-		submitOnPress: async () => {
-			if (newExpenceName == "") {
-				setInputTypeError(true);
-			} else {
-				setInputTypeError(false);
-				await money.expence.addNewTypeExpences(newExpenceName);
-				const newExpenceTypes = await money.expence.getExpencesTypes();
-				setExpenceTypes(newExpenceTypes);
-			}
-		},
-	};
+        inputs: inputs,
+        submitTextButton: "Добавить расход",
+        submitOnPress: async () => {
+            if (sum.length == 0) return;
+            if (comment.length == 0) return;
+            if (selectExpenceType == null) return;
+            if (selectWallet == null) return;
+            if (selectWallet.id == null) return;
+            if (selectCurrency == null) return;
+            if (selectCurrency.id == null) return;
+
+            const newExpence: MoneyType = {
+                id: 1,
+                money: parseFloat(sum),
+                time_data: new Date().toString(),
+                comment: comment,
+                type: 0,
+                wallet_id: selectWallet.id,
+                moneyMovementType: 'expences',
+                currency_id: selectCurrency.id
+            }
+
+            try {
+				const result = await money.addExpences(newExpence);
+				if (!result.result) {
+					console.error(result.message);
+				} else {
+					console.log(result.message);
+				}
+            } catch (error) {
+                console.error(error);
+            }
+            
+        }
+    };
 	// Форма добавления расходов (конец) -----------------------------------------
 
 	return (

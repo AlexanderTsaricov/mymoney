@@ -78,9 +78,11 @@ export class DB {
      * @returns 
      */
     private async get(sqlRequest: string, sqlArguments: any[] = []): Promise<any[]> {
-        console.log("sql get: ", sqlRequest);
         await this.open();
-        return await this.execute(sqlRequest, sqlArguments);
+        const result = await this.execute(sqlRequest, sqlArguments);
+        if (!Array.isArray(result)) { console.log("sql result is not array:", result); return []; }
+        console.log('sql result', result);
+        return result;
     }
 
     /**

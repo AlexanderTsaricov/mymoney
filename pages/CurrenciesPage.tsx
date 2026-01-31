@@ -44,8 +44,17 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 	];
 	const formHeadSubmitCallback = async () => {
 		if (nameHeadCurrecy.length !== 0 && wordCodeHeadCurrency.length !== 0) {
-			await money.currencies.createHeadCurrency(nameHeadCurrecy, wordCodeHeadCurrency);
+			
+			try {
+				await money.currencies.createHeadCurrency(nameHeadCurrecy, wordCodeHeadCurrency);
+			} catch (error) {
+				console.error(error);
+			}
+			
 			await updateCurrencies();
+		} else {
+			console.error('nameHeadCurrecy', nameHeadCurrecy);
+			console.error('wordCodeHeadCurrency', wordCodeHeadCurrency);
 		}
 	};
 	const formHeadCurrencyProps: FormProps = {
@@ -101,7 +110,6 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 	const updateCurrencies = async () => {
 		const head = await money.currencies.getHeadCurrency();
 		const all = await money.currencies.getAllCurrencies();
-		console.log(all);
 		setHeadCurrency(head);
 		setCurrencies(all);
 	};

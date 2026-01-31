@@ -1,5 +1,5 @@
 import ModelParamsExeption from "../../exeptions/ModelExeprion";
-import { StorageHandle, Currency, HeadCurrency, CurrencyChangeProp, HeadCurrencyChangeProp } from "../../storage/StorageHandle";
+import { StorageHandle, Currency, CurrencyChangeProp, HeadCurrencyChangeProp } from "../../storage/StorageHandle";
 
 export class Currencies {
     storage: StorageHandle;
@@ -17,7 +17,7 @@ export class Currencies {
         if (await this.isHaveCurrency(currencyName)) {
             throw new ModelParamsExeption(`${currencyName} is have exists`);
         }
-        await this.storage.createCurrencyStorage('head_currency', currencyName, shortCurrencyName);
+        await this.storage.createCurrencyStorage(currencyName, shortCurrencyName);
     }
 
     /**
@@ -30,7 +30,7 @@ export class Currencies {
         if (await this.isHaveCurrency(currencyName)) {
             throw new ModelParamsExeption(`${currencyName} is have exists`);
         }
-        await this.storage.createCurrencyStorage('currencies', currencyName, shortCurrencyName, course_to_head);
+        await this.storage.createCurrencyStorage(currencyName, shortCurrencyName, course_to_head);
     }
 
     /**
@@ -55,7 +55,7 @@ export class Currencies {
      * Возвращает основную валюту
      * @returns Promise<HeadCurrency>
      */
-    public async getHeadCurrency():Promise<HeadCurrency | null> {
+    public async getHeadCurrency():Promise<Currency | null> {
         return await this.storage.getHeadCurrency();
     }
 

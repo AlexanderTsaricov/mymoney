@@ -16,7 +16,7 @@ function Selector<T extends { name?: string } | string>({
     items,
     onChange,
 }: SelectorProps<T>) {
-    const initialValue = items.length > 0 ? items[0] : null;
+    const initialValue = items?.length > 0 ? items[0] : null;
     const [selected, setSelected] = useState<T | null>(initialValue);
 
     useEffect(() => {

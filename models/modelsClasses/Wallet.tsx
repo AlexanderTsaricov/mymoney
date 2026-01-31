@@ -18,9 +18,9 @@ export class Wallet {
         const tableExist = await this.storage.isStorageExist('wallets');
         if (tableExist) {
             try {
-                return await this.storage.createStorage(walletName, 'wallet', currency_id);
+                return await this.storage.createStorage(walletName, 'wallet', null, currency_id);
             } catch (error) {
-                console.error(error);
+                console.error("Ошибка создания кошелька", error);
                 return {
                     result: false,
                     message: error as string,
@@ -97,9 +97,15 @@ export class Wallet {
         }
 
         try {
-            result.result = true;
             result.value = await this.storage.getDataFromStorageByName('wallets', name) as unknown as WalletType;
-            result.message = 'Кошелёк получен';
+            if (typeof result.value?.name) {
+                result.message = 'Кошелёк получен';
+                result.result = true;
+            } else {
+                result.value = null;
+                result.message = "Не получилось вернуть кошелек";
+            }
+            
         } catch (error) {
             console.error(error);
             result.message = error as string;
@@ -124,7 +130,6 @@ export class Wallet {
             result.result = true;
             result.value = await this.storage.getAllDataFromStorage('wallets') as unknown as WalletType[];
             result.message = "Данные кошельков получены";
-            console.log(result.value);
         } catch (error) {
             console.error(error);
             result.message = error as string;

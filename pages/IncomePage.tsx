@@ -39,9 +39,7 @@ export default function IncomePage({ money }: IncomeProps) {
 
     useEffect(() => {
         const loadIncomeTypes = async () => {
-            console.log("Start load income types...");
             const data = await money.income.getIncomesTypes();
-            console.log("Loaded income types: ", data);
             setIncomeTypes(data);
             setLoadingIncomeTypes(false);
         };

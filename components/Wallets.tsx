@@ -11,7 +11,6 @@ type WalletsProps = {
 }
 
 export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, showButton }) => {
-    console.log(wallets);
     return (
         <View>
             {wallets == null || wallets.length === 0 ? (

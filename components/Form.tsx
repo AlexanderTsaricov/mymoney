@@ -21,7 +21,7 @@ export type InputByText = {
 	placeholder: string;
 	keyboardType: KeyboardTypeOptions | undefined;
 	value: any;
-	onChangeText: React.Dispatch<React.SetStateAction<any>>;
+	onChangeText: React.Dispatch<React.SetStateAction<string>>;
 	required?: boolean;
 	textError?: string;
 };

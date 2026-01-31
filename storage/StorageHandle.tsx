@@ -2,8 +2,7 @@ import DBException from "../exeptions/DBExeption";
 import { DB } from "./DB";
 
 export type MoneyStorageType = 'expences' | 'income' | 'wallet' | 'incomeType' | 'expenceType';
-export type CurrenciesType = 'currencies' | 'head_currency';
-export type tableNameType = 'wallets' | 'incomeTypes' | 'expenceTypes' | 'moneyMovement' | 'currencies' | 'head_currency';
+export type tableNameType = 'wallets' | 'incomeTypes' | 'expenceTypes' | 'moneyMovement' | 'currencies';
 export type Storages = {
     [key in MoneyStorageType]: Record<string, string>;
 };
@@ -14,7 +13,7 @@ export type MoneyType = {
     time_data: string;
     comment: string | null;
     type: number,
-    walletHashName: string,
+    wallet_id: number,
     moneyMovementType: 'income' | 'expences',
     currency_id: number
 };
@@ -47,12 +46,6 @@ export type Currency = {
     name: string,
     short_name: string,
     course_to_head: number,
-}
-
-export type HeadCurrency = {
-    id: number | null,
-    name: string,
-    short_name: string
 }
 
 export type CurrencyChangeProp = 'name' | 'short_name' | 'course_to_head';
@@ -88,18 +81,6 @@ export class StorageHandle {
     }
 
     async createHeadStorages() {
-        // Создание таблицы главной валюты
-        if (!await this.isStorageExist('head_currency')) {
-            await this.db.createTable(
-                'head_currency',
-                [
-                    { name: 'name', type: 'TEXT', notNull: true },
-                    { name: 'short_name', type: 'TEXT', notNull: true },
-                    { name: 'currency_id', type: 'INTEGER', notNull: true }
-                ]
-            );
-        }
-
         // Создание таблицы валют
         if (!await this.isStorageExist('currencies')) {
             await this.db.createTable(
@@ -132,7 +113,7 @@ export class StorageHandle {
                     { name: 'time_data', type: 'DATETIME', notNull: true },
                     { name: 'comment', type: 'TEXT', notNull: false },
                     { name: 'type', type: 'INTEGER', notNull: true },
-                    { name: 'walletHashName', type: 'TEXT', notNull: true },
+                    { name: 'wallet_id', type: 'INTEGER', notNull: true },
                     { name: 'moneyMovmentType', type: 'TEXT', notNull: true },
                     { name: 'currency_id', type: 'INTEGER', notNull: true }
                 ]
@@ -207,40 +188,22 @@ export class StorageHandle {
 
     /**
      * Метод создает новую валюту
-     * @param storageCyrrencyType - тип валюты главная/обычная (currencies/head_currecny)
      * @param storageName - имя валюты
      * @param shortName - сокращенное имя валюты (например, RUB)
      * @param course_to_head - курс по отношению к главной валюте
      */
-    async createCurrencyStorage(storageCyrrencyType: CurrenciesType, storageName: string, shortName: string, course_to_head: number = 0) {
+    async createCurrencyStorage(storageName: string, shortName: string, course_to_head: number = 1) {
         await this.createHeadStorages();
 
-        switch (storageCyrrencyType) {
-
-            case 'currencies':
-                this.db.setToTable(
-                    'currencies',
-                    [
-                        { name: 'name', value: storageName },
-                        { name: 'short_name', value: shortName },
-                        { name: 'course_to_head', value: course_to_head }
-                    ]
-                );
-                break;
-
-            case 'head_currency':
-                this.db.setToTable(
-                    'head_currency',
-                    [
-                        { name: 'name', value: storageName },
-                        { name: 'short_name', value: shortName }
-                    ]
-                );
-                break;
-
-            default:
-                throw new DBException(`${storageCyrrencyType} не является валидным типом для создания валюты`);
-        }
+        await this.db.setToTable(
+            'currencies',
+            [
+                { name: 'name', value: storageName },
+                { name: 'short_name', value: shortName },
+                { name: 'course_to_head', value: course_to_head }
+            ]
+        );
+        
     }
 
     /**
@@ -251,7 +214,7 @@ export class StorageHandle {
     async getCurrency(id:number):Promise<Currency> {
         await this.createHeadStorages();
 
-        return await this.db.getFromTableByProp('currencies', 'id', `${id}`, '=') as unknown as Currency;
+        return (await this.db.getFromTableByProp('currencies', 'id', `${id}`, '='))[0] as unknown as Currency;
     }
 
     /**
@@ -268,13 +231,13 @@ export class StorageHandle {
      * Возвращает основную валюту
      * @returns Promise<HeadCurrency>
      */
-    async getHeadCurrency():Promise<HeadCurrency | null> {
+    async getHeadCurrency():Promise<Currency | null> {
         await this.createHeadStorages();
-        const result = await this.db.getFromTableByProp('head_currency', 'id', '1', '=');
+        const result = await this.db.getFromTableByProp('currencies', 'id', '1', '=');
         if (result.length == 0) {
             return null
         } else {
-            return result[0] as unknown as HeadCurrency;
+            return result[0] as unknown as Currency;
         }
         
     }
@@ -289,7 +252,7 @@ export class StorageHandle {
     async isHaveCurrency(name: string):Promise<boolean> {
         await this.createHeadStorages();
 
-        if (await this.db.isRowExistsByColumn('currencies', 'name', name) || await this.db.isRowExistsByColumn('head_currency', 'name', name)) {
+        if (await this.db.isRowExistsByColumn('currencies', 'name', name)) {
             return true;
         } else {
             return false;
@@ -360,8 +323,8 @@ export class StorageHandle {
      * @param value - Новое значение валюты
      */
     async updateHeadCurrencyData(prop: HeadCurrencyChangeProp, value: string) {
-        if (await this.db.isRowExists('head_currency', 1)) {
-            await this.db.updateDataInTable('head_currency', prop, value, 'id', '1', '=');
+        if (await this.db.isRowExists('currencies', 1)) {
+            await this.db.updateDataInTable('currencies', prop, value, 'id', '1', '=');
         } else {
             throw new DBException('Отсутствует основная валюта');
         }

@@ -1,96 +1,129 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
-import { Money } from '../models/Money';
-import { pageStyles } from '../Styles/page';
-import { returnOjb } from '../storage/StorageHandle';
-import { Wallets } from '../components/Wallets';
-import { WalletType } from '../storage/StorageHandle';
+import * as React from "react";
+import { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, TextInput, GestureResponderEvent } from "react-native";
+import { Money } from "../models/Money";
+import { pageStyles } from "../Styles/page";
+import { Currency, returnOjb } from "../storage/StorageHandle";
+import { Wallets } from "../components/Wallets";
+import { WalletType } from "../storage/StorageHandle";
+import Form, { FormProps, InputBySelector, InputByText } from "../components/Form";
+import { SelectorProps } from "../components/Selector";
+import CreateDataExeption from "../exeptions/CreateDataExeption";
 
 type WalletsPageProps = {
-    money: Money
-}
+	money: Money;
+};
 
 export default function WalletsPage({ money }: WalletsPageProps) {
-    const [newWalletName, onChangeNewWalletName] = React.useState('');
-    const [startSum, onChangeStartSum] = React.useState('');
-    const [isNameFocused, setNameIsFocused] = React.useState(false);
-    const [isSumFocused, setSumIsFocused] = React.useState(false);
-    const [wallets, setWallets] = useState<WalletType[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [enterError, setEnterError] = useState(false);
+	const [isNameFocused, setNameIsFocused] = React.useState(false);
+	const [isSumFocused, setSumIsFocused] = React.useState(false);
+	const [wallets, setWallets] = useState<WalletType[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [enterError, setEnterError] = useState(false);
+	const [currencies, setCurrencies] = useState<Currency[]>([]);
 
-    useEffect(() => {
-        const loadWallets = async () => {
-            const data = await money.wallet.getAllWallets();
-            console.log(data.message);
-            setWallets(data.value as WalletType[]);
-            setLoading(false);
-        };
+	const loadWallets = async () => {
+		setLoading(true);
+		const data = await money.wallet.getAllWallets();
+		setWallets(data.value as WalletType[]);
+		setLoading(false);
+	};
 
-        loadWallets();
-    }, [money]);
+	useEffect(() => {
+		const loadCurrencies = async () => {
+			const data: Currency[] = await money.currencies.getAllCurrencies();
+			const headCurrency: Currency | null = await money.currencies.getHeadCurrency();
 
-    const addNewWallet = async (name: string, sum: number) => {
-        try {
-            await money.wallet.addWallet(name);
-            const returnRequest = await money.wallet.getWalletByName(name) as unknown as returnOjb;
-            if (returnRequest.value != null) {
-                const newWallet = (returnRequest.value as WalletType[])[0];
-                if (sum != 0 && newWallet.id != undefined) {
-                    await money.wallet.changeMoney(newWallet.id, sum);
-                }
-            }
+			if (headCurrency) {
+				setCurrencies([headCurrency, ...data]);
+			}
+		};
 
-        } catch (error) {
-            console.error(error);
-        }
+		loadCurrencies();
+		loadWallets();
+	}, [money]);
 
-    }
+	// Форма создания кошелька (начало) ------------------------------------
 
-    return (
-        <View style={pageStyles.headContainer}>
-            <View style={pageStyles.block}>
-                <Text style={pageStyles.text}>Новый кошелек</Text>
-                <TextInput
-                    placeholder='Имя нового кошелька'
-                    value={newWalletName}
-                    onChangeText={onChangeNewWalletName}
-                    style={[pageStyles.inputText, enterError && pageStyles.inputError, isNameFocused && pageStyles.inputTextFocus]}
-                    onFocus={() => setNameIsFocused(true)}
-                    onBlur={() => setNameIsFocused(false)}
-                    placeholderTextColor={'#a68ebf'}
-                />
-                <TextInput
-                    placeholder='Начальная сумма'
-                    keyboardType='numeric'
-                    value={startSum}
-                    onChangeText={onChangeStartSum}
-                    style={[pageStyles.inputText, isSumFocused && pageStyles.inputTextFocus]}
-                    onFocus={() => setSumIsFocused(true)}
-                    onBlur={() => setSumIsFocused(false)}
-                    placeholderTextColor={'#a68ebf'}
-                />
-                <TouchableOpacity
-                    style={pageStyles.button}
-                    onPress={async () => {
-                        if (newWalletName == '' || newWalletName == null) {
-                            setEnterError(true);
-                        } else {
-                            setEnterError(false);
-                            await addNewWallet(newWalletName, parseFloat(startSum));
-                            const result = await money.wallet.getAllWallets();
-                            setWallets(result.value as WalletType[]);
-                        }
-                    }}
-                >
-                    <Text style={pageStyles.buttonText}>Создать кошелёк</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={pageStyles.block}>
-                <Text style={pageStyles.text}>Кошельки</Text>
-                <Wallets money={money} wallets={wallets} setWallets={setWallets} showButton={true} />
-            </View>
-        </View>
-    )
+	const [newWalletName, onChangeNewWalletName] = React.useState("");
+	const [startSum, onChangeStartSum] = React.useState("");
+	const [selectCurrency, setSelectCurrency] = React.useState<Currency | null>(null);
+
+	const selectorProps: SelectorProps<Currency> = {
+		title: "",
+		titleDontHave: "Отсутствуют валюты",
+		items: currencies,
+		onChange: setSelectCurrency,
+	};
+
+	const inputs: (InputByText | InputBySelector)[] = [
+		{
+			labelText: "",
+			placeholder: "Имя кошелька",
+			keyboardType: undefined,
+			value: newWalletName,
+			onChangeText: onChangeNewWalletName,
+			required: true,
+			textError: "Имя не может быть пустым",
+		},
+		{
+			labelText: "",
+			placeholder: "Стартовая сумма",
+			keyboardType: "numeric",
+			value: startSum,
+			onChangeText: onChangeStartSum,
+		},
+		{
+			labelText: "Валюта",
+			selectorProps: selectorProps,
+		},
+	];
+
+	const addNewWallet = async () => {
+		try {
+			if (selectCurrency == null) {
+				return;
+			}
+			if (selectCurrency.id == null) {
+				return;
+			}
+
+			const createResult = await money.wallet.addWallet(newWalletName, selectCurrency.id);
+			if (!createResult.result) {
+				throw new CreateDataExeption(createResult.message);
+			}
+			const returnRequest = (await money.wallet.getWalletByName(newWalletName)) as unknown as returnOjb;
+			if (returnRequest.value != null) {
+				const newWallet = (returnRequest.value as WalletType[])[0];
+				if (parseFloat(startSum) != 0 && newWallet.id != undefined) {
+					await money.wallet.changeMoney(newWallet.id, parseFloat(startSum));
+				}
+			}
+		} catch (error) {
+			console.error("Ошибка создания кошелька", error);
+		}
+
+		await loadWallets();
+	};
+
+	const formProps: FormProps = {
+		inputs: inputs,
+		submitTextButton: "Добавить кошелёк",
+		submitOnPress: addNewWallet,
+	};
+
+	// Форма создания кошелька (конец) ------------------------------------
+
+	return (
+		<View style={pageStyles.headContainer}>
+			<View style={pageStyles.block}>
+				<Text style={pageStyles.text}>Новый кошелек</Text>
+				<Form {...formProps} />
+			</View>
+			<View style={pageStyles.block}>
+				<Text style={pageStyles.text}>Кошельки</Text>
+				<Wallets money={money} wallets={wallets} setWallets={setWallets} showButton={true} />
+			</View>
+		</View>
+	);
 }
