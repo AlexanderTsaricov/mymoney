@@ -59,12 +59,12 @@ export default function IncomePage({ money }: IncomeProps) {
 		onChange: setSelectWallet,
 	};
 
-    const selectorCurrencyProps: SelectorProps<Currency> = {
-        title: "",
-        titleDontHave: "Отсутствуют валюты",
-        items: currencies,
-        onChange: setSelectCurrency
-    }
+	const selectorCurrencyProps: SelectorProps<Currency> = {
+		title: "",
+		titleDontHave: "Отсутствуют валюты",
+		items: currencies,
+		onChange: setSelectCurrency,
+	};
 
 	const inputsNewIncome: (InputByText | InputBySelector)[] = [
 		{
@@ -89,10 +89,10 @@ export default function IncomePage({ money }: IncomeProps) {
 			labelText: "Кошелёк",
 			selectorProps: selectorWalletsProps,
 		},
-        {
-            labelText: "Валюта",
-            selectorProps: selectorCurrencyProps
-        }
+		{
+			labelText: "Валюта",
+			selectorProps: selectorCurrencyProps,
+		},
 	];
 
 	const formNewIncomeProps: FormProps = {
@@ -100,6 +100,35 @@ export default function IncomePage({ money }: IncomeProps) {
 		submitTextButton: "Добавить доход",
 		submitOnPress: async () => {
 			console.log(`Добавляется доход: ${sum} ${selectCurrency?.short_name}. Коммент: ${comment}`);
+			if (sum.length == 0) return;
+			if (comment.length == 0) return;
+			if (selectIncomeType == null) return;
+			if (selectWallet == null) return;
+			if (selectWallet.id == null) return;
+			if (selectCurrency == null) return;
+			if (selectCurrency.id == null) return;
+
+			const newIncome: MoneyType = {
+				id: 1,
+				money: parseFloat(sum),
+				time_data: new Date().toString(),
+				comment: comment,
+				type: 0,
+				wallet_id: selectWallet.id,
+				moneyMovementType: "income",
+				currency_id: selectCurrency.id,
+			};
+
+			try {
+				const result = await money.addIncome(newIncome);
+				if (!result.result) {
+					console.error(result.message);
+				} else {
+					console.log(result.message);
+				}
+			} catch (error) {
+				console.error(error);
+			}
 		},
 	};
 	// Форма добавления дохода (конец) ------------------------------
