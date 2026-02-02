@@ -1,121 +1,164 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
-import { Money } from '../models/Money';
-import { pageStyles } from '../Styles/page';
-import { MoneyMoovmentType, MoneyType, WalletType } from '../storage/StorageHandle';
-import Selector from '../components/Selector';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { MoneyMoovmentTypes } from '../components/MoneyMoovmentTypes';
+import * as React from "react";
+import { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView, TextInput, GestureResponderEvent } from "react-native";
+import { Money } from "../models/Money";
+import { pageStyles } from "../Styles/page";
+import { Currency, MoneyMoovmentType, MoneyType, WalletType } from "../storage/StorageHandle";
+import Selector, { SelectorProps } from "../components/Selector";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { MoneyMoovmentTypes } from "../components/MoneyMoovmentTypes";
+import Form, { FormProps, InputBySelector, InputByText } from "../components/Form";
 
 type IncomeProps = {
-    money: Money
-}
+	money: Money;
+};
 
 export default function IncomePage({ money }: IncomeProps) {
-    const [sum, onChangeSum] = React.useState('');
-    const [isCommentFocused, setNameIsFocused] = React.useState(false);
-    const [isSumFocused, setSumIsFocused] = React.useState(false);
-    const [wallets, setWallets] = useState<WalletType[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [incomeTypes, setIncomeTypes] = useState<MoneyMoovmentType[]>([]);
-    const [loadingIncomeTypes, setLoadingIncomeTypes] = useState(true);
-    const [newIncomeName, setNewIncome] = useState('');
-    const [isIncomeNameFocused, setIncomeNameIsFocused] = React.useState(false);
-    const [comment, onChangeComment] = React.useState('');
-    const [selectWallet, setSelectWallet] = useState<MoneyMoovmentType | WalletType | null>(null);
-    const [selectIncomeType, setSelectIncomeType] = useState<MoneyMoovmentType | WalletType | null>(null);
+	const [isCommentFocused, setNameIsFocused] = React.useState(false);
+	const [isSumFocused, setSumIsFocused] = React.useState(false);
+	const [isIncomeNameFocused, setIncomeNameIsFocused] = React.useState(false);
+	const [comment, onChangeComment] = React.useState("");
+	const [loading, setLoading] = useState<boolean>(false);
 
+	// Форма добавления дохода (начало) -----------------------------
+	const [sum, onChangeSum] = React.useState("");
+	const [wallets, setWallets] = useState<WalletType[]>([]);
+	const [incomeTypes, setIncomeTypes] = useState<MoneyMoovmentType[]>([]);
+	const [newIncomeName, setNewIncome] = useState("");
+	const [selectWallet, setSelectWallet] = useState<WalletType | null>(null);
+	const [selectIncomeType, setSelectIncomeType] = useState<MoneyMoovmentType | null>(null);
+	const [currencies, setCurrencies] = useState<Currency[]>([]);
+	const [selectCurrency, setSelectCurrency] = useState<Currency | null>(null);
 
-    useEffect(() => {
-        const loadWallets = async () => {
-            const data = await money.wallet.getAllWallets();
-            setWallets(data.value as WalletType[]);
-            setLoading(false);
-        };
+	const loadWallets = async () => {
+		const data = await money.wallet.getAllWallets();
+		setWallets(data.value as WalletType[]);
+	};
 
-        loadWallets();
-    }, [money]);
+	const loadIncomeTypes = async () => {
+		const data = await money.income.getIncomesTypes();
+		setIncomeTypes(data);
+	};
 
-    useEffect(() => {
-        const loadIncomeTypes = async () => {
-            const data = await money.income.getIncomesTypes();
-            setIncomeTypes(data);
-            setLoadingIncomeTypes(false);
-        };
+	const loadCurrency = async () => {
+		const data = await money.currencies.getAllCurrencies();
+		setCurrencies(data);
+	};
 
-        loadIncomeTypes();
-    }, [money]);
+	const selectorTypeIncomeProps: SelectorProps<MoneyMoovmentType> = {
+		title: "",
+		titleDontHave: "Отстутсвуют типы доходов",
+		items: incomeTypes,
+		onChange: setSelectIncomeType,
+	};
 
-    return (
+	const selectorWalletsProps: SelectorProps<WalletType> = {
+		title: "",
+		titleDontHave: "Отсутствуют кошельки",
+		items: wallets,
+		onChange: setSelectWallet,
+	};
 
-        <KeyboardAwareScrollView
-            style={pageStyles.headContainer}
-            contentContainerStyle={{ paddingBottom: 40 }}
-            extraScrollHeight={20}
-            enableOnAndroid={true}
-            keyboardShouldPersistTaps="handled"
-        >
-            <ScrollView>
-                <View style={pageStyles.block}>
-                    <Text style={pageStyles.text}>Доходы</Text>
-                    <TextInput
-                        placeholder='Сумма'
-                        keyboardType='numeric'
-                        value={sum}
-                        onChangeText={onChangeSum}
-                        style={[pageStyles.inputText, isSumFocused && pageStyles.inputTextFocus]}
-                        onFocus={() => setSumIsFocused(true)}
-                        onBlur={() => setSumIsFocused(false)}
-                        placeholderTextColor={'#a68ebf'}
-                    />
-                    <TextInput
-                        placeholder='Комментарий'
-                        value={comment}
-                        onChangeText={onChangeComment}
-                        style={[pageStyles.inputText, isCommentFocused && pageStyles.inputTextFocus]}
-                        onFocus={() => setNameIsFocused(true)}
-                        onBlur={() => setNameIsFocused(false)}
-                        placeholderTextColor={'#a68ebf'}
-                    />
-                    <Selector title='Тип доходов' titleDontHave='Нет типов' items={incomeTypes} onChange={setSelectIncomeType} />
-                    <Selector title='Кошелек' titleDontHave='Нет типов' items={wallets} onChange={setSelectWallet} />
-                    <TouchableOpacity
-                        style={pageStyles.button}
-                        onPress={async () => {
-                            console.log(`Добавляется доход: ${sum} р. Коммент: ${comment}`);
-                        }}
-                    >
-                        <Text style={pageStyles.buttonText}>Добавить доход</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={pageStyles.block}>
-                    <Text style={pageStyles.text}>Типы доходов</Text>
-                    <View style={pageStyles.blockAtRow}>
-                        <TextInput
-                            placeholder='Название типа'
-                            value={newIncomeName}
-                            onChangeText={setNewIncome}
-                            style={[pageStyles.inputText, pageStyles.flexChild, isIncomeNameFocused && pageStyles.inputTextFocus]}
-                            onFocus={() => setIncomeNameIsFocused(true)}
-                            onBlur={() => setIncomeNameIsFocused(false)}
-                            placeholderTextColor={'#a68ebf'}
-                        />
-                        <TouchableOpacity
-                            style={[pageStyles.button, pageStyles.flexChild, { maxWidth: 50, height: 38 }]}
-                            onPress={async () => {
-                                await money.income.addNewTypeIncome(newIncomeName);
-                                const newIncomeTypes = await money.income.getIncomesTypes();
+    const selectorCurrencyProps: SelectorProps<Currency> = {
+        title: "",
+        titleDontHave: "Отсутствуют валюты",
+        items: currencies,
+        onChange: setSelectCurrency
+    }
 
-                                setIncomeTypes(newIncomeTypes);
-                            }}
-                        >
-                            <Text style={pageStyles.buttonText}>✚</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <MoneyMoovmentTypes money={money} moov={incomeTypes} setMoovTypes={setIncomeTypes} showButton={true} type='income' />
-                </View>
-            </ScrollView>
-        </KeyboardAwareScrollView>
-    )
+	const inputsNewIncome: (InputByText | InputBySelector)[] = [
+		{
+			labelText: "",
+			placeholder: "Сумма",
+			keyboardType: "numeric",
+			value: sum,
+			onChangeText: onChangeSum,
+		},
+		{
+			labelText: "",
+			placeholder: "Комментарий",
+			keyboardType: undefined,
+			value: comment,
+			onChangeText: onChangeComment,
+		},
+		{
+			labelText: "Тип дохода",
+			selectorProps: selectorTypeIncomeProps,
+		},
+		{
+			labelText: "Кошелёк",
+			selectorProps: selectorWalletsProps,
+		},
+        {
+            labelText: "Валюта",
+            selectorProps: selectorCurrencyProps
+        }
+	];
+
+	const formNewIncomeProps: FormProps = {
+		inputs: inputsNewIncome,
+		submitTextButton: "Добавить доход",
+		submitOnPress: async () => {
+			console.log(`Добавляется доход: ${sum} ${selectCurrency?.short_name}. Коммент: ${comment}`);
+		},
+	};
+	// Форма добавления дохода (конец) ------------------------------
+
+	useEffect(() => {
+		setLoading(true);
+		const allLoading = async () => {
+			await loadWallets();
+			await loadIncomeTypes();
+			await loadCurrency();
+		};
+		setLoading(false);
+		allLoading();
+	}, [money]);
+
+	return (
+		<KeyboardAwareScrollView
+			style={pageStyles.headContainer}
+			contentContainerStyle={{ paddingBottom: 40 }}
+			extraScrollHeight={20}
+			enableOnAndroid={true}
+			keyboardShouldPersistTaps="handled"
+		>
+			{loading ? (
+				<Text style={pageStyles.text}>Загрузка...</Text>
+			) : (
+				<ScrollView>
+					<View style={pageStyles.block}>
+						<Text style={pageStyles.text}>Доходы</Text>
+						<Form {...formNewIncomeProps} />
+					</View>
+					<View style={pageStyles.block}>
+						<Text style={pageStyles.text}>Типы доходов</Text>
+						<View style={pageStyles.blockAtRow}>
+							<TextInput
+								placeholder="Название типа"
+								value={newIncomeName}
+								onChangeText={setNewIncome}
+								style={[pageStyles.inputText, pageStyles.flexChild, isIncomeNameFocused && pageStyles.inputTextFocus]}
+								onFocus={() => setIncomeNameIsFocused(true)}
+								onBlur={() => setIncomeNameIsFocused(false)}
+								placeholderTextColor={"#a68ebf"}
+							/>
+							<TouchableOpacity
+								style={[pageStyles.button, pageStyles.flexChild, { maxWidth: 50, height: 38 }]}
+								onPress={async () => {
+									await money.income.addNewTypeIncome(newIncomeName);
+									const newIncomeTypes = await money.income.getIncomesTypes();
+
+									setIncomeTypes(newIncomeTypes);
+								}}
+							>
+								<Text style={pageStyles.buttonText}>✚</Text>
+							</TouchableOpacity>
+						</View>
+						<MoneyMoovmentTypes money={money} moov={incomeTypes} setMoovTypes={setIncomeTypes} showButton={true} type="income" />
+					</View>
+				</ScrollView>
+			)}
+		</KeyboardAwareScrollView>
+	);
 }
