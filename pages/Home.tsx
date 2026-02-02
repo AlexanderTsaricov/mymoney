@@ -4,6 +4,7 @@ import { pageStyles } from '../Styles/page';
 import { Money } from '../models/Money';
 import { MoneyType, WalletType } from '../storage/StorageHandle';
 import { Wallets } from '../components/Wallets';
+import Graphic from '../components/Graphic';
 
 type HomeProps = {
     money: Money
