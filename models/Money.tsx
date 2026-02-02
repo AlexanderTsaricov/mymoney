@@ -1,4 +1,4 @@
-import { MoneyType, WalletType } from "../storage/StorageHandle";
+import { MoneyMoovmentType, MoneyType, WalletType } from "../storage/StorageHandle";
 import { Expence } from "./modelsClasses/Expence";
 import { Income } from "./modelsClasses/Income";
 import { Wallet } from "./modelsClasses/Wallet";
@@ -59,11 +59,17 @@ export class Money {
 		const wallets = (await this.wallet.getWalletByID(expences.wallet_id)).value as WalletType[];
 		const wallet = wallets[0];
 
-		console.log(wallet);
 		if (wallet.id == undefined) {
 			return {
 				result: false,
 				message: `id - undefined`,
+			};
+		}
+
+		if (expences.moneyMovementType !== 'expences') {
+			return {
+				result: false,
+				message: "Некорректный тип - income"
 			};
 		}
 
@@ -102,6 +108,64 @@ export class Money {
 		}
 
 		const newMoneyOnHeadCurrency = walletMoneyOnHeadCurrency - expenceMoneyOnHeadCurency;
+		const resultMoney = newMoneyOnHeadCurrency / walletCurrency.course_to_head;
+
+		if (!Number.isFinite(resultMoney)) {
+			return {
+				result: false,
+				message: "Некорректный результат расчёта",
+			};
+		}
+
+		return await this.wallet.changeMoney(wallet.id, resultMoney);
+	}
+
+	/**
+	 * Добавляет доход в кошельк.
+	 *
+	 * @param expences Объект дохода MoneyType
+	 * Возвращает ошибку при отсутствии кошелька,
+	 * либо результат обновления баланса кошелька.
+	 */
+	async addIncome(income: MoneyType) {
+		const wallets = (await this.wallet.getWalletByID(income.wallet_id)).value as WalletType[];
+		const wallet = wallets[0];
+
+		if (wallet.id == undefined) {
+			return {
+				result: false,
+				message: `id - undefined`,
+			};
+		}
+
+		if (income.moneyMovementType !== 'income') {
+			return {
+				result: false,
+				message: "Некорректный тип - expences"
+			};
+		}
+
+		if (wallet == null) {
+			return {
+				result: false,
+				message: `Кошелька с id=${income.wallet_id} не существует`,
+			};
+		}
+
+		if (wallet.currency_id == income.currency_id) {
+			return await this.wallet.changeMoney(wallet.id, wallet.moneyCount + income.money);
+		}
+
+		const walletCurrency = await this.currencies.getCurrecy(wallet.currency_id);
+		const incomeCurrency = await this.currencies.getCurrecy(income.currency_id);
+
+		let walletMoneyOnHeadCurrency = 0;
+		let incomeMoneyOnHeadCurency = 0;
+
+		walletMoneyOnHeadCurrency = wallet.moneyCount * walletCurrency.course_to_head;
+		incomeMoneyOnHeadCurency = income.money * incomeCurrency.course_to_head;
+
+		const newMoneyOnHeadCurrency = walletMoneyOnHeadCurrency + incomeMoneyOnHeadCurency;
 		const resultMoney = newMoneyOnHeadCurrency / walletCurrency.course_to_head;
 
 		if (!Number.isFinite(resultMoney)) {
