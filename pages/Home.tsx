@@ -16,7 +16,7 @@ type WalletsProps = {
 	money: Money;
 };
 
-type TimeType = 'year' | 'month' | 'day' | 'hour' | 'minutes';
+type TimeType = "year" | "month" | "day" | "hour" | "minutes";
 
 const Home: React.FC<HomeProps> = ({ money }) => {
 	const [wallets, setWallets] = useState<WalletType[]>([]);
@@ -24,8 +24,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	const [incomes, setIncomes] = useState<MoneyType[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [selectWallet, setSelectWallet] = useState<WalletType | null>(null);
-	const [incomesByWallet, setIncomesByWallet] = useState<MoneyType[] | null>(null);
-	const [expencesByWallet, setExpencesByWalley] = useState<MoneyType[] | null>(null);
 	const [moneyMoovmentByWallet, setMoneyMoovmentByWallet] = useState<MoneyType[]>([]);
 	const [timeDatas, setTimeDatas] = useState<string[]>([]);
 	const [graphicLabels, setGraphicLabels] = useState<string[]>([]);
@@ -65,16 +63,15 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			const incomes = await money.income.getAllIncomeByProps("wallet_id", selectWallet.id);
 			const expences = await money.expence.getAllExpenceByProps("wallet_id", selectWallet.id);
 
-			//TODO: Удалить стейт, если будет не нужен
-			setIncomesByWallet(incomes);
-			setExpencesByWalley(expences);
-		}
+			const moneyMoovment = [...incomes, ...expences];
 
-		if (incomesByWallet != null && expencesByWallet != null) {
-			const moneyMoovment = [...incomesByWallet, ...expencesByWallet];
-			moneyMoovment.sort((a, b) => new Date(a.time_data).getTime() - new Date(b.time_data).getTime());
-
-			setMoneyMoovmentByWallet(moneyMoovment);
+			// Сортируем по времени и ставим в стейт
+			if (moneyMoovment.length > 0) {
+				moneyMoovment.sort((a, b) => new Date(a.time_data).getTime() - new Date(b.time_data).getTime());
+				setMoneyMoovmentByWallet(moneyMoovment);
+			}
+		} else {
+			console.log("Page: home", "Не выбран кошелёк");
 		}
 	};
 
@@ -83,55 +80,52 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			const filtredTimes: string[] = [];
 			switch (timeType) {
 				case "year":
-					moneyMoovmentByWallet.forEach(moneyMoovment => {
-						const date = (new Date(moneyMoovment.time_data)).getFullYear().toString();
+					moneyMoovmentByWallet.forEach((moneyMoovment) => {
+						const date = new Date(moneyMoovment.time_data).getFullYear().toString();
 						if (!filtredTimes.includes(date)) {
 							filtredTimes.push(date);
 						}
-						
 					});
 					break;
 				case "month":
-					moneyMoovmentByWallet.forEach(moneyMoovment => {
-						const date = (new Date(moneyMoovment.time_data)).getMonth().toString();
+					moneyMoovmentByWallet.forEach((moneyMoovment) => {
+						const date = new Date(moneyMoovment.time_data).getMonth().toString();
 						if (!filtredTimes.includes(date)) {
 							filtredTimes.push();
 						}
 					});
 					break;
 				case "day":
-					moneyMoovmentByWallet.forEach(moneyMoovment => {
-						const date = (new Date(moneyMoovment.time_data)).getDay().toString();
+					moneyMoovmentByWallet.forEach((moneyMoovment) => {
+						const date = new Date(moneyMoovment.time_data).getDay().toString();
 						if (!filtredTimes.includes(date)) {
 							filtredTimes.push(date);
 						}
 					});
 					break;
 				case "hour":
-					moneyMoovmentByWallet.forEach(moneyMoovment => {
-						const date = (new Date(moneyMoovment.time_data)).getHours().toString();
+					moneyMoovmentByWallet.forEach((moneyMoovment) => {
+						const date = new Date(moneyMoovment.time_data).getHours().toString();
 						if (!filtredTimes.includes(date)) {
 							filtredTimes.push(date);
 						}
 					});
 					break;
 				case "minutes":
-					moneyMoovmentByWallet.forEach(moneyMoovment => {
-						const date = (new Date(moneyMoovment.time_data)).getMinutes().toString();
+					moneyMoovmentByWallet.forEach((moneyMoovment) => {
+						const date = new Date(moneyMoovment.time_data).getMinutes().toString();
 						if (!filtredTimes.includes(date)) {
 							filtredTimes.push(date);
 						}
-					})
-					break;		
+					});
+					break;
 			}
 
-			setGraphicLabels(filtredTimes)
+			setGraphicLabels(filtredTimes);
 		}
 	};
 
-	const loadDatas = async () => {
-		
-	}
+	const loadDatas = async () => {};
 
 	useEffect(() => {}, [selectWallet]);
 
