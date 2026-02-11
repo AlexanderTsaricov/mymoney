@@ -20,7 +20,10 @@ export class Expence {
     }
 
     async addExpences(expences: MoneyType) {
-        return await this.storage.setMoneyToStorage(expences)
+        const result = await this.storage.setMoneyToStorage(expences);
+        //TODO: debug
+        console.log("result add expences", result); 
+        return result
     }
 
     async addNewTypeExpences(name: string) {

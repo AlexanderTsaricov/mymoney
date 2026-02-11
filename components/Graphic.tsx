@@ -11,7 +11,7 @@ export type GraphicProps = {
 export default function Graphic({ labels, data }: GraphicProps) {
 	return (
 		<View style={pageStyles.headContainer}>
-			{data.length > 0 ? (
+			{(data.length === 0)? (
 				<Text style={pageStyles.text}>Нет данных</Text>
 			) : (
 				<LineChart

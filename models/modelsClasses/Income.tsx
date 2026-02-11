@@ -45,7 +45,10 @@ export class Income {
     }
 
     async getAllIncomeByProps(prop: MoneyTypeProp, value: any): Promise<MoneyType[]> {
-        const arrayMoneyMoovment = await this.storage.getDataFromStorageByProp('moneyMovement', prop, value)
+        const arrayMoneyMoovment = await this.storage.getDataFromStorageByProp('moneyMovement', prop, value);
+        //TODO:debug ---
+        console.log("getAllIncomeByProps moneyMoovment", arrayMoneyMoovment);
+        //TODO:debug ---
         const arrayIncome: MoneyType[] = [];
         arrayMoneyMoovment.forEach(moneyMoovment => {
             if (moneyMoovment.moneyMovementType == 'income') {

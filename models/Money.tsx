@@ -117,6 +117,7 @@ export class Money {
 			};
 		}
 
+		await this.expence.addExpences(expences);
 		return await this.wallet.changeMoney(wallet.id, resultMoney);
 	}
 
@@ -174,7 +175,7 @@ export class Money {
 				message: "Некорректный результат расчёта",
 			};
 		}
-
+		await this.income.addIncome(income);
 		return await this.wallet.changeMoney(wallet.id, resultMoney);
 	}
 }
