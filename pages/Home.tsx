@@ -74,7 +74,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		};
 
 		loadAll();
-	}, [money]);
+	}, []);
 
 	const loadMoneyMoovmentByWallet = async () => {
 		//TODO: debug
@@ -112,20 +112,24 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		console.log("select wallet", selectWallet);
 
 		if (selectWallet != null) {
-			const filtredTimes: string[] = [];
+			const filtredTimes: string[] = ["0"];
 			const filtredDatas: Dataset = {
 				data: [],
 			};
-			let sum = 0;
+
+			let sum = selectWallet.moneyCount;
+			let firstSum = selectWallet.moneyCount;
 			switch (timeType) {
 				case "year":
 					moneyMoovmentByWallet.forEach((moneyMoovment) => {
 						const date = new Date(moneyMoovment.time_data).getFullYear().toString();
 
-						if (moneyMoovment.moneyMovementType == "income") {
+						if (moneyMoovment.moneyMovmentType == "income") {
 							sum += moneyMoovment.money;
+							firstSum -= moneyMoovment.money;
 						} else {
 							sum -= moneyMoovment.money;
+							firstSum += moneyMoovment.money;
 						}
 
 						if (!filtredTimes.includes(date)) {
@@ -134,16 +138,19 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 						} else {
 							filtredDatas.data[filtredDatas.data.length - 1] = filtredDatas.data[filtredDatas.data.length - 1] + sum;
 						}
+
 					});
 					break;
 				case "month":
 					moneyMoovmentByWallet.forEach((moneyMoovment) => {
 						const date = new Date(moneyMoovment.time_data).getMonth().toString();
 
-						if (moneyMoovment.moneyMovementType == "income") {
+						if (moneyMoovment.moneyMovmentType == "income") {
 							sum += moneyMoovment.money;
+							firstSum -= moneyMoovment.money;
 						} else {
 							sum -= moneyMoovment.money;
+							firstSum += moneyMoovment.money;
 						}
 
 						if (!filtredTimes.includes(date)) {
@@ -158,11 +165,19 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 					moneyMoovmentByWallet.forEach((moneyMoovment) => {
 						const date = new Date(moneyMoovment.time_data).getDay().toString();
 
-						if (moneyMoovment.moneyMovementType == "income") {
+						
+
+						if (moneyMoovment.moneyMovmentType == "income") {
 							sum += moneyMoovment.money;
+							firstSum -= moneyMoovment.money;
 						} else {
 							sum -= moneyMoovment.money;
+							firstSum += moneyMoovment.money;
 						}
+
+						//TODO: debug
+						console.log("sum", sum);
+						console.log("firstSum", firstSum);
 
 						if (!filtredTimes.includes(date)) {
 							filtredTimes.push(date);
@@ -170,16 +185,19 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 						} else {
 							filtredDatas.data[filtredDatas.data.length - 1] = filtredDatas.data[filtredDatas.data.length - 1] + sum;
 						}
+
 					});
 					break;
 				case "hour":
 					moneyMoovmentByWallet.forEach((moneyMoovment) => {
 						const date = new Date(moneyMoovment.time_data).getHours().toString();
 
-						if (moneyMoovment.moneyMovementType == "income") {
+						if (moneyMoovment.moneyMovmentType == "income") {
 							sum += moneyMoovment.money;
+							firstSum -= moneyMoovment.money;
 						} else {
 							sum -= moneyMoovment.money;
+							firstSum += moneyMoovment.money;
 						}
 
 						if (!filtredTimes.includes(date)) {
@@ -194,10 +212,12 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 					moneyMoovmentByWallet.forEach((moneyMoovment) => {
 						const date = new Date(moneyMoovment.time_data).getMinutes().toString();
 
-						if (moneyMoovment.moneyMovementType == "income") {
+						if (moneyMoovment.moneyMovmentType == "income") {
 							sum += moneyMoovment.money;
+							firstSum -= moneyMoovment.money;
 						} else {
 							sum -= moneyMoovment.money;
+							firstSum += moneyMoovment.money;
 						}
 
 						if (!filtredTimes.includes(date)) {
@@ -211,7 +231,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			}
 
 			setGraphicLabels(filtredTimes);
-
+			filtredDatas.data = [firstSum, ...filtredDatas.data];
 			const datasets: Dataset[] = [];
 			datasets.push(filtredDatas);
 
@@ -242,7 +262,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 
 	useEffect(() => {
 		loadGraphicData(selectTimeType);
-	}, [selectWallet, selectTimeType]);
+	}, [selectWallet, selectTimeType, moneyMoovmentByWallet]);
 
 	return (
 		<View style={pageStyles.headContainer}>
@@ -259,6 +279,9 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 					</View>
 					<View style={pageStyles.block}>
 						<Graphic labels={graphicLabels} data={graphicDatasets} />
+					</View>
+					
+					<View style={pageStyles.block}>
 						<Selector {...selectorWalletsProps} />
 						<Selector {...selectorTimeTypeProps} />
 					</View>

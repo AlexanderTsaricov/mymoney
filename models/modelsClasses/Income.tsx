@@ -37,7 +37,7 @@ export class Income {
         const arrayMoneyMoovment = await this.storage.getAllDataFromStorage('moneyMovement') as MoneyType[];
         const arrayIncome: MoneyType[] = [];
         arrayMoneyMoovment.forEach(moneyMoovment => {
-            if (moneyMoovment.moneyMovementType == 'income') {
+            if (moneyMoovment.moneyMovmentType == 'income') {
                 arrayIncome.push(moneyMoovment);
             }
         });
@@ -46,12 +46,9 @@ export class Income {
 
     async getAllIncomeByProps(prop: MoneyTypeProp, value: any): Promise<MoneyType[]> {
         const arrayMoneyMoovment = await this.storage.getDataFromStorageByProp('moneyMovement', prop, value);
-        //TODO:debug ---
-        console.log("getAllIncomeByProps moneyMoovment", arrayMoneyMoovment);
-        //TODO:debug ---
         const arrayIncome: MoneyType[] = [];
         arrayMoneyMoovment.forEach(moneyMoovment => {
-            if (moneyMoovment.moneyMovementType == 'income') {
+            if (moneyMoovment.moneyMovmentType == 'income') {
                 arrayIncome.push(moneyMoovment);
             }
         });

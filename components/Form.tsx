@@ -125,9 +125,6 @@ export default function Form(formProps: FormProps) {
 							keyboardType={input.keyboardType}
 							value={String(input.value ?? "")}
 							onChangeText={(value) => {
-								//TODO: debug
-								console.log("onChangeText", value);
-
 								input.onChangeText(value)
 							}}
 							style={[

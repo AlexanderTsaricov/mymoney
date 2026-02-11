@@ -28,8 +28,8 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 	const [isInputTypeError, setInputTypeError] = useState(false);
 	const [selectWallet, setSelectWallet] = useState<WalletType | null>(null);
 	const [selectExpenceType, setSelectExpenceType] = useState<MoneyMoovmentType | null>(null);
-    const [currencies, setCurrencies] = useState<Currency[]>([]);
-    const [selectCurrency, setSelectCurrency] = useState<Currency | null>(null);
+	const [currencies, setCurrencies] = useState<Currency[]>([]);
+	const [selectCurrency, setSelectCurrency] = useState<Currency | null>(null);
 
 	useEffect(() => {
 		const loadWallets = async () => {
@@ -38,16 +38,19 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 			setLoading(false);
 		};
 
-        const loadCurrencies = async () => {
-            const data: Currency[] = await money.currencies.getAllCurrencies();
-            const headCurrency: Currency | null = await money.currencies.getHeadCurrency();
+		const loadCurrencies = async () => {
+			const data: Currency[] = await money.currencies.getAllCurrencies();
+			const headCurrency: Currency | null = await money.currencies.getHeadCurrency();
 
-            if (headCurrency) {
-                setCurrencies([headCurrency, ...data]);
-            }
-        }
+			if (headCurrency) {
+				const filtered = data.filter((c) => c.id !== headCurrency.id);
+				setCurrencies([headCurrency, ...filtered]);
+			} else {
+				setCurrencies(data);
+			}
+		};
 
-        loadCurrencies();
+		loadCurrencies();
 		loadWallets();
 	}, [money]);
 
@@ -76,12 +79,12 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 		onChange: setSelectWallet,
 	};
 
-    const currenciesSelectorProps: SelectorProps<Currency> = {
-        title: "",
-        titleDontHave: "Нет валют",
-        items: currencies,
-        onChange: setSelectCurrency 
-    }
+	const currenciesSelectorProps: SelectorProps<Currency> = {
+		title: "",
+		titleDontHave: "Нет валют",
+		items: currencies,
+		onChange: setSelectCurrency,
+	};
 
 	const inputs: (InputByText | InputBySelector)[] = [
 		{
@@ -108,48 +111,46 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 			labelText: "Кошелек",
 			selectorProps: walletSelectorProps,
 		},
-        {
-            labelText: "Валюта",
-            selectorProps: currenciesSelectorProps
-        }
+		{
+			labelText: "Валюта",
+			selectorProps: currenciesSelectorProps,
+		},
 	];
 
 	const formProps: FormProps = {
-        inputs: inputs,
-        submitTextButton: "Добавить расход",
-        submitOnPress: async () => {
-            if (sum.length == 0) return;
-            if (comment.length == 0) return;
-            if (selectExpenceType == null) return;
-            if (selectWallet == null) return;
-            if (selectWallet.id == null) return;
-            if (selectCurrency == null) return;
-            if (selectCurrency.id == null) return;
+		inputs: inputs,
+		submitTextButton: "Добавить расход",
+		submitOnPress: async () => {
+			if (sum.length == 0) return;
+			if (comment.length == 0) return;
+			if (selectExpenceType == null) return;
+			if (selectWallet == null) return;
+			if (selectWallet.id == null) return;
+			if (selectCurrency == null) return;
+			if (selectCurrency.id == null) return;
 
-            const newExpence: MoneyType = {
-                id: 1,
-                money: parseFloat(sum),
-                time_data: new Date().toString(),
-                comment: comment,
-                type: 0,
-                wallet_id: selectWallet.id,
-                moneyMovementType: 'expences',
-                currency_id: selectCurrency.id
-            }
+			const newExpence: MoneyType = {
+				money: parseFloat(sum),
+				time_data: new Date().toString(),
+				comment: comment,
+				type: 0,
+				wallet_id: selectWallet.id,
+				moneyMovmentType: "expences",
+				currency_id: selectCurrency.id,
+			};
 
-            try {
+			try {
 				const result = await money.addExpences(newExpence);
 				if (!result.result) {
 					console.error(result.message);
 				} else {
 					console.log(result.message);
 				}
-            } catch (error) {
-                console.error(error);
-            }
-            
-        }
-    };
+			} catch (error) {
+				console.error(error);
+			}
+		},
+	};
 	// Форма добавления расходов (конец) -----------------------------------------
 
 	return (

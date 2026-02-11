@@ -8,13 +8,13 @@ export type Storages = {
 };
 
 export type MoneyType = {
-    id: number;
+    id?: number;
     money: number;
     time_data: string;
     comment: string | null;
     type: number,
     wallet_id: number,
-    moneyMovementType: 'income' | 'expences',
+    moneyMovmentType: 'income' | 'expences',
     currency_id: number
 };
 
@@ -268,7 +268,7 @@ export class StorageHandle {
      */
     async setMoneyToStorage(data: MoneyType) {
         if (!await this.isStorageExist("moneyMovement")) throw new DBException('table moneyMovement not exist');
-        const entries = Object.entries(data) as [keyof MoneyType, MoneyType[keyof MoneyType]][];
+        const entries = Object.entries(data).filter(([key]) => key !== "id") as [keyof MoneyType, MoneyType[keyof MoneyType]][];
         const setData = []
         for (const [key, value] of entries) {
             setData.push({ name: key, value: value });

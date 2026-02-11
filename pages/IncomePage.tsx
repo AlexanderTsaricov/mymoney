@@ -109,13 +109,12 @@ export default function IncomePage({ money }: IncomeProps) {
 			if (selectCurrency.id == null) return;
 
 			const newIncome: MoneyType = {
-				id: 1,
 				money: parseFloat(sum),
 				time_data: new Date().toString(),
 				comment: comment,
 				type: 0,
 				wallet_id: selectWallet.id,
-				moneyMovementType: "income",
+				moneyMovmentType: "income",
 				currency_id: selectCurrency.id,
 			};
 

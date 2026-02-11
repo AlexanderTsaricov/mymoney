@@ -66,10 +66,10 @@ export class Money {
 			};
 		}
 
-		if (expences.moneyMovementType !== 'expences') {
+		if (expences.moneyMovmentType !== "expences") {
 			return {
 				result: false,
-				message: "Некорректный тип - income"
+				message: "Некорректный тип - income",
 			};
 		}
 
@@ -87,6 +87,8 @@ export class Money {
 					message: "Не хватает денежных средств",
 				};
 			}
+
+			const resultAdd = await this.expence.addExpences(expences);
 
 			return await this.wallet.changeMoney(wallet.id, wallet.moneyCount - expences.money);
 		}
@@ -117,7 +119,8 @@ export class Money {
 			};
 		}
 
-		await this.expence.addExpences(expences);
+		const resultAdd = await this.expence.addExpences(expences);
+
 		return await this.wallet.changeMoney(wallet.id, resultMoney);
 	}
 
@@ -139,10 +142,10 @@ export class Money {
 			};
 		}
 
-		if (income.moneyMovementType !== 'income') {
+		if (income.moneyMovmentType !== "income") {
 			return {
 				result: false,
-				message: "Некорректный тип - expences"
+				message: "Некорректный тип - expences",
 			};
 		}
 
@@ -154,6 +157,9 @@ export class Money {
 		}
 
 		if (wallet.currency_id == income.currency_id) {
+			//TODO: debug
+			console.log("income", income);
+			await this.income.addIncome(income);
 			return await this.wallet.changeMoney(wallet.id, wallet.moneyCount + income.money);
 		}
 

@@ -21,8 +21,6 @@ export class Expence {
 
     async addExpences(expences: MoneyType) {
         const result = await this.storage.setMoneyToStorage(expences);
-        //TODO: debug
-        console.log("result add expences", result); 
         return result
     }
 
@@ -42,7 +40,7 @@ export class Expence {
             const arrayMoneyMoovment = await this.storage.getDataFromStorageByProp('moneyMovement', prop, value)
             const arrayExpence: MoneyType[] = [];
             arrayMoneyMoovment.forEach(moneyMoovment => {
-                if (moneyMoovment.moneyMovementType == 'expences') {
+                if (moneyMoovment.moneyMovmentType == 'expences') {
                     arrayExpence.push(moneyMoovment);
                 }
             });
@@ -53,7 +51,7 @@ export class Expence {
         const allData = await this.storage.getAllDataFromStorage('moneyMovement');
         const result: MoneyType[] = [];
         allData.forEach(data => {
-            if (data.moneyMovementType == "expences") {
+            if (data.moneyMovmentType == "expences") {
                 result.push(data);
             }
         });
