@@ -18,6 +18,8 @@ export type MoneyType = {
     currency_id: number
 };
 
+export type MoneyTypeProp = 'id' | 'money' | 'time_data' | 'comment' | 'wallet_id' | MoneyMoovmentType | 'currency_id';
+
 export type RowType = {
     name: string;
     type: 'TEXT' | 'INTEGER';
@@ -348,6 +350,17 @@ export class StorageHandle {
      */
     async getDataFromStorageByName(tableName: tableNameType, storageName: string) {
         return await this.db.getFromTableByProp(tableName, 'name', storageName, '=');
+    }
+
+    /**
+     * Возвращает массив объектов, поле prop, которого соответствует value
+     * @param tableName имя таблицы
+     * @param prop имя поля
+     * @param value значение поля
+     * @returns 
+     */
+    async getDataFromStorageByProp(tableName: tableNameType, prop: MoneyTypeProp, value: any) {
+        return await this.db.getFromTableByProp(tableName, prop as string, value, '=');
     }
 
     /**

@@ -1,4 +1,4 @@
-import { MoneyMoovmentType, MoneyType } from '../../storage/StorageHandle';
+import { MoneyMoovmentType, MoneyType, MoneyTypeProp } from '../../storage/StorageHandle';
 import { StorageHandle } from '../../storage/StorageHandle';
 
 export class Income {
@@ -35,6 +35,17 @@ export class Income {
 
     async getAllIncome(): Promise<MoneyType[]> {
         const arrayMoneyMoovment = await this.storage.getAllDataFromStorage('moneyMovement') as MoneyType[];
+        const arrayIncome: MoneyType[] = [];
+        arrayMoneyMoovment.forEach(moneyMoovment => {
+            if (moneyMoovment.moneyMovementType == 'income') {
+                arrayIncome.push(moneyMoovment);
+            }
+        });
+        return arrayIncome;
+    }
+
+    async getAllIncomeByProps(prop: MoneyTypeProp, value: any): Promise<MoneyType[]> {
+        const arrayMoneyMoovment = await this.storage.getDataFromStorageByProp('moneyMovement', prop, value)
         const arrayIncome: MoneyType[] = [];
         arrayMoneyMoovment.forEach(moneyMoovment => {
             if (moneyMoovment.moneyMovementType == 'income') {
