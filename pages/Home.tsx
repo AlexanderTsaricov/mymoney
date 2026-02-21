@@ -237,7 +237,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 						>
 							<Text style={pageStyles.buttonText}>Выбрать диапазон графика</Text>
 						</TouchableOpacity>
-						<Calendar showCalendar={showCalendar} callbackSelect={(value) => {testCollbackCalendar(value as [])}} minTime={minTimeCalendar} maxTime={maxTimeCalendar}/>
+						<Calendar showCalendar={showCalendar} setShowCalendar={setShowCalendar} callbackSelect={(value) => {testCollbackCalendar(value as [])}} minTime={minTimeCalendar} maxTime={maxTimeCalendar}/>
 					</View>
 					<View style={pageStyles.block}>
 						<Selector {...selectorWalletsProps} />

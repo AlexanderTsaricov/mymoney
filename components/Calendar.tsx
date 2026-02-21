@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
-import { Modal, TextInput, TouchableOpacity, View, Text } from "react-native";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { TextInput, TouchableOpacity, View, Text } from "react-native";
+import Modal from "react-native-modal";
 import { pageStyles } from "../Styles/page";
 
 export interface CalendarProps<T> {
 	callbackSelect: (value: T | null) => void;
 	showCalendar: boolean;
+	setShowCalendar: Dispatch<SetStateAction<boolean>>;
 	minTime: number;
 	maxTime: number;
 }
@@ -153,7 +155,7 @@ function getStringHours(hours: number) {
  * @param minTime - минимальное время и дата календаря (Date)
  * @param maxTime - максимальное время и дата календаря (Date)
  */
-export default function Calendar<T>({ callbackSelect, showCalendar, minTime, maxTime }: CalendarProps<T>) {
+export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalendar, minTime, maxTime }: CalendarProps<T>) {
 	// Стейт для результата
 	const [resultData, setResultData] = useState<number[]>(getCurrentMonthRange(minTime, maxTime));
 
@@ -265,8 +267,31 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 		}
 	};
 
+	const selectedMonth = (back: boolean = false) => {
+		switch (selectMonth) {
+			case 0:
+				if (back) {
+					setSelectMonth(11);
+				} else{
+					setSelectMonth(1);
+				}
+			case 11:
+				if (back) {
+					setSelectMonth(10);
+				} else {
+					setSelectMonth(0);
+				}
+			default:
+				if (back) {
+					setSelectMonth(selectMonth - 1);
+				} else {
+					setSelectMonth(selectMonth + 1);
+				}
+		}
+	}
+
 	return (
-		<Modal visible={showCalendar}>
+		<Modal isVisible={showCalendar} swipeDirection="down" onSwipeComplete={() => (setShowCalendar(false))}>
 			<View style={pageStyles.headContainer}>
 				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
 					<TouchableOpacity style={pageStyles.button}>
@@ -278,11 +303,11 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 					</TouchableOpacity>
 				</View>
 				<View style={[pageStyles.blockAtRow, { marginTop: 10 }]}>
-					<TouchableOpacity style={pageStyles.button}>
+					<TouchableOpacity style={pageStyles.button} onPress={() => {selectedMonth(true)}}>
 						<Text style={pageStyles.buttonText}>{"<"}</Text>
 					</TouchableOpacity>
 					<Text style={[pageStyles.text, { marginLeft: 10, marginRight: 10 }]}>{selectMonth ? monthArr[selectMonth] : "????"}</Text>
-					<TouchableOpacity style={pageStyles.button}>
+					<TouchableOpacity style={pageStyles.button} onPress={() => {selectedMonth()}}>
 						<Text style={pageStyles.buttonText}>{">"}</Text>
 					</TouchableOpacity>
 				</View>
@@ -290,6 +315,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 					{selectMonth && selectYear ? (
 						<View style={[pageStyles.gridCalendar]}>
 							<View style={pageStyles.calendarWeekdayBox}>
+								<Text style={[pageStyles.text, {textAlign: "center", color: "#87ff92"}]}>ПН</Text>
 								{daysByWeekdays.monday.map((day, index) => (
 									<TouchableOpacity key={index}>
 										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
@@ -297,6 +323,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 								))}
 							</View>
 							<View style={pageStyles.calendarWeekdayBox}>
+								<Text style={[pageStyles.text, {textAlign: "center", color: "#87ff92"}]}>ВТ</Text>
 								{daysByWeekdays.tuesday.map((day, index) => (
 									<TouchableOpacity key={index}>
 										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
@@ -304,6 +331,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 								))}
 							</View>
 							<View style={pageStyles.calendarWeekdayBox}>
+								<Text style={[pageStyles.text, {textAlign: "center", color: "#87ff92"}]}>СР</Text>
 								{daysByWeekdays.wednesday.map((day, index) => (
 									<TouchableOpacity key={index}>
 										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
@@ -311,6 +339,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 								))}
 							</View>
 							<View style={pageStyles.calendarWeekdayBox}>
+								<Text style={[pageStyles.text, {textAlign: "center", color: "#87ff92"}]}>ЧТ</Text>
 								{daysByWeekdays.thursday.map((day, index) => (
 									<TouchableOpacity key={index}>
 										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
@@ -318,6 +347,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 								))}
 							</View>
 							<View style={pageStyles.calendarWeekdayBox}>
+								<Text style={[pageStyles.text, {textAlign: "center", color: "#87ff92"}]}>ПТ</Text>
 								{daysByWeekdays.friday.map((day, index) => (
 									<TouchableOpacity key={index}>
 										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
@@ -325,6 +355,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 								))}
 							</View>
 							<View style={pageStyles.calendarWeekdayBox}>
+								<Text style={[pageStyles.text, {textAlign: "center", color: "#87ff92"}]}>СБ</Text>
 								{daysByWeekdays.saturday.map((day, index) => (
 									<TouchableOpacity key={index}>
 										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
@@ -332,6 +363,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 								))}
 							</View>
 							<View style={pageStyles.calendarWeekdayBox}>
+								<Text style={[pageStyles.text, {textAlign: "center", color: "#87ff92"}]}>ВС</Text>
 								{daysByWeekdays.sunday.map((day, index) => (
 									<TouchableOpacity key={index}>
 										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
