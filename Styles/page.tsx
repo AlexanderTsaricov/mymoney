@@ -144,8 +144,39 @@ export const pageStyles = StyleSheet.create({
 		borderColor: "#c25757ff",
 	},
 
-    debugBorder: {
-        borderWidth: 2,
+	debugBorder: {
+		borderWidth: 2,
 		borderColor: "red",
-    }
+	},
+
+	calendarDay: {
+		width: 35,
+	},
+
+	calendarContainer: {
+		width: "100%",
+		display: "flex",
+		alignContent: "center",
+		justifyContent: "center",
+		alignItems: "center",
+		marginTop: 10
+	},
+
+	calendarWeekdayBox: {
+		display: "flex",
+		alignContent: "flex-start",
+		alignItems: "flex-start",
+		justifyContent: "flex-start"
+	},
+
+	gridCalendar: {
+		display: "flex",
+		maxWidth: 240,
+		flexDirection: "row",
+		gap: 10,
+		flexWrap: "wrap",
+		alignContent: "center",
+		justifyContent: "center",
+		alignItems: "center"
+	},
 });

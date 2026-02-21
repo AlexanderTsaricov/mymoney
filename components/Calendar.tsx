@@ -22,6 +22,18 @@ type IsSelectedDays = {
 	endDay: boolean;
 };
 
+type DaysByWeekdays = {
+	monday: number[];
+	tuesday: number[];
+	wednesday: number[];
+	thursday: number[];
+	friday: number[];
+	saturday: number[];
+	sunday: number[];
+};
+
+type Weekday = keyof DaysByWeekdays;
+
 /**
  * Возвращает массив с годами между минимальной и максимальной датой
  * @param minTime максимальная дата (Date)
@@ -51,21 +63,27 @@ function isLeapYear(year: number): boolean {
  * Возвращает количество дней в месяце
  * @param month месяц
  * @param year год
- * @returns number количество дней в месяце
+ * @returns Array<number> количество дней в месяце, первый день недели месяца
  */
-function getDaysInMonths(month: Month, year: number): number {
+function getDaysInMonths(month: Month, year: number): Array<number> {
 	const thirtyOneDays = [0, 2, 4, 6, 7, 11];
 	const thirtyDays = [3, 5, 8, 10];
+	const mathMonth = month + 1;
+	const mathCentryYear = year % 100;
+	const centry = year / 100;
+	const firstWeekday = Math.floor(
+		(1 + Math.floor((13 * mathMonth + 13) / 5) + mathCentryYear + Math.floor(mathCentryYear / 4) + Math.floor(centry / 4) + 5 * centry) % 7,
+	);
 
 	if (thirtyDays.includes(month)) {
-		return 30;
+		return [30, firstWeekday];
 	} else if (thirtyOneDays.includes(month)) {
-		return 31;
+		return [31, firstWeekday];
 	} else {
 		if (isLeapYear(year)) {
-			return 29;
+			return [29, firstWeekday];
 		} else {
-			return 28;
+			return [28, firstWeekday];
 		}
 	}
 }
@@ -159,9 +177,21 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 
 	// Стейт данных для рендера календаря
 	const [timeData, setTimeData] = useState<TimeData | null>(null);
+	const [monthData, setMonthData] = useState<Array<number>>([]);
+	const [daysByWeekdays, setDaysByWeekdays] = useState<DaysByWeekdays>({
+		monday: [],
+		tuesday: [],
+		wednesday: [],
+		thursday: [],
+		friday: [],
+		saturday: [],
+		sunday: [],
+	});
 
 	// Объект из двух булевных значений, обозначающих что выбран диапазон дней
 	const [isSelectedDays, setIsSelectedDays] = useState<IsSelectedDays>({ startDay: true, endDay: true });
+
+	const weekdays: Weekday[] = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
 	// Геенерация данных для календаря
 	useEffect(() => {
@@ -176,6 +206,51 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 			maxDate: maxDate,
 		});
 	}, [minTime, maxTime]);
+
+	useEffect(() => {
+		setMonthData(getDaysInMonths(selectMonth as Month, selectYear));
+	}, [selectMonth, selectYear]);
+
+	useEffect(() => {
+		const firstWeekday = monthData[1];
+
+		if (firstWeekday) {
+			let weekdayIndex: number = firstWeekday;
+
+			const monthWeekdays: DaysByWeekdays = {
+				monday: [],
+				tuesday: [],
+				wednesday: [],
+				thursday: [],
+				friday: [],
+				saturday: [],
+				sunday: [],
+			};
+			let index = 0;
+			Object.keys(monthWeekdays).forEach((key) => {
+				if (index != firstWeekday) {
+					monthWeekdays[key as Weekday].push(0);
+				}
+				index++;
+			});
+
+			for (let index = 1; index <= monthData[0]; index++) {
+				monthWeekdays[weekdays[weekdayIndex]].push(index);
+				weekdayIndex++;
+				if (weekdayIndex > 6 && index <= monthData[0]) {
+					weekdayIndex = 0;
+				}				
+			}
+
+			if (weekdayIndex <= 6) {
+				for (let index = weekdayIndex; index <= 6; index++) {
+					monthWeekdays[weekdays[weekdayIndex]].push(0);					
+				}
+			}
+
+			setDaysByWeekdays(monthWeekdays);
+		}
+	}, [monthData]);
 
 	const selectDay = (dayNumber: number) => {
 		if (isSelectedDays.startDay && isSelectedDays.endDay) {
@@ -195,30 +270,78 @@ export default function Calendar<T>({ callbackSelect, showCalendar, minTime, max
 			<View style={pageStyles.headContainer}>
 				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
 					<TouchableOpacity style={pageStyles.button}>
-						<Text style={pageStyles.buttonText}>До</Text>
+						<Text style={pageStyles.buttonText}>{"<"}</Text>
 					</TouchableOpacity>
-					<Text style={pageStyles.text}>{selectYear}</Text>
+					<Text style={[pageStyles.text, { marginLeft: 10, marginRight: 10 }]}>{selectYear}</Text>
 					<TouchableOpacity style={pageStyles.button}>
-						<Text style={pageStyles.buttonText}>После</Text>
+						<Text style={pageStyles.buttonText}>{">"}</Text>
 					</TouchableOpacity>
 				</View>
-				<View>
-					<TouchableOpacity>
-						<Text>{"<"}</Text>
+				<View style={[pageStyles.blockAtRow, { marginTop: 10 }]}>
+					<TouchableOpacity style={pageStyles.button}>
+						<Text style={pageStyles.buttonText}>{"<"}</Text>
 					</TouchableOpacity>
-					<Text>{selectMonth ? monthArr[selectMonth] : "????"}</Text>
-					<TouchableOpacity>
-						<Text>{">"}</Text>
+					<Text style={[pageStyles.text, { marginLeft: 10, marginRight: 10 }]}>{selectMonth ? monthArr[selectMonth] : "????"}</Text>
+					<TouchableOpacity style={pageStyles.button}>
+						<Text style={pageStyles.buttonText}>{">"}</Text>
 					</TouchableOpacity>
 				</View>
-				<View>
-					{selectMonth && selectYear
-						? Array.from({ length: getDaysInMonths(selectMonth as Month, selectYear) }, (_, i) => (
-								<TouchableOpacity key={i + 1} onPress={() => selectDay(i)}>
-									<Text>{i + 1}</Text>
-								</TouchableOpacity>
-							))
-						: "???"}
+				<View style={[pageStyles.calendarContainer]}>
+					{selectMonth && selectYear ? (
+						<View style={[pageStyles.gridCalendar]}>
+							<View style={pageStyles.calendarWeekdayBox}>
+								{daysByWeekdays.monday.map((day, index) => (
+									<TouchableOpacity key={index}>
+										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
+									</TouchableOpacity>
+								))}
+							</View>
+							<View style={pageStyles.calendarWeekdayBox}>
+								{daysByWeekdays.tuesday.map((day, index) => (
+									<TouchableOpacity key={index}>
+										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
+									</TouchableOpacity>
+								))}
+							</View>
+							<View style={pageStyles.calendarWeekdayBox}>
+								{daysByWeekdays.wednesday.map((day, index) => (
+									<TouchableOpacity key={index}>
+										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
+									</TouchableOpacity>
+								))}
+							</View>
+							<View style={pageStyles.calendarWeekdayBox}>
+								{daysByWeekdays.thursday.map((day, index) => (
+									<TouchableOpacity key={index}>
+										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
+									</TouchableOpacity>
+								))}
+							</View>
+							<View style={pageStyles.calendarWeekdayBox}>
+								{daysByWeekdays.friday.map((day, index) => (
+									<TouchableOpacity key={index}>
+										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
+									</TouchableOpacity>
+								))}
+							</View>
+							<View style={pageStyles.calendarWeekdayBox}>
+								{daysByWeekdays.saturday.map((day, index) => (
+									<TouchableOpacity key={index}>
+										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
+									</TouchableOpacity>
+								))}
+							</View>
+							<View style={pageStyles.calendarWeekdayBox}>
+								{daysByWeekdays.sunday.map((day, index) => (
+									<TouchableOpacity key={index}>
+										<Text style={[pageStyles.text, {textAlign: "center"}]}>{day ? day : " "}</Text>
+									</TouchableOpacity>
+								))}
+							</View>
+						</View>
+					) : (
+						"???"
+					)}
 				</View>
 				<View>
 					<View>
