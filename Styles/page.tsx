@@ -132,7 +132,6 @@ export const pageStyles = StyleSheet.create({
 	blockAtRow: {
 		display: "flex",
 		flexDirection: "row",
-		boxSizing: "border-box",
 		justifyContent: "center",
 		alignItems: "center",
 	},

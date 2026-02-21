@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Modal, TextInput, TouchableOpacity, View } from "react-native";
-import { Text } from "react-native-svg";
+import { Modal, TextInput, TouchableOpacity, View, Text } from "react-native";
+import { pageStyles } from "../Styles/page";
 
 export interface CalendarProps<T> {
 	callbackSelect: (value: T | null) => void;
+	showCalendar: boolean;
 	minTime: number;
 	maxTime: number;
 }
@@ -17,9 +18,9 @@ type TimeData = {
 type Month = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
 type IsSelectedDays = {
-	startDay: boolean,
-	endDay: boolean
-}
+	startDay: boolean;
+	endDay: boolean;
+};
 
 /**
  * Возвращает массив с годами между минимальной и максимальной датой
@@ -134,7 +135,7 @@ function getStringHours(hours: number) {
  * @param minTime - минимальное время и дата календаря (Date)
  * @param maxTime - максимальное время и дата календаря (Date)
  */
-export default function Calendar<T>({ callbackSelect, minTime, maxTime }: CalendarProps<T>) {
+export default function Calendar<T>({ callbackSelect, showCalendar, minTime, maxTime }: CalendarProps<T>) {
 	// Стейт для результата
 	const [resultData, setResultData] = useState<number[]>(getCurrentMonthRange(minTime, maxTime));
 
@@ -152,7 +153,6 @@ export default function Calendar<T>({ callbackSelect, minTime, maxTime }: Calend
 	const [selectEndMinutes, setSelectEndMinutes] = useState<number>(new Date(resultData[1]).getMinutes());
 	const [selectEndHours, setSelectEndHours] = useState<number>(new Date(resultData[1]).getHours());
 
-
 	// Стейты максимальной и минимальной даты календаря
 	const [minDate, setMinDate] = useState<Date>(new Date(maxTime));
 	const [maxDate, setMaxDate] = useState<Date>(new Date(maxTime));
@@ -161,7 +161,7 @@ export default function Calendar<T>({ callbackSelect, minTime, maxTime }: Calend
 	const [timeData, setTimeData] = useState<TimeData | null>(null);
 
 	// Объект из двух булевных значений, обозначающих что выбран диапазон дней
-	const [isSelectedDays, setIsSelectedDays] = useState<IsSelectedDays>({startDay: true, endDay: true});
+	const [isSelectedDays, setIsSelectedDays] = useState<IsSelectedDays>({ startDay: true, endDay: true });
 
 	// Геенерация данных для календаря
 	useEffect(() => {
@@ -181,70 +181,72 @@ export default function Calendar<T>({ callbackSelect, minTime, maxTime }: Calend
 		if (isSelectedDays.startDay && isSelectedDays.endDay) {
 			setSelectStartDay(dayNumber);
 			setSelectEndDay(dayNumber);
-			setIsSelectedDays({startDay: true, endDay: false});
+			setIsSelectedDays({ startDay: true, endDay: false });
 		}
 
 		if (isSelectedDays.startDay && !isSelectedDays.endDay) {
 			setSelectEndDay(dayNumber);
-			setIsSelectedDays({startDay: true, endDay: true});
+			setIsSelectedDays({ startDay: true, endDay: true });
 		}
-	}
+	};
 
 	return (
-		<Modal>
-			<View>
-				<TouchableOpacity>
-					<Text>{"<"}</Text>
-				</TouchableOpacity>
-				<Text>{selectYear}</Text>
-				<TouchableOpacity>
-					<Text>{">"}</Text>
-				</TouchableOpacity>
-			</View>
-			<View>
-				<TouchableOpacity>
-					<Text>{"<"}</Text>
-				</TouchableOpacity>
-				<Text>{selectMonth ? monthArr[selectMonth] : "????"}</Text>
-				<TouchableOpacity>
-					<Text>{">"}</Text>
-				</TouchableOpacity>
-			</View>
-			<View>
-				{selectMonth && selectYear
-					? Array.from({ length: getDaysInMonths(selectMonth as Month, selectYear) }, (_, i) => (
-							<TouchableOpacity key={i + 1} onPress={() => selectDay(i)}>
-								<Text>{i + 1}</Text>
-							</TouchableOpacity>
-						))
-					: "???"}
-			</View>
-			<View>
-				<View>
-					<TextInput
-						value={getStringHours(selectStartHour)}
-						onChangeText={(value) => setSelectStartHour(parseInt(value))}
-						keyboardType="number-pad"
-					/>
-					<Text>:</Text>
-					<TextInput
-						value={getStringMinutes(selectStartMinutes)}
-						onChangeText={(value) => setSelectStartMinutes(parseInt(value))}
-						keyboardType="number-pad"
-					/>
+		<Modal visible={showCalendar}>
+			<View style={pageStyles.headContainer}>
+				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
+					<TouchableOpacity style={pageStyles.button}>
+						<Text style={pageStyles.buttonText}>До</Text>
+					</TouchableOpacity>
+					<Text style={pageStyles.text}>{selectYear}</Text>
+					<TouchableOpacity style={pageStyles.button}>
+						<Text style={pageStyles.buttonText}>После</Text>
+					</TouchableOpacity>
 				</View>
 				<View>
-					<TextInput
-						value={getStringHours(selectEndHours)}
-						onChangeText={(value) => setSelectEndHours(parseInt(value))}
-						keyboardType="number-pad"
-					/>
-					<Text>:</Text>
-					<TextInput
-						value={getStringMinutes(selectEndMinutes)}
-						onChangeText={(value) => setSelectEndMinutes(parseInt(value))}
-						keyboardType="number-pad"
-					/>
+					<TouchableOpacity>
+						<Text>{"<"}</Text>
+					</TouchableOpacity>
+					<Text>{selectMonth ? monthArr[selectMonth] : "????"}</Text>
+					<TouchableOpacity>
+						<Text>{">"}</Text>
+					</TouchableOpacity>
+				</View>
+				<View>
+					{selectMonth && selectYear
+						? Array.from({ length: getDaysInMonths(selectMonth as Month, selectYear) }, (_, i) => (
+								<TouchableOpacity key={i + 1} onPress={() => selectDay(i)}>
+									<Text>{i + 1}</Text>
+								</TouchableOpacity>
+							))
+						: "???"}
+				</View>
+				<View>
+					<View>
+						<TextInput
+							value={getStringHours(selectStartHour)}
+							onChangeText={(value) => setSelectStartHour(parseInt(value))}
+							keyboardType="number-pad"
+						/>
+						<Text>:</Text>
+						<TextInput
+							value={getStringMinutes(selectStartMinutes)}
+							onChangeText={(value) => setSelectStartMinutes(parseInt(value))}
+							keyboardType="number-pad"
+						/>
+					</View>
+					<View>
+						<TextInput
+							value={getStringHours(selectEndHours)}
+							onChangeText={(value) => setSelectEndHours(parseInt(value))}
+							keyboardType="number-pad"
+						/>
+						<Text>:</Text>
+						<TextInput
+							value={getStringMinutes(selectEndMinutes)}
+							onChangeText={(value) => setSelectEndMinutes(parseInt(value))}
+							keyboardType="number-pad"
+						/>
+					</View>
 				</View>
 			</View>
 		</Modal>

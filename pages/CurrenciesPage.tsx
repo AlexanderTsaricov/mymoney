@@ -1,4 +1,4 @@
-import { Currency, HeadCurrency } from "../storage/StorageHandle";
+import { Currency } from "../storage/StorageHandle";
 import { CurrecyCourse } from "../components/CurrecyCourse";
 import { Text, TextInput, View, TouchableOpacity, GestureResponderEvent } from "react-native";
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ type CurrenciesPageProps = {
 };
 
 export default function CurrenciesPage({ money }: CurrenciesPageProps) {
-	const [headCurrency, setHeadCurrency] = useState<HeadCurrency | null>(null);
+	const [headCurrency, setHeadCurrency] = useState<Currency | null>(null);
 	const [currencies, setCurrencies] = useState<Currency[]>([]);
 	const [loading, setLoading] = useState(true);
 	const navigation = useNavigation<NativeStackNavigationProp<any>>();

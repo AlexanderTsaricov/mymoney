@@ -9,6 +9,7 @@ import { Dataset } from "react-native-chart-kit/dist/HelperTypes";
 import { MoneyMoovmentTypes } from "../components/MoneyMoovmentTypes";
 import Selector, { SelectorProps } from "../components/Selector";
 import PageParamExeption from "../exeptions/PageParamExeption";
+import Calendar from "../components/Calendar";
 
 type HomeProps = {
 	money: Money;
@@ -42,6 +43,9 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	const [graphicLabels, setGraphicLabels] = useState<string[]>([]);
 	const [graphicDatasets, setGraphicDatasets] = useState<Dataset[]>([]);
 	const [moneyMoovments, setMoneyMoovments] = useState<MoneyType[]>([]);
+	const [minTimeCalendar, setMinTimeCalendar] = useState<number>(0);
+	const [maxTimeCalendar, setMaxTimeCalendar] = useState<number>(0);
+	const [showCalendar, setShowCalendar] = useState<boolean>(false);
 
 	const emptyWalletsProps: SelectorProps<WalletType> = {
 		title: "Выбор кошелька для графика",
@@ -72,6 +76,12 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		}
 	};
 
+	// Устанавливает максимальное и минимальное значения календаря
+	const loadCalendarData = (moneyMoovments: MoneyType[]) => {
+		setMinTimeCalendar(new Date(moneyMoovments[0].time_data).getTime());
+		setMaxTimeCalendar(new Date(moneyMoovments[moneyMoovments.length - 1].time_data).getTime());
+	} 
+
 	// Загружает денежные потоки по переданному кошельку и сортирует по времени
 	const loadMoneyMoovmentByWallet = async (wallet: WalletType) => {
 		if (!wallet.id) return;
@@ -88,10 +98,13 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			return aDate - bDate;
 		});
 
+		loadCalendarData(moneyMoovment);
+
 		setMoneyMoovments(moneyMoovment);
 	};
 
 
+	// TODO: добавить конечное время выбора отображения графика. Применить загрузку.
 	const setterGraphicProps = async (moneyMoovments: MoneyType[], wallet: WalletType, selectedTimeType: TimeType, startTime: Date) => {
 
 		const moneyMoovmentsFromStart = moneyMoovments.filter((moneyMoovment) => {
@@ -190,6 +203,10 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		onChange: setSelectTimeType,
 	};
 
+	const testCollbackCalendar = (result: []) => {
+		console.log(result);
+	}
+
 	return (
 		<View style={pageStyles.headContainer}>
 			{loading ? (
@@ -206,7 +223,22 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 					<View style={pageStyles.block}>
 						<Graphic labels={graphicLabels} data={graphicDatasets} />
 					</View>
+					<View style={pageStyles.block}>
+						<TouchableOpacity
+							onPress={() => {
+								if (showCalendar) {
+									setShowCalendar(false);
+								} else {
+									setShowCalendar(true)
+								}
+							}}
 
+							style={pageStyles.button}
+						>
+							<Text style={pageStyles.buttonText}>Выбрать диапазон графика</Text>
+						</TouchableOpacity>
+						<Calendar showCalendar={showCalendar} callbackSelect={(value) => {testCollbackCalendar(value as [])}} minTime={minTimeCalendar} maxTime={maxTimeCalendar}/>
+					</View>
 					<View style={pageStyles.block}>
 						<Selector {...selectorWalletsProps} />
 						<Selector {...selectorTimeTypeProps} />
