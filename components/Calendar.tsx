@@ -310,7 +310,9 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	}
 
 	const isInSelectedDays = (day: number) => {
-
+		if (day >= selectStartDay && day <= selectEndDay) {
+			return true;
+		} else return false;
 	}
 
 	return (
@@ -351,7 +353,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ПН</Text>
 								{daysByWeekdays.monday.map((day, index) => (
 									<TouchableOpacity key={index}>
-										<Text style={[pageStyles.text, { textAlign: "center" }]}>{day ? day : " "}</Text>
+										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
 							</View>
@@ -359,7 +361,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ВТ</Text>
 								{daysByWeekdays.tuesday.map((day, index) => (
 									<TouchableOpacity key={index}>
-										<Text style={[pageStyles.text, { textAlign: "center" }]}>{day ? day : " "}</Text>
+										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
 							</View>
@@ -367,7 +369,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>СР</Text>
 								{daysByWeekdays.wednesday.map((day, index) => (
 									<TouchableOpacity key={index}>
-										<Text style={[pageStyles.text, { textAlign: "center" }]}>{day ? day : " "}</Text>
+										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
 							</View>
@@ -375,7 +377,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ЧТ</Text>
 								{daysByWeekdays.thursday.map((day, index) => (
 									<TouchableOpacity key={index}>
-										<Text style={[pageStyles.text, { textAlign: "center" }]}>{day ? day : " "}</Text>
+										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
 							</View>
@@ -383,7 +385,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ПТ</Text>
 								{daysByWeekdays.friday.map((day, index) => (
 									<TouchableOpacity key={index}>
-										<Text style={[pageStyles.text, { textAlign: "center" }]}>{day ? day : " "}</Text>
+										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
 							</View>
@@ -391,7 +393,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>СБ</Text>
 								{daysByWeekdays.saturday.map((day, index) => (
 									<TouchableOpacity key={index}>
-										<Text style={[pageStyles.text, { textAlign: "center" }]}>{day ? day : " "}</Text>
+										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
 							</View>
@@ -399,7 +401,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ВС</Text>
 								{daysByWeekdays.sunday.map((day, index) => (
 									<TouchableOpacity key={index}>
-										<Text style={[pageStyles.text, { textAlign: "center" }]}>{day ? day : " "}</Text>
+										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
 							</View>
