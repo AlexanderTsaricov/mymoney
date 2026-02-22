@@ -179,4 +179,9 @@ export const pageStyles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center"
 	},
+
+	inputTextShort: {
+		maxWidth: 45,
+		padding: 3
+	}
 });

@@ -309,8 +309,12 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 		}
 	}
 
+	const isInSelectedDays = (day: number) => {
+
+	}
+
 	return (
-		<Modal isVisible={showCalendar} swipeDirection="down" onSwipeComplete={() => setShowCalendar(false)}>
+		<Modal isVisible={showCalendar} swipeDirection="down" onSwipeComplete={() => setShowCalendar(false)} style={{maxHeight: 350, borderBlockColor: "#610a5a", borderRadius: 15, borderWidth: 1}}>
 			<View style={pageStyles.headContainer}>
 				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
 					<TouchableOpacity style={pageStyles.button} onPress={() => {selectedYear(true)}}>
@@ -405,30 +409,36 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 					)}
 				</View>
 				<View>
-					<View>
+					<View style={pageStyles.blockAtRow}>
+						<Text style={pageStyles.text}>Время от (Ч/М): </Text>
 						<TextInput
 							value={getStringHours(selectStartHour)}
 							onChangeText={(value) => setSelectStartHour(parseInt(value))}
 							keyboardType="number-pad"
+							style={[pageStyles.inputText, pageStyles.inputTextShort]}
 						/>
 						<Text>:</Text>
 						<TextInput
 							value={getStringMinutes(selectStartMinutes)}
 							onChangeText={(value) => setSelectStartMinutes(parseInt(value))}
 							keyboardType="number-pad"
+							style={[pageStyles.inputText, pageStyles.inputTextShort]}
 						/>
 					</View>
-					<View>
+					<View style={pageStyles.blockAtRow}>
+						<Text style={pageStyles.text}>Время до (Ч/М): </Text>
 						<TextInput
 							value={getStringHours(selectEndHours)}
 							onChangeText={(value) => setSelectEndHours(parseInt(value))}
 							keyboardType="number-pad"
+							style={[pageStyles.inputText, pageStyles.inputTextShort]}
 						/>
 						<Text>:</Text>
 						<TextInput
 							value={getStringMinutes(selectEndMinutes)}
 							onChangeText={(value) => setSelectEndMinutes(parseInt(value))}
 							keyboardType="number-pad"
+							style={[pageStyles.inputText, pageStyles.inputTextShort]}
 						/>
 					</View>
 				</View>
