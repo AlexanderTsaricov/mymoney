@@ -212,6 +212,8 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	}, [minTime, maxTime]);
 
 	useEffect(() => {
+		Logger.log(selectMonth);
+		Logger.log(monthArr[selectMonth]);
 		setMonthData(getDaysInMonths(selectMonth as Month, selectYear));
 	}, [selectMonth, selectYear]);
 
@@ -274,35 +276,48 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	const selectedMonth = (back: boolean = false) => {
 		switch (selectMonth) {
 			case 0:
+				console.log("case 0");
+				console.log(back);
 				if (back) {
 					setSelectMonth(11);
 				} else {
 					setSelectMonth(1);
 				}
+				break;
 			case 11:
 				if (back) {
 					setSelectMonth(10);
 				} else {
 					setSelectMonth(0);
 				}
+				break;
 			default:
 				if (back) {
 					setSelectMonth(selectMonth - 1);
 				} else {
 					setSelectMonth(selectMonth + 1);
 				}
+				break;
 		}
 	};
+
+	const selectedYear = (back: boolean) => {
+		if (back) {
+			setSelectYear(selectYear - 1);
+		} else {
+			setSelectYear(selectYear + 1);
+		}
+	}
 
 	return (
 		<Modal isVisible={showCalendar} swipeDirection="down" onSwipeComplete={() => setShowCalendar(false)}>
 			<View style={pageStyles.headContainer}>
 				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
-					<TouchableOpacity style={pageStyles.button}>
+					<TouchableOpacity style={pageStyles.button} onPress={() => {selectedYear(true)}}>
 						<Text style={pageStyles.buttonText}>{"<"}</Text>
 					</TouchableOpacity>
 					<Text style={[pageStyles.text, { marginLeft: 10, marginRight: 10 }]}>{selectYear}</Text>
-					<TouchableOpacity style={pageStyles.button}>
+					<TouchableOpacity style={pageStyles.button} onPress={() => {selectedYear(false)}}>
 						<Text style={pageStyles.buttonText}>{">"}</Text>
 					</TouchableOpacity>
 				</View>
