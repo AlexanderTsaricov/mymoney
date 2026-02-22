@@ -171,7 +171,7 @@ export const pageStyles = StyleSheet.create({
 
 	gridCalendar: {
 		display: "flex",
-		maxWidth: 240,
+		maxWidth: 260,
 		flexDirection: "row",
 		gap: 10,
 		flexWrap: "wrap",
