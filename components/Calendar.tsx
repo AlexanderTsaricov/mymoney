@@ -166,8 +166,8 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	const startSelectMonth = isBetweenTimes(today, minTime, maxTime) ? new Date().getMonth() : new Date(minTime).getMonth();
 	const startSelectYear = isBetweenTimes(today, minTime, maxTime) ? new Date().getFullYear() : new Date(minTime).getFullYear();
 
-	const [selectStartDay, setSelectStartDay] = useState<number>(new Date(resultData[0]).getDay());
-	const [selectEndDay, setSelectEndDay] = useState<number>(new Date(resultData[1]).getDay());
+	const [selectStartDay, setSelectStartDay] = useState<number>(new Date(resultData[0]).getDate());
+	const [selectEndDay, setSelectEndDay] = useState<number>(new Date(resultData[1]).getDate());
 	const [selectMonth, setSelectMonth] = useState<number>(new Date().getMonth());
 	const [selectYear, setSelectYear] = useState<number>(new Date().getFullYear());
 	const [selectStartMinutes, setSelectStartMinutes] = useState<number>(new Date(resultData[0]).getMinutes());
@@ -197,7 +197,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 
 	const weekdays: Weekday[] = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
-	// Геенерация данных для календаря
+	// Рассчитываем максимальное и минимальное время календаря
 	useEffect(() => {
 		const minDate = new Date(minTime);
 		const maxDate = new Date(maxTime);
@@ -211,12 +211,14 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 		});
 	}, [minTime, maxTime]);
 
+	// Рассчитываем количество дней в выбранном месяце
 	useEffect(() => {
 		Logger.log(selectMonth);
 		Logger.log(monthArr[selectMonth]);
 		setMonthData(getDaysInMonths(selectMonth as Month, selectYear));
 	}, [selectMonth, selectYear]);
 
+	// Генерируем дни
 	useEffect(() => {
 		const firstWeekday = monthData[1];
 
@@ -310,6 +312,8 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	}
 
 	const isInSelectedDays = (day: number) => {
+		/* Logger.log(selectStartDay, false, "select start day: ");
+		Logger.log(selectEndDay, false, "select end day: "); */
 		if (day >= selectStartDay && day <= selectEndDay) {
 			return true;
 		} else return false;

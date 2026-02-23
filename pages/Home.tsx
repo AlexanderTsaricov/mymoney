@@ -10,6 +10,7 @@ import { MoneyMoovmentTypes } from "../components/MoneyMoovmentTypes";
 import Selector, { SelectorProps } from "../components/Selector";
 import PageParamExeption from "../exeptions/PageParamExeption";
 import Calendar from "../components/Calendar";
+import Logger from "../components/logger/Logger";
 
 type HomeProps = {
 	money: Money;
@@ -78,9 +79,12 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 
 	// Устанавливает максимальное и минимальное значения календаря
 	const loadCalendarData = (moneyMoovments: MoneyType[]) => {
-		setMinTimeCalendar(new Date(moneyMoovments[0].time_data).getTime());
-		setMaxTimeCalendar(new Date(moneyMoovments[moneyMoovments.length - 1].time_data).getTime());
-	} 
+		if (moneyMoovments.length > 0) {
+			setMinTimeCalendar(new Date(moneyMoovments[0].time_data).getTime());
+			setMaxTimeCalendar(new Date(moneyMoovments[moneyMoovments.length - 1].time_data).getTime());
+		}
+
+	};
 
 	// Загружает денежные потоки по переданному кошельку и сортирует по времени
 	const loadMoneyMoovmentByWallet = async (wallet: WalletType) => {
@@ -98,15 +102,10 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			return aDate - bDate;
 		});
 
-		loadCalendarData(moneyMoovment);
-
 		setMoneyMoovments(moneyMoovment);
 	};
 
-
-	// TODO: добавить конечное время выбора отображения графика. Применить загрузку.
 	const setterGraphicProps = async (moneyMoovments: MoneyType[], wallet: WalletType, selectedTimeType: TimeType, startTime: Date) => {
-
 		const moneyMoovmentsFromStart = moneyMoovments.filter((moneyMoovment) => {
 			const moneyMoovmentDate = new Date(moneyMoovment.time_data).getTime();
 
@@ -135,10 +134,10 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		});
 
 		const dataset: Dataset = {
-			data: moneyChangedProps
-		}
+			data: moneyChangedProps,
+		};
 
-		setGraphicDatasets([dataset]);
+		await setGraphicDatasets([dataset]);
 
 		switch (selectTimeType) {
 			case "day":
@@ -158,10 +157,13 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 				break;
 		}
 
+		// TODO: debug
+		Logger.log(moneyMoovmentsFromStart, true, "moneyMoovmentsFromStart: ");
+
 		moneyMoovmentsFromStart.forEach((moneyMoovment) => {
 			switch (selectTimeType) {
 				case "day":
-					timeChangedProps.push(new Date(moneyMoovment.time_data).getDay());
+					timeChangedProps.push(new Date(moneyMoovment.time_data).getDate());
 					break;
 				case "month":
 					timeChangedProps.push(new Date(moneyMoovment.time_data).getMonth());
@@ -178,23 +180,55 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			}
 		});
 
-		setGraphicLabels([...timeChangedProps.toString()]);
+		const timeChangePropsStringArr: string[] = [];
 
+		timeChangedProps.forEach(element => {
+			timeChangePropsStringArr.push(element.toString());
+		});
+
+		Logger.log(timeChangePropsStringArr, true, "timeChangedProps: ");
+
+		setGraphicLabels(timeChangePropsStringArr);
 	};
 
-	const loadAll = async () => {
+	const loadAllWallets = async () => {
+		const wallets = await getAllWallets();
+		setWallets(wallets);
+	};
+
+	// поочередная загрузка ----------  начало
+	useEffect(() => {
 		setLoading(true);
-		setWallets(await getAllWallets());
-		await loadWalletSelectorProps(wallets);
-		if (selectWallet) {
-			await loadMoneyMoovmentByWallet(selectWallet);
-		}
-		setLoading(false);
-	};
+		loadAllWallets();
+	}, []);
 
 	useEffect(() => {
-		loadAll();
-	}, []);
+		loadWalletSelectorProps(wallets);
+	}, [wallets]);
+
+	useEffect(() => {
+		if (selectWallet) {
+			loadMoneyMoovmentByWallet(selectWallet);
+		}
+	}, [selectWallet]);
+
+	useEffect(() => {
+		loadCalendarData(moneyMoovments);
+	}, [moneyMoovments]);
+
+	useEffect(() => {
+		if (selectWallet && selectTimeType && moneyMoovments.length > 0) {
+			Logger.log(moneyMoovments, true);
+			const startTimeData = new Date(moneyMoovments[0].time_data);
+			setterGraphicProps(moneyMoovments, selectWallet, selectTimeType, startTimeData);
+		}
+	}, [selectWallet, selectTimeType, moneyMoovments]);
+
+	useEffect(() => {
+		setLoading(false);
+	}, [graphicDatasets]);
+
+	// поочередная загрузка ---------- конец
 
 	const selectorTimeTypeProps: SelectorProps<TimeType> = {
 		title: "Выбор интервала для графика",
@@ -205,7 +239,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 
 	const testCollbackCalendar = (result: []) => {
 		console.log(result);
-	}
+	};
 
 	return (
 		<View style={pageStyles.headContainer}>
@@ -229,15 +263,22 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 								if (showCalendar) {
 									setShowCalendar(false);
 								} else {
-									setShowCalendar(true)
+									setShowCalendar(true);
 								}
 							}}
-
 							style={pageStyles.button}
 						>
 							<Text style={pageStyles.buttonText}>Выбрать диапазон графика</Text>
 						</TouchableOpacity>
-						<Calendar showCalendar={showCalendar} setShowCalendar={setShowCalendar} callbackSelect={(value) => {testCollbackCalendar(value as [])}} minTime={minTimeCalendar} maxTime={maxTimeCalendar}/>
+						<Calendar
+							showCalendar={showCalendar}
+							setShowCalendar={setShowCalendar}
+							callbackSelect={(value) => {
+								testCollbackCalendar(value as []);
+							}}
+							minTime={minTimeCalendar}
+							maxTime={maxTimeCalendar}
+						/>
 					</View>
 					<View style={pageStyles.block}>
 						<Selector {...selectorWalletsProps} />
@@ -248,11 +289,5 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		</View>
 	);
 };
-
-const styles = StyleSheet.create({
-	container: { flex: 1, justifyContent: "center", alignItems: "center" },
-	title: { fontSize: 24, marginBottom: 20 },
-	money: { fontSize: 20, marginBottom: 10 },
-});
 
 export default Home;

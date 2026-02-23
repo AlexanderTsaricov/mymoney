@@ -2,6 +2,7 @@ import { View, Dimensions, Text } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { pageStyles } from "../Styles/page";
 import { Dataset } from "react-native-chart-kit/dist/HelperTypes";
+import Logger from "./logger/Logger";
 
 export type GraphicProps = {
 	labels: string[];
