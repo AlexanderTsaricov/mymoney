@@ -6,8 +6,8 @@ export class Wallet {
     storage: StorageHandle;
     allMoney: number = 0;
 
-    constructor(dbName: string) {
-        this.storage = new StorageHandle(dbName);
+    constructor(storage: StorageHandle) {
+        this.storage = storage;
     }
 
     /**

@@ -83,7 +83,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			setMinTimeCalendar(new Date(moneyMoovments[0].time_data).getTime());
 			setMaxTimeCalendar(new Date(moneyMoovments[moneyMoovments.length - 1].time_data).getTime());
 		}
-
 	};
 
 	// Загружает денежные потоки по переданному кошельку и сортирует по времени
@@ -182,7 +181,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 
 		const timeChangePropsStringArr: string[] = [];
 
-		timeChangedProps.forEach(element => {
+		timeChangedProps.forEach((element) => {
 			timeChangePropsStringArr.push(element.toString());
 		});
 
@@ -241,6 +240,9 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		console.log(result);
 	};
 
+	const memoLabels = React.useMemo(() => graphicLabels, [JSON.stringify(graphicLabels)]);
+	const memoData = React.useMemo(() => graphicDatasets, [JSON.stringify(graphicDatasets)]);
+
 	return (
 		<View style={pageStyles.headContainer}>
 			{loading ? (
@@ -255,7 +257,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 						</TouchableOpacity>
 					</View>
 					<View style={pageStyles.block}>
-						<Graphic labels={graphicLabels} data={graphicDatasets} />
+						<Graphic labels={memoLabels} data={memoData} />
 					</View>
 					<View style={pageStyles.block}>
 						<TouchableOpacity

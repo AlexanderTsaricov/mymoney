@@ -7,8 +7,8 @@ export class Expence {
     storage: StorageHandle;
     allMoney: number = 0;
 
-    constructor(dbName: string) {
-        this.storage = new StorageHandle(dbName);
+    constructor(storage: StorageHandle) {
+        this.storage = storage;
     }
 
     async deleteExpences(id: number) {

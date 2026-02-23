@@ -26,8 +26,7 @@ const screens = [
 ];
 
 export default function App() {
-	const money = new Money("mymoney.sqlite");
-
+	const [money, setMoney] = React.useState(new Money("mymoney.sqlite"));
 	return (
 		<NavigationContainer>
 			<Stack.Navigator>

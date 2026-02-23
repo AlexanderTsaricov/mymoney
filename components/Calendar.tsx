@@ -101,6 +101,9 @@ function getDaysInMonths(month: Month, year: number): Array<number> {
 function getCurrentMonthRange(minTime: number, maxTime: number): [number, number] {
 	const now = new Date();
 
+
+	Logger.log(minTime, false, "min time in getCurrentMonthRange:");
+	Logger.log(maxTime, false, "max time in getCurrentMonthRange:");
 	const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
 
 	const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).getTime();
@@ -213,8 +216,6 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 
 	// Рассчитываем количество дней в выбранном месяце
 	useEffect(() => {
-		Logger.log(selectMonth);
-		Logger.log(monthArr[selectMonth]);
 		setMonthData(getDaysInMonths(selectMonth as Month, selectYear));
 	}, [selectMonth, selectYear]);
 
@@ -312,7 +313,8 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	}
 
 	const isInSelectedDays = (day: number) => {
-		/* Logger.log(selectStartDay, false, "select start day: ");
+		/* Logger.log(resultData, true, "resultData:");
+		Logger.log(selectStartDay, false, "select start day: ");
 		Logger.log(selectEndDay, false, "select end day: "); */
 		if (day >= selectStartDay && day <= selectEndDay) {
 			return true;

@@ -1,5 +1,6 @@
 {
   "expo": {
+    "sdkVersion": "48.0.18",
     "name": "mymoney",
     "slug": "mymoney",
     "version": "1.0.0",

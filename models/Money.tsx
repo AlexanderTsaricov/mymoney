@@ -1,4 +1,4 @@
-import { MoneyMoovmentType, MoneyType, WalletType } from "../storage/StorageHandle";
+import { MoneyMoovmentType, MoneyType, StorageHandle, WalletType } from "../storage/StorageHandle";
 import { Expence } from "./modelsClasses/Expence";
 import { Income } from "./modelsClasses/Income";
 import { Wallet } from "./modelsClasses/Wallet";
@@ -7,16 +7,18 @@ import { Currencies } from "./modelsClasses/Currencies";
 
 export class Money {
 	allMoney: number = 0;
+	storage: StorageHandle;
 	expence: Expence;
 	income: Income;
 	wallet: Wallet;
 	currencies: Currencies;
 
 	constructor(dbName: string) {
-		this.expence = new Expence(dbName);
-		this.income = new Income(dbName);
-		this.wallet = new Wallet(dbName);
-		this.currencies = new Currencies(dbName);
+		this.storage = new StorageHandle(dbName);
+		this.expence = new Expence(this.storage);
+		this.income = new Income(this.storage);
+		this.wallet = new Wallet(this.storage);
+		this.currencies = new Currencies(this.storage);
 	}
 
 	async init() {
