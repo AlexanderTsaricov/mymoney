@@ -142,12 +142,12 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 			try {
 				const result = await money.addExpences(newExpence);
 				if (!result.result) {
-					console.error(result.message);
+					// console.error(result.message);
 				} else {
-					console.log(result.message);
+					// console.log(result.message);
 				}
 			} catch (error) {
-				console.error(error);
+				// console.error(error);
 			}
 		},
 	};

@@ -2,10 +2,10 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { TextInput, TouchableOpacity, View, Text } from "react-native";
 import Modal from "react-native-modal";
 import { pageStyles } from "../Styles/page";
-import Logger from "./logger/Logger";
+import Logger from "../logger/Logger";
 
 export interface CalendarProps<T> {
-	callbackSelect: (value: T | null) => void;
+	callbackSelect: (value: number) => void;
 	showCalendar: boolean;
 	setShowCalendar: Dispatch<SetStateAction<boolean>>;
 	minTime: number;
@@ -101,9 +101,6 @@ function getDaysInMonths(month: Month, year: number): Array<number> {
 function getCurrentMonthRange(minTime: number, maxTime: number): [number, number] {
 	const now = new Date();
 
-
-	Logger.log(minTime, false, "min time in getCurrentMonthRange:");
-	Logger.log(maxTime, false, "max time in getCurrentMonthRange:");
 	const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
 
 	const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).getTime();
@@ -169,8 +166,8 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	const startSelectMonth = isBetweenTimes(today, minTime, maxTime) ? new Date().getMonth() : new Date(minTime).getMonth();
 	const startSelectYear = isBetweenTimes(today, minTime, maxTime) ? new Date().getFullYear() : new Date(minTime).getFullYear();
 
-	const [selectStartDay, setSelectStartDay] = useState<number>(new Date(resultData[0]).getDate());
-	const [selectEndDay, setSelectEndDay] = useState<number>(new Date(resultData[1]).getDate());
+	const [selectStartDay, setSelectStartDay] = useState<number | null>(new Date(resultData[0]).getDate());
+	const [selectEndDay, setSelectEndDay] = useState<number | null>(new Date(resultData[1]).getDate());
 	const [selectMonth, setSelectMonth] = useState<number>(new Date().getMonth());
 	const [selectYear, setSelectYear] = useState<number>(new Date().getFullYear());
 	const [selectStartMinutes, setSelectStartMinutes] = useState<number>(new Date(resultData[0]).getMinutes());
@@ -279,8 +276,8 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	const selectedMonth = (back: boolean = false) => {
 		switch (selectMonth) {
 			case 0:
-				console.log("case 0");
-				console.log(back);
+				// console.log("case 0");
+				// console.log(back);
 				if (back) {
 					setSelectMonth(11);
 				} else {
@@ -313,16 +310,31 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	}
 
 	const isInSelectedDays = (day: number) => {
-		/* Logger.log(resultData, true, "resultData:");
-		Logger.log(selectStartDay, false, "select start day: ");
-		Logger.log(selectEndDay, false, "select end day: "); */
+		if (!selectStartDay || !selectEndDay) return false;
 		if (day >= selectStartDay && day <= selectEndDay) {
 			return true;
 		} else return false;
 	}
 
+	const selectingData = (day: number) => {
+		if (selectStartDay && selectEndDay) {
+			setSelectEndDay(null);
+			setSelectStartDay(day);
+		}
+
+		if (selectStartDay && !selectEndDay) {
+			setSelectEndDay(day);
+		}
+	}
+
+	useEffect(() => {
+		if (selectEndDay) {
+			callbackSelect(new Date(selectYear, selectMonth, selectEndDay).getTime());
+		}
+	}, [selectEndDay])
+
 	return (
-		<Modal isVisible={showCalendar} swipeDirection="down" onSwipeComplete={() => setShowCalendar(false)} style={{maxHeight: 350, borderBlockColor: "#610a5a", borderRadius: 15, borderWidth: 1}}>
+		<Modal isVisible={showCalendar} swipeDirection="down" onSwipeComplete={() => setShowCalendar(false)} style={{maxHeight: 350, borderRadius: 15, borderWidth: 1}}>
 			<View style={pageStyles.headContainer}>
 				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
 					<TouchableOpacity style={pageStyles.button} onPress={() => {selectedYear(true)}}>
@@ -358,7 +370,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 							<View style={pageStyles.calendarWeekdayBox}>
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ПН</Text>
 								{daysByWeekdays.monday.map((day, index) => (
-									<TouchableOpacity key={index}>
+									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
 										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
@@ -366,7 +378,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 							<View style={pageStyles.calendarWeekdayBox}>
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ВТ</Text>
 								{daysByWeekdays.tuesday.map((day, index) => (
-									<TouchableOpacity key={index}>
+									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
 										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
@@ -374,7 +386,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 							<View style={pageStyles.calendarWeekdayBox}>
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>СР</Text>
 								{daysByWeekdays.wednesday.map((day, index) => (
-									<TouchableOpacity key={index}>
+									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
 										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
@@ -382,7 +394,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 							<View style={pageStyles.calendarWeekdayBox}>
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ЧТ</Text>
 								{daysByWeekdays.thursday.map((day, index) => (
-									<TouchableOpacity key={index}>
+									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
 										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
@@ -390,7 +402,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 							<View style={pageStyles.calendarWeekdayBox}>
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ПТ</Text>
 								{daysByWeekdays.friday.map((day, index) => (
-									<TouchableOpacity key={index}>
+									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
 										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
@@ -398,7 +410,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 							<View style={pageStyles.calendarWeekdayBox}>
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>СБ</Text>
 								{daysByWeekdays.saturday.map((day, index) => (
-									<TouchableOpacity key={index}>
+									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
 										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}
@@ -406,7 +418,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 							<View style={pageStyles.calendarWeekdayBox}>
 								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ВС</Text>
 								{daysByWeekdays.sunday.map((day, index) => (
-									<TouchableOpacity key={index}>
+									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
 										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
 									</TouchableOpacity>
 								))}

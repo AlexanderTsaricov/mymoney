@@ -172,7 +172,7 @@ export class StorageHandle {
                 case 'incomeType':
                 case 'expenceType':
                     const tableName = storageType + 's';
-                    console.log("createStorage, tableName: ", tableName);
+                    // console.log("createStorage, tableName: ", tableName);
                     result.result = await this.db.setToTable(tableName, [{ name: 'name', value: storageName }]);
                     break;
                 default:

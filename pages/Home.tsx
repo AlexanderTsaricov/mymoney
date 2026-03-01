@@ -10,7 +10,7 @@ import { MoneyMoovmentTypes } from "../components/MoneyMoovmentTypes";
 import Selector, { SelectorProps } from "../components/Selector";
 import PageParamExeption from "../exeptions/PageParamExeption";
 import Calendar from "../components/Calendar";
-import Logger from "../components/logger/Logger";
+import Logger from "../logger/Logger";
 
 type HomeProps = {
 	money: Money;
@@ -52,9 +52,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		title: "Выбор кошелька для графика",
 		titleDontHave: "Нет кошельков",
 		items: [],
-		onChange: function (value: WalletType | null): void {
-			throw new Error("Function not implemented.");
-		},
+		onChange: function (value: WalletType | null): void {},
 	};
 	const [selectorWalletsProps, setSelectorWalletProps] = useState<SelectorProps<WalletType>>(emptyWalletsProps);
 
@@ -70,7 +68,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 				title: "Выбор кошелька для графика",
 				titleDontHave: "Нет кошельков",
 				items: wallets,
-				onChange: setSelectWallet,
+				onChange: (v) => setSelectWallet(v),
 			};
 
 			setSelectorWalletProps(props);
@@ -131,16 +129,29 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 					break;
 			}
 		});
-
-		const dataset: Dataset = {
-			data: moneyChangedProps,
+		let dataset: Dataset = {
+			data: [],
 		};
+		try {
+			dataset = {
+				data: moneyChangedProps,
+			};
+		} catch (e) {
+			console.error(e);
+		}
 
-		await setGraphicDatasets([dataset]);
+		let datasets: Dataset[] = [];
+
+		try {
+			datasets.push(dataset);
+		} catch (e) {
+			console.error(e);
+		}
+		setGraphicDatasets(datasets);
 
 		switch (selectTimeType) {
 			case "day":
-				timeChangedProps.push(startTime.getDay());
+				timeChangedProps.push(startTime.getDate());
 				break;
 			case "month":
 				timeChangedProps.push(startTime.getMonth());
@@ -155,9 +166,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 				timeChangedProps.push(startTime.getHours());
 				break;
 		}
-
-		// TODO: debug
-		Logger.log(moneyMoovmentsFromStart, true, "moneyMoovmentsFromStart: ");
 
 		moneyMoovmentsFromStart.forEach((moneyMoovment) => {
 			switch (selectTimeType) {
@@ -185,8 +193,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			timeChangePropsStringArr.push(element.toString());
 		});
 
-		Logger.log(timeChangePropsStringArr, true, "timeChangedProps: ");
-
 		setGraphicLabels(timeChangePropsStringArr);
 	};
 
@@ -202,7 +208,9 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	}, []);
 
 	useEffect(() => {
-		loadWalletSelectorProps(wallets);
+		if (wallets.length > 0) {
+			loadWalletSelectorProps(wallets);
+		}
 	}, [wallets]);
 
 	useEffect(() => {
@@ -212,16 +220,18 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	}, [selectWallet]);
 
 	useEffect(() => {
-		loadCalendarData(moneyMoovments);
+		if (moneyMoovments.length > 0) {
+			loadCalendarData(moneyMoovments);
+		}
 	}, [moneyMoovments]);
 
 	useEffect(() => {
 		if (selectWallet && selectTimeType && moneyMoovments.length > 0) {
-			Logger.log(moneyMoovments, true);
 			const startTimeData = new Date(moneyMoovments[0].time_data);
 			setterGraphicProps(moneyMoovments, selectWallet, selectTimeType, startTimeData);
 		}
-	}, [selectWallet, selectTimeType, moneyMoovments]);
+	}, [selectTimeType, moneyMoovments]);
+	//[selectWallet, selectTimeType, moneyMoovments]
 
 	useEffect(() => {
 		setLoading(false);
@@ -233,63 +243,69 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		title: "Выбор интервала для графика",
 		titleDontHave: "Ошибка",
 		items: ["day", "year", "month", "hour", "minutes"],
-		onChange: setSelectTimeType,
+		onChange: (v) => setSelectTimeType(v),
 	};
 
-	const testCollbackCalendar = (result: []) => {
-		console.log(result);
+	const selectDatasCollbackCalendar = (result: number) => {
+		const selectedEndDate: Date = new Date(result);
+		Logger.log(selectedEndDate, false, "Выбранное время: ");
 	};
 
-	const memoLabels = React.useMemo(() => graphicLabels, [JSON.stringify(graphicLabels)]);
-	const memoData = React.useMemo(() => graphicDatasets, [JSON.stringify(graphicDatasets)]);
+	let graphicElement = <Text style={pageStyles.text}>Нет данных</Text>;
 
-	return (
-		<View style={pageStyles.headContainer}>
-			{loading ? (
+	try {
+		graphicElement = <Graphic labels={graphicLabels} data={graphicDatasets} />;
+	} catch (e) {
+		console.error("Graphic render error:", e);
+	}
+
+	if (loading) {
+		return (
+			<View style={pageStyles.headContainer}>
 				<Text style={pageStyles.text}>Загрузка...</Text>
-			) : (
-				<View>
-					<View style={pageStyles.block}>
-						<Text style={pageStyles.text}>Баланс</Text>
-						<Wallets money={money} wallets={wallets} setWallets={setWallets} showButton={false} />
-						<TouchableOpacity style={pageStyles.button} onPress={async () => await money.deleteDatabase()}>
-							<Text style={pageStyles.buttonText}>Удалить данные</Text>
-						</TouchableOpacity>
-					</View>
-					<View style={pageStyles.block}>
-						<Graphic labels={memoLabels} data={memoData} />
-					</View>
-					<View style={pageStyles.block}>
-						<TouchableOpacity
-							onPress={() => {
-								if (showCalendar) {
-									setShowCalendar(false);
-								} else {
-									setShowCalendar(true);
-								}
-							}}
-							style={pageStyles.button}
-						>
-							<Text style={pageStyles.buttonText}>Выбрать диапазон графика</Text>
-						</TouchableOpacity>
-						<Calendar
-							showCalendar={showCalendar}
-							setShowCalendar={setShowCalendar}
-							callbackSelect={(value) => {
-								testCollbackCalendar(value as []);
-							}}
-							minTime={minTimeCalendar}
-							maxTime={maxTimeCalendar}
-						/>
-					</View>
-					<View style={pageStyles.block}>
-						<Selector {...selectorWalletsProps} />
-						<Selector {...selectorTimeTypeProps} />
-					</View>
+			</View>
+		);
+	} else {
+		return (
+			<View style={pageStyles.headContainer}>
+				<View style={pageStyles.block}>
+					<Text style={pageStyles.text}>Баланс</Text>
+					<Wallets money={money} wallets={wallets} setWallets={setWallets} showButton={false} />
+					<TouchableOpacity style={pageStyles.button} onPress={async () => await money.deleteDatabase()}>
+						<Text style={pageStyles.buttonText}>Удалить данные</Text>
+					</TouchableOpacity>
 				</View>
-			)}
-		</View>
-	);
+				<View style={pageStyles.block}>{graphicElement}</View>
+				<View style={pageStyles.block}>
+					<TouchableOpacity
+						onPress={() => {
+							if (showCalendar) {
+								setShowCalendar(false);
+							} else {
+								setShowCalendar(true);
+							}
+						}}
+						style={pageStyles.button}
+					>
+						<Text style={pageStyles.buttonText}>Выбрать диапазон графика</Text>
+					</TouchableOpacity>
+					<Calendar
+						showCalendar={showCalendar}
+						setShowCalendar={setShowCalendar}
+						callbackSelect={(value) => {
+							selectDatasCollbackCalendar(value);
+						}}
+						minTime={minTimeCalendar}
+						maxTime={maxTimeCalendar}
+					/>
+				</View>
+				<View style={pageStyles.block}>
+					<Selector {...selectorWalletsProps} />
+					<Selector {...selectorTimeTypeProps} />
+				</View>
+			</View>
+		);
+	}
 };
 
 export default Home;

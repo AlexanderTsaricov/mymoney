@@ -166,7 +166,6 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 											<CurrecyCourse
 												key={currency.id}
 												currency={currency}
-												headCurrency={headCurrency}
 												navigation={navigation}
 												deleteCurrency={() => {
 													if (currency.id) {
