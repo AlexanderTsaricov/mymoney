@@ -35,7 +35,10 @@ type DaysByWeekdays = {
 	sunday: number[];
 };
 
-type Weekday = keyof DaysByWeekdays;
+type Weekday = {
+	rus: string;
+	en: keyof DaysByWeekdays;
+};
 
 /**
  * Возвращает массив с годами между минимальной и максимальной датой
@@ -195,7 +198,15 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	// Объект из двух булевных значений, обозначающих что выбран диапазон дней
 	const [isSelectedDays, setIsSelectedDays] = useState<IsSelectedDays>({ startDay: true, endDay: true });
 
-	const weekdays: Weekday[] = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+	const weekdays: Weekday[] = [
+		{ rus: "ПН", en: "monday" },
+		{ rus: "ВТ", en: "tuesday" },
+		{ rus: "СР", en: "wednesday" },
+		{ rus: "ЧТ", en: "thursday" },
+		{ rus: "ПТ", en: "friday" },
+		{ rus: "СБ", en: "saturday" },
+		{ rus: "ВС", en: "sunday" },
+	];
 
 	// Рассчитываем максимальное и минимальное время календаря
 	useEffect(() => {
@@ -232,46 +243,31 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 				saturday: [],
 				sunday: [],
 			};
-			let index = 0;
 
 			// Заполняем пустыми значениями дни недели до первого дня
-			Object.keys(monthWeekdays).forEach((key) => {
+			for (let index = 0; index < weekdays.length && index < firstWeekday; index++) {
 				if (index < firstWeekday) {
-					monthWeekdays[key as Weekday].push(0);
-				}
-				++index;
-			});
+					monthWeekdays[weekdays[index].en].push(0);
+				}	
+			}
 
 			// Заполняем днями
 			for (let index = 1; index <= monthData[0]; index++) {
 				if (weekdayIndex > 6 && index <= monthData[0]) {
 					weekdayIndex = 0;
 				}
-				monthWeekdays[weekdays[weekdayIndex]].push(index);
+				monthWeekdays[weekdays[weekdayIndex].en].push(index);
 				weekdayIndex++;
 			}
 
 			// Заполняем пустыми значениями оставшиеся дни недели
 			for (let index = weekdayIndex; index <= 6; index++) {
-				monthWeekdays[weekdays[index]].push(0);
+				monthWeekdays[weekdays[index].en].push(0);
 			}
 
 			setDaysByWeekdays(monthWeekdays);
 		}
 	}, [monthData]);
-
-	const selectDay = (dayNumber: number) => {
-		if (isSelectedDays.startDay && isSelectedDays.endDay) {
-			setSelectStartDay(dayNumber);
-			setSelectEndDay(dayNumber);
-			setIsSelectedDays({ startDay: true, endDay: false });
-		}
-
-		if (isSelectedDays.startDay && !isSelectedDays.endDay) {
-			setSelectEndDay(dayNumber);
-			setIsSelectedDays({ startDay: true, endDay: true });
-		}
-	};
 
 	const selectedMonth = (back: boolean = false) => {
 		switch (selectMonth) {
@@ -307,14 +303,14 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 		} else {
 			setSelectYear(selectYear + 1);
 		}
-	}
+	};
 
 	const isInSelectedDays = (day: number) => {
 		if (!selectStartDay || !selectEndDay) return false;
 		if (day >= selectStartDay && day <= selectEndDay) {
 			return true;
 		} else return false;
-	}
+	};
 
 	const selectingData = (day: number) => {
 		if (selectStartDay && selectEndDay) {
@@ -325,23 +321,38 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 		if (selectStartDay && !selectEndDay) {
 			setSelectEndDay(day);
 		}
-	}
+	};
 
 	useEffect(() => {
 		if (selectEndDay) {
 			callbackSelect(new Date(selectYear, selectMonth, selectEndDay).getTime());
 		}
-	}, [selectEndDay])
+	}, [selectEndDay]);
 
 	return (
-		<Modal isVisible={showCalendar} swipeDirection="down" onSwipeComplete={() => setShowCalendar(false)} style={{maxHeight: 350, borderRadius: 15, borderWidth: 1}}>
+		<Modal
+			isVisible={showCalendar}
+			swipeDirection="down"
+			onSwipeComplete={() => setShowCalendar(false)}
+			style={{ maxHeight: 350, borderRadius: 15, borderWidth: 1 }}
+		>
 			<View style={pageStyles.headContainer}>
 				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
-					<TouchableOpacity style={pageStyles.button} onPress={() => {selectedYear(true)}}>
+					<TouchableOpacity
+						style={pageStyles.button}
+						onPress={() => {
+							selectedYear(true);
+						}}
+					>
 						<Text style={pageStyles.buttonText}>{"<"}</Text>
 					</TouchableOpacity>
 					<Text style={[pageStyles.text, { marginLeft: 10, marginRight: 10 }]}>{selectYear}</Text>
-					<TouchableOpacity style={pageStyles.button} onPress={() => {selectedYear(false)}}>
+					<TouchableOpacity
+						style={pageStyles.button}
+						onPress={() => {
+							selectedYear(false);
+						}}
+					>
 						<Text style={pageStyles.buttonText}>{">"}</Text>
 					</TouchableOpacity>
 				</View>
@@ -367,62 +378,23 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 				<View style={[pageStyles.calendarContainer]}>
 					{selectMonth != null && selectYear != null ? (
 						<View style={[pageStyles.gridCalendar]}>
-							<View style={pageStyles.calendarWeekdayBox}>
-								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ПН</Text>
-								{daysByWeekdays.monday.map((day, index) => (
-									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
-										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
+							{weekdays.map((weekday, weekdayIndex) => (
+								<View style={pageStyles.calendarWeekdayBox} key={weekdayIndex}>
+									<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>{weekday.rus}</Text>
+									{daysByWeekdays[weekday.en].map((day, index) => (
+									<TouchableOpacity
+										key={index}
+										onPress={() => {
+											selectingData(day);
+										}}
+									>
+										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>
+											{day ? day : " "}
+										</Text>
 									</TouchableOpacity>
 								))}
-							</View>
-							<View style={pageStyles.calendarWeekdayBox}>
-								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ВТ</Text>
-								{daysByWeekdays.tuesday.map((day, index) => (
-									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
-										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
-									</TouchableOpacity>
-								))}
-							</View>
-							<View style={pageStyles.calendarWeekdayBox}>
-								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>СР</Text>
-								{daysByWeekdays.wednesday.map((day, index) => (
-									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
-										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
-									</TouchableOpacity>
-								))}
-							</View>
-							<View style={pageStyles.calendarWeekdayBox}>
-								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ЧТ</Text>
-								{daysByWeekdays.thursday.map((day, index) => (
-									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
-										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
-									</TouchableOpacity>
-								))}
-							</View>
-							<View style={pageStyles.calendarWeekdayBox}>
-								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ПТ</Text>
-								{daysByWeekdays.friday.map((day, index) => (
-									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
-										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
-									</TouchableOpacity>
-								))}
-							</View>
-							<View style={pageStyles.calendarWeekdayBox}>
-								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>СБ</Text>
-								{daysByWeekdays.saturday.map((day, index) => (
-									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
-										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
-									</TouchableOpacity>
-								))}
-							</View>
-							<View style={pageStyles.calendarWeekdayBox}>
-								<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>ВС</Text>
-								{daysByWeekdays.sunday.map((day, index) => (
-									<TouchableOpacity key={index} onPress={() => {selectingData(day)}}>
-										<Text style={[pageStyles.text, { textAlign: "center" }, isInSelectedDays(day) ? { color: "#b4d302" } : {}]}>{day ? day : " "}</Text>
-									</TouchableOpacity>
-								))}
-							</View>
+								</View>
+							))}
 						</View>
 					) : (
 						"???"
