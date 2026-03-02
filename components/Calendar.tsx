@@ -5,7 +5,7 @@ import { pageStyles } from "../Styles/page";
 import Logger from "../logger/Logger";
 
 export interface CalendarProps<T> {
-	callbackSelect: (value: number) => void;
+	callbackSelect: (value: number[]) => void;
 	showCalendar: boolean;
 	setShowCalendar: Dispatch<SetStateAction<boolean>>;
 	minTime: number;
@@ -162,6 +162,8 @@ function getStringHours(hours: number) {
  */
 export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalendar, minTime, maxTime }: CalendarProps<T>) {
 	// Стейт для результата
+	const [selectStartDate, setSelectStartDate] = useState<Date | null>(null);
+	const [selectEndDate, setSelectEndDate] = useState<Date | null>(null);
 	const [resultData, setResultData] = useState<number[]>(getCurrentMonthRange(minTime, maxTime));
 
 	// Стейты выбранного времени и даты
@@ -307,7 +309,9 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 
 	const isInSelectedDays = (day: number) => {
 		if (!selectStartDay || !selectEndDay) return false;
-		if (day >= selectStartDay && day <= selectEndDay) {
+		const date = new Date(selectYear, selectMonth, day);
+		if (!selectStartDate || !selectEndDate) return false;
+		if (date >= selectStartDate && date <= selectEndDate) {
 			return true;
 		} else return false;
 	};
@@ -326,16 +330,21 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 		if (selectStartDay && selectEndDay) {
 			setSelectEndDay(null);
 			setSelectStartDay(day);
+			setSelectStartDate(new Date(selectYear, selectMonth, day));
 		}
 
 		if (selectStartDay && !selectEndDay) {
 			setSelectEndDay(day);
+			setSelectEndDate(new Date(selectYear, selectMonth, day));
 		}
 	};
 
 	useEffect(() => {
 		if (selectEndDay) {
-			callbackSelect(new Date(selectYear, selectMonth, selectEndDay).getTime());
+			const endDate = new Date(selectYear, selectMonth, selectEndDay);
+			if (selectStartDate) {
+				callbackSelect([selectStartDate.getTime(), endDate.getTime()]);
+			}
 		}
 	}, [selectEndDay]);
 

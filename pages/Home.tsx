@@ -102,12 +102,19 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		setMoneyMoovments(moneyMoovment);
 	};
 
-	const setterGraphicProps = async (moneyMoovments: MoneyType[], wallet: WalletType, selectedTimeType: TimeType, startTime: Date) => {
-		const moneyMoovmentsFromStart = moneyMoovments.filter((moneyMoovment) => {
+	const setterGraphicProps = async (moneyMoovments: MoneyType[], wallet: WalletType, startTime: Date, endTime: Date | null = null) => {
+		let moneyMoovmentsFromStart = moneyMoovments.filter((moneyMoovment) => {
 			const moneyMoovmentDate = new Date(moneyMoovment.time_data).getTime();
 
 			return moneyMoovmentDate >= startTime.getTime();
 		});
+
+		if (endTime) {
+			moneyMoovmentsFromStart = moneyMoovmentsFromStart.filter((moneyMoovment) => {
+				const moneyMoovmentDate = new Date(moneyMoovment.time_data).getTime();
+				return moneyMoovmentDate <= endTime.getTime();
+			});
+		}
 
 		const fromStartSum = getSumMoney(moneyMoovmentsFromStart);
 
@@ -228,7 +235,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	useEffect(() => {
 		if (selectWallet && selectTimeType && moneyMoovments.length > 0) {
 			const startTimeData = new Date(moneyMoovments[0].time_data);
-			setterGraphicProps(moneyMoovments, selectWallet, selectTimeType, startTimeData);
+			setterGraphicProps(moneyMoovments, selectWallet, startTimeData);
 		}
 	}, [selectTimeType, moneyMoovments]);
 	//[selectWallet, selectTimeType, moneyMoovments]
@@ -246,9 +253,14 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		onChange: (v) => setSelectTimeType(v),
 	};
 
-	const selectDatasCollbackCalendar = (result: number) => {
-		const selectedEndDate: Date = new Date(result);
-		Logger.log(selectedEndDate, false, "Выбранное время: ");
+	const selectDatasCollbackCalendar = (result: number[]) => {
+		const selectedStartDate: Date = new Date(result[0]);
+		const selectedEndDate: Date = new Date(result[1]);
+		Logger.log(`Год: ${selectedStartDate.getFullYear()}, месяц: ${selectedStartDate.getMonth()}, день: ${selectedStartDate.getDate()}`, false, "Выбранное время от: ");
+		Logger.log(`Год: ${selectedEndDate.getFullYear()}, месяц: ${selectedEndDate.getMonth()}, день: ${selectedEndDate.getDate()}`, false, "Выбранное время до: ");
+		if (selectWallet) {
+			setterGraphicProps(moneyMoovments, selectWallet, selectedStartDate, selectedEndDate);
+		}
 	};
 
 	let graphicElement = <Text style={pageStyles.text}>Нет данных</Text>;
