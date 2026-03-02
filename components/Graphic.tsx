@@ -98,8 +98,8 @@ export default memo(function Graphic({ labels, data }: GraphicProps) {
 						width={Dimensions.get("window").width}
 						height={220}
 						chartConfig={{
-							backgroundGradientFrom: "#a68ebf",
-							backgroundGradientTo: "#a68ebf",
+							backgroundGradientFromOpacity: 0,
+							backgroundGradientToOpacity: 0,
 							color: () => "#000000",
 						}}
 					/>

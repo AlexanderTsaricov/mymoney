@@ -1,187 +1,152 @@
 import { Dimensions, StyleSheet } from "react-native";
-const { height } = Dimensions.get("window");
 export const pageStyles = StyleSheet.create({
-	borderRedDebug: {
-		borderWidth: 1,
-		borderColor: "red",
-	},
+  headContainer: {
+    flex: 1,
+    backgroundColor: "#a68ebf",
+  },
 
-	text: {
-		color: "#fff", // белый цвет
-		fontSize: 19, // размер текста
-		fontWeight: "700", // жирный
-		letterSpacing: 1, // межбуквенный интервал
-		textShadowColor: "#000", // тень текста
-		textShadowOffset: { width: 1, height: 1 },
-		textShadowRadius: 3,
-	},
+  text: {
+    color: "#ffffff",
+    fontSize: 17,
+    fontWeight: "600",
+    letterSpacing: 0.3,
+    textShadowColor: "rgba(0,0,0,0.15)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
+  },
 
-	block: {
-		display: "flex",
-		alignItems: "center",
-		justifyContent: "center",
-		padding: 8,
-		width: "100%",
-		borderBottomWidth: 1,
-		borderBottomColor: "#5f348a",
-		borderStyle: "dashed",
-	},
+  block: {
+    width: "100%",
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.25)",
+  },
 
-	headContainer: {
-		backgroundColor: "#a68ebf",
-		flex: 1,
-	},
+  button: {
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    backgroundColor: "#6d3fa8",
 
-	button: {
-		borderRadius: 8,
-		backgroundColor: "#5f348a",
-		paddingVertical: 5,
-		paddingHorizontal: 10,
+    // лёгкая, аккуратная тень
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+  },
 
-		// для iOS
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
+  buttonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+  },
 
-		// для Android
-		elevation: 5,
-		alignContent: "center",
-		justifyContent: "center",
-	},
+  inputText: {
+    borderWidth: 1,
+    borderColor: "#cbb7e6",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    fontSize: 15,
+    backgroundColor: "#ffffff",
+    width: "100%",
+    marginVertical: 6,
 
-	buttonText: {
-		color: "#fff",
-		fontSize: 18,
-		fontWeight: "700",
-		textAlign: "center",
-	},
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 1,
+    elevation: 1,
+  },
 
-	inputText: {
-		borderWidth: 1,
-		borderColor: "#ccc",
-		borderRadius: 8,
-		paddingVertical: 8,
-		paddingHorizontal: 12,
-		fontSize: 16,
-		backgroundColor: "#fff",
-		width: "100%",
-		padding: 7,
-		marginVertical: 6,
+  inputTextFocus: {
+    borderColor: "#7e57c2",
+  },
 
-		// тень для iOS
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.1,
-		shadowRadius: 2,
+  selectorContainer: {
+    width: "100%",
+    marginVertical: 8,
+  },
 
-		// тень для Android
-		elevation: 2,
-	},
+  selectorTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#ffffff",
+    marginBottom: 4,
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
+  },
 
-	inputTextFocus: {
-		borderColor: "#5f348a",
-	},
+  selectorWrapper: {
+    borderRadius: 8,
+    backgroundColor: "#6d3fa8",
+    borderWidth: 1,
+    borderColor: "#8c6ccf",
 
-	// Стили для селекторов
-	selectorContainer: {
-		width: "100%",
-		marginVertical: 8,
-		maxHeight: 70,
-	},
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 1,
+    elevation: 2,
+  },
 
-	selectorTitle: {
-		fontSize: 18,
-		fontWeight: "700",
-		color: "#fff",
-		marginBottom: 5,
-		textShadowColor: "#000",
-		textShadowOffset: { width: 1, height: 1 },
-		textShadowRadius: 2,
-	},
+  selectorInputInner: {
+    color: "#fff",
+  },
 
-	selectorWrapper: {
-		borderRadius: 8,
-		backgroundColor: "#5f348a",
-		borderWidth: 2,
-		borderColor: "#7e57c2",
-		overflow: "hidden",
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.2,
-		shadowRadius: 2,
-		elevation: 3, // для Android
-	},
+  selectorPlaceholder: {
+    color: "#e0d4f5",
+  },
 
-	selectorInputInner: {
-		color: "#fff",
-	},
+  listWithButton: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-	selectorPlaceholder: {
-		color: "#d1c0eb",
-	},
+  blockAtRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-	listWithButton: {
-		display: "flex",
-		gap: 10,
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "center",
-	},
+  flexChild: {
+    flex: 1,
+  },
 
-	blockAtRow: {
-		display: "flex",
-		flexDirection: "row",
-		justifyContent: "center",
-		alignItems: "center",
-	},
+  inputError: {
+    borderColor: "#d66",
+  },
 
-	flexChild: {
-		flex: 1,
-	},
+  calendarContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: 10,
+  },
 
-	inputError: {
-		borderColor: "#c25757ff",
-	},
+  gridCalendar: {
+    maxWidth: 260,
+    flexDirection: "row",
+    gap: 10,
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-	debugBorder: {
-		borderWidth: 2,
-		borderColor: "red",
-	},
+  calendarDay: {
+    width: 35,
+  },
 
-	calendarDay: {
-		width: 35,
-	},
-
-	calendarContainer: {
-		width: "100%",
-		display: "flex",
-		alignContent: "center",
-		justifyContent: "center",
-		alignItems: "center",
-		marginTop: 10
-	},
-
-	calendarWeekdayBox: {
-		display: "flex",
-		alignContent: "flex-start",
-		alignItems: "flex-start",
-		justifyContent: "flex-start"
-	},
-
-	gridCalendar: {
-		display: "flex",
-		maxWidth: 260,
-		flexDirection: "row",
-		gap: 10,
-		flexWrap: "wrap",
-		alignContent: "center",
-		justifyContent: "center",
-		alignItems: "center"
-	},
-
-	inputTextShort: {
-		maxWidth: 45,
-		padding: 3
-	}
+  inputTextShort: {
+    maxWidth: 45,
+    padding: 3,
+  },
 });
+

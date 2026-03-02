@@ -256,8 +256,16 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	const selectDatasCollbackCalendar = (result: number[]) => {
 		const selectedStartDate: Date = new Date(result[0]);
 		const selectedEndDate: Date = new Date(result[1]);
-		Logger.log(`Год: ${selectedStartDate.getFullYear()}, месяц: ${selectedStartDate.getMonth()}, день: ${selectedStartDate.getDate()}`, false, "Выбранное время от: ");
-		Logger.log(`Год: ${selectedEndDate.getFullYear()}, месяц: ${selectedEndDate.getMonth()}, день: ${selectedEndDate.getDate()}`, false, "Выбранное время до: ");
+		Logger.log(
+			`Год: ${selectedStartDate.getFullYear()}, месяц: ${selectedStartDate.getMonth()}, день: ${selectedStartDate.getDate()}`,
+			false,
+			"Выбранное время от: ",
+		);
+		Logger.log(
+			`Год: ${selectedEndDate.getFullYear()}, месяц: ${selectedEndDate.getMonth()}, день: ${selectedEndDate.getDate()}`,
+			false,
+			"Выбранное время до: ",
+		);
 		if (selectWallet) {
 			setterGraphicProps(moneyMoovments, selectWallet, selectedStartDate, selectedEndDate);
 		}
