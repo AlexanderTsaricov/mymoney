@@ -289,10 +289,10 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		return (
 			<View style={pageStyles.headContainer}>
 				<View style={pageStyles.block}>
-					<Text style={pageStyles.text}>Баланс</Text>
+					<Text style={[pageStyles.text, {marginBottom: 10, fontWeight: "800", fontSize: 24}]}>Балансы кошельков</Text>
 					<Wallets money={money} wallets={wallets} setWallets={setWallets} showButton={false} />
-					<TouchableOpacity style={pageStyles.button} onPress={async () => await money.deleteDatabase()}>
-						<Text style={pageStyles.buttonText}>Удалить данные</Text>
+					<TouchableOpacity style={[pageStyles.button, {marginTop: 10}]} onPress={async () => await money.deleteDatabase()}>
+						<Text style={pageStyles.buttonText}>Удалить все данные</Text>
 					</TouchableOpacity>
 				</View>
 				<View style={pageStyles.block}>{graphicElement}</View>
