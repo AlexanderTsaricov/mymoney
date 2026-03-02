@@ -316,6 +316,14 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 		} else return false;
 	};
 
+	const isInSelectStartDay = (day: number) => {
+		if (!selectStartDate) {
+			return false;
+		}
+		const date = new Date(selectYear, selectMonth, day);
+		return date.getTime() == selectStartDate.getTime();
+	}
+
 	const  isAfterStartWallet = (day: number) => {
 		const time = new Date(selectYear, selectMonth, day);
 
@@ -410,7 +418,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 										}}
 										disabled={!isAfterStartWallet(day)}
 									>
-										<Text style={[pageStyles.text, { textAlign: "center" }, isAfterStartWallet(day) ? (isInSelectedDays(day) ? { color: "#b4d302" } : {}) : {color: "#616161"}]}>
+										<Text style={[pageStyles.text, { textAlign: "center" }, isAfterStartWallet(day) ? ((isInSelectedDays(day) || isInSelectStartDay(day)) ? { color: "#b4d302" } : {}) : {color: "#616161"}]}>
 											{day ? day : " "}
 										</Text>
 									</TouchableOpacity>
