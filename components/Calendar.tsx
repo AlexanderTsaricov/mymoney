@@ -378,9 +378,11 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 				<View style={[pageStyles.calendarContainer]}>
 					{selectMonth != null && selectYear != null ? (
 						<View style={[pageStyles.gridCalendar]}>
+							{/* Дни недели */}
 							{weekdays.map((weekday, weekdayIndex) => (
 								<View style={pageStyles.calendarWeekdayBox} key={weekdayIndex}>
 									<Text style={[pageStyles.text, { textAlign: "center", color: "#87ff92" }]}>{weekday.rus}</Text>
+									{/* Числа */}
 									{daysByWeekdays[weekday.en].map((day, index) => (
 									<TouchableOpacity
 										key={index}
