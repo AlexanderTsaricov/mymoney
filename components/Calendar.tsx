@@ -361,9 +361,9 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 			isVisible={showCalendar}
 			swipeDirection="down"
 			onSwipeComplete={() => setShowCalendar(false)}
-			style={{ maxHeight: 350, borderRadius: 15, borderWidth: 1 }}
+			style={{ maxHeight: 400 }}
 		>
-			<View style={pageStyles.headContainer}>
+			<View style={[pageStyles.headContainer, {borderRadius: 15, borderWidth: 3}]}>
 				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
 					<TouchableOpacity
 						style={pageStyles.button}
