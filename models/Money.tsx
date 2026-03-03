@@ -184,4 +184,14 @@ export class Money {
 		await this.income.addIncome(income);
 		return await this.wallet.changeMoney(wallet.id, resultMoney);
 	}
+
+	async getAllMoneyMoovmentTypesExpences(): Promise<MoneyMoovmentType[]> {
+        const tempExpences = await this.storage.getAllDataFromStorage("expenceTypes");
+        return tempExpences;
+    }
+
+    async getAllMoneyMoovmentTypesIncomes(): Promise<MoneyMoovmentType[]> {
+        const tempIncomes = await this.storage.getAllDataFromStorage("incomeTypes");
+        return tempIncomes;
+    }
 }

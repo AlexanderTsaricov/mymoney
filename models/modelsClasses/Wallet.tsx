@@ -1,4 +1,4 @@
-import { StorageHandle, returnOjb } from '../../storage/StorageHandle';
+import { MoneyMoovmentType, StorageHandle, returnOjb } from '../../storage/StorageHandle';
 import { MoneyType, WalletType } from '../../storage/StorageHandle';
 
 
@@ -159,6 +159,5 @@ export class Wallet {
         }
 
         return result;
-
     }
 }

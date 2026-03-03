@@ -8,7 +8,7 @@ export interface SelectorProps<T> {
 	title: string;
 	titleDontHave: string;
 	items: any[];
-	onChange: (value: T | null) => void;
+	onChange: (value: any | null) => void;
 }
 
 function Selector<T extends { name?: string } | string>({ title, titleDontHave, items, onChange }: SelectorProps<any>) {

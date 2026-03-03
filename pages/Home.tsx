@@ -244,7 +244,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		onChange: (v) => {
 			if (v) {
 				const index = rusDaysweek.indexOf(v);
-				console.log(timeTypes[index]);
 				setSelectTimeType(timeTypes[index]);
 			} else {
 				setSelectTimeType(null);

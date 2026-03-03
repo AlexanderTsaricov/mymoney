@@ -1,0 +1,176 @@
+import { useEffect, useState } from "react";
+import { Money } from "../models/Money";
+import { Currency, MoneyMoovmentType, MoneyType, WalletType } from "../storage/StorageHandle";
+import { View, Text, ScrollView } from "react-native";
+import { pageStyles } from "../Styles/page";
+import Selector, { SelectorProps } from "../components/Selector";
+
+type MoneyMoovmentsPageProps = {
+	money: Money;
+};
+
+type moneyMoovmentTypeType = "incomes" | "expences";
+
+export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
+	const [loading, setLoading] = useState<boolean>(true);
+	const [wallets, setWallets] = useState<WalletType[]>([]);
+	const [walletsNames, setWalletsNames] = useState<string[]>([]);
+	const [selectWallet, setSelectWallet] = useState<WalletType | null>(null);
+	const [moneyMoovmentsByWallet, setMoneyMoovmentsByWallet] = useState<MoneyType[]>([]);
+	const [currencies, setCurrencies] = useState<Currency[]>([]);
+	const [moneyMoovmentTypesExpences, setMoneyMoovmentsTypesExpences] = useState<MoneyMoovmentType[]>([]);
+	const [moneyMoovmentTypesIncomes, setMoneyMoovmentsTypesIncomes] = useState<MoneyMoovmentType[]>([]);
+
+	async function loadWallets(money: Money): Promise<WalletType[]> {
+		setLoading(true);
+		const wallets = await money.getAllWallet();
+		setLoading(false);
+
+		if (wallets && Array.isArray(wallets)) {
+			return wallets;
+		} else {
+			return [];
+		}
+	}
+
+	async function loadCurrencies(money: Money): Promise<Currency[]> {
+		setLoading(true);
+		const currenciesTemp = await money.currencies.getAllCurrencies();
+		setLoading(false);
+
+		return currenciesTemp;
+	}
+
+	async function loadMoneyMoovmentTypes(money: Money) {
+		const tempMoneyTypesExpences = await money.getAllMoneyMoovmentTypesExpences();
+		const tempMoneyTypesIncomes = await money.getAllMoneyMoovmentTypesIncomes();
+
+		return {
+			expences: tempMoneyTypesExpences,
+			incomes: tempMoneyTypesIncomes,
+		};
+	}
+
+	function getMoovmentTypeNameById(id: number, type: moneyMoovmentTypeType): string {
+		try {
+			if (type == "expences") {
+				return moneyMoovmentTypesExpences[id].name;
+			} else if (type == "incomes") {
+                return moneyMoovmentTypesIncomes[id].name;
+            } else {
+                return "";
+            }
+		} catch (e) {
+			console.log(e);
+			return "";
+		}
+	}
+
+	useEffect(() => {
+		loadWallets(money).then((wallets_res: WalletType[]) => {
+			setWallets(wallets_res);
+
+			const walletsNamesTemp: string[] = [];
+
+			wallets_res.forEach((wallet: WalletType) => {
+				walletsNamesTemp.push(wallet.name);
+			});
+
+			setWalletsNames(walletsNamesTemp);
+		});
+
+		loadCurrencies(money).then((currencies: Currency[]) => {
+			setCurrencies(currencies);
+		});
+
+		loadMoneyMoovmentTypes(money).then((result) => {
+			setMoneyMoovmentsTypesExpences(result.expences);
+			setMoneyMoovmentsTypesIncomes(result.incomes);
+		});
+	}, []);
+
+	async function loadMoneyMoovmentByWallet(wallet: WalletType): Promise<MoneyType[]> {
+		if (!selectWallet || !selectWallet.id) return [];
+		const expences = await money.expence.getAllExpenceByProps("wallet_id", selectWallet.id);
+		const incomes = await money.income.getAllIncomeByProps("wallet_id", selectWallet.id);
+
+		const moneyMoovmentsTemp: MoneyType[] = [...expences, ...incomes];
+		moneyMoovmentsTemp.sort((a: MoneyType, b: MoneyType) => {
+			return new Date(a.time_data).getTime() - new Date(b.time_data).getTime();
+		});
+
+		return moneyMoovmentsTemp;
+	}
+
+	function getCurrencyShortNameById(id: number): string {
+		if (currencies.length == 0) return "";
+		const index = currencies.findIndex((currency) => currency.id == id);
+		return currencies[index].short_name;
+	}
+
+	useEffect(() => {
+		if (selectWallet) {
+			loadMoneyMoovmentByWallet(selectWallet).then((moovments: MoneyType[]) => {
+				setMoneyMoovmentsByWallet(moovments);
+			});
+		}
+	}, [selectWallet]);
+
+	if (loading) {
+		return (
+			<View style={pageStyles.headContainer}>
+				<Text style={pageStyles.text}>Загрузка...</Text>
+			</View>
+		);
+	}
+
+	if (wallets.length == 0) {
+		return (
+			<View style={pageStyles.headContainer}>
+				<Text style={pageStyles.text}>У вас нет кошельков</Text>
+			</View>
+		);
+	}
+
+	const walletSelectorProps: SelectorProps<WalletType> = {
+		title: "Выбрете кошелёк",
+		titleDontHave: "Нет кошельков",
+		items: walletsNames,
+		onChange: function (value): void {
+			const index = wallets.findIndex((wallet) => wallet.name === value);
+			setSelectWallet(wallets[index]);
+		},
+	};
+
+	return (
+		<View style={[pageStyles.headContainer, { paddingHorizontal: 10, paddingBottom: 50 }]}>
+			<Selector {...walletSelectorProps} />
+
+			{selectWallet && (
+				<ScrollView style={{ paddingVertical: 10 }}>
+					{moneyMoovmentsByWallet.map((moneyMoovment: MoneyType, key) => (
+						<View style={[pageStyles.block, { alignItems: "flex-start" }]} key={key}>
+							{moneyMoovment.moneyMovmentType == "expences" ? (
+								<>
+									<Text style={[pageStyles.text, { color: "#9e1414", textAlign: "left" }]}>
+										Расход: {moneyMoovment.money} {getCurrencyShortNameById(moneyMoovment.currency_id)}
+									</Text>
+									<Text style={pageStyles.text}>Комментарий: {moneyMoovment.comment}</Text>
+									<Text style={pageStyles.text}>Тип: {getMoovmentTypeNameById(moneyMoovment.type, "expences")}</Text>
+								</>
+							) : (
+								<>
+									<Text style={[pageStyles.text, { color: "#0e721e", textAlign: "left" }]}>
+										Доход: {moneyMoovment.money} {getCurrencyShortNameById(moneyMoovment.currency_id)}
+									</Text>
+									<Text style={pageStyles.text}>Комментарий: {moneyMoovment.comment}</Text>
+									<Text style={pageStyles.text}>Тип: {getMoovmentTypeNameById(moneyMoovment.type, "incomes")}</Text>
+								</>
+							)}
+						</View>
+					))}
+				</ScrollView>
+			)}
+		</View>
+	);
+}

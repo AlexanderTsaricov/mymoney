@@ -15,6 +15,7 @@ import CurrenciesPage from "./pages/CurrenciesPage";
 import CurrencyManage from "./pages/CurrencyManage";
 import HeadCurrencyManage from "./pages/HeadCurrencyManage";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+import MoneyMoovmentsPage from "./pages/MoneyMoovmentsPage";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ const screens = [
 	{ name: "Доходы", component: IncomePage },
 	{ name: "Расходы", component: ExpencesPage },
 	{ name: "Валюты", component: CurrenciesPage },
+	{ name: "Потоки денег", component: MoneyMoovmentsPage }
 ];
 
 function ErrorFallback({ error }: FallbackProps) {
