@@ -57,12 +57,12 @@ export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, sh
 				<Text style={[pageStyles.text]}>У вас нет кошельков</Text>
 			) : (
 				wallets.map((w, index) => (
-					<View key={index} style={{display: "flex", flexDirection: "row"}}>
+					<View key={index} style={{display: "flex", flexDirection: "row", justifyContent: "center", alignContent: "center", alignItems: "center", gap: 10}}>
 						<Text style={pageStyles.text}>
 							{w.name}: {w.moneyCount}{" "} {w.id !== null && currenciesByWallets ? (currenciesByWallets as CurrencyByWallet)[w.id as number]?.short_name : ""}
 						</Text>
 						{showButton && (
-							<View style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+							<View>
 								<TouchableOpacity
 									style={[pageStyles.button, { width: 160, marginTop: 10 }]}
 									onPress={async () => {
