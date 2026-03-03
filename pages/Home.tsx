@@ -240,7 +240,10 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		title: "Выбор интервала для графика",
 		titleDontHave: "Ошибка",
 		items: ["day", "year", "month", "hour", "minutes"],
-		onChange: (v) => setSelectTimeType(v),
+		onChange: (v) => {
+			console.log(v);
+			setSelectTimeType(v);
+		},
 	};
 
 	const selectDatasCollbackCalendar = (result: number[]) => {

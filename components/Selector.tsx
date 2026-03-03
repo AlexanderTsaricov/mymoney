@@ -15,10 +15,10 @@ function Selector<T extends { name?: string } | string>({ title, titleDontHave, 
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(initialIndex);
 
 	useEffect(() => {
-		if (items && items.length > 0) {
+		if (items && items.length > 0 && selectedIndex === null) {
 			setSelectedIndex(0);
 			onChange(items[0]);
-		} else {
+		} else if (!items || items.length === 0) {
 			setSelectedIndex(null);
 			onChange(null);
 		}
@@ -37,7 +37,7 @@ function Selector<T extends { name?: string } | string>({ title, titleDontHave, 
 	const pickerItems: Item[] =
 		items.length > 0
 			? items.map((item, idx) => ({
-					label: typeof item === "string" ? item : item.name ?? "unknown",
+					label: typeof item === "string" ? item : (item.name ?? "unknown"),
 					value: idx,
 				}))
 			: [{ label: titleDontHave, value: null }]; // появляется только если items пустой
