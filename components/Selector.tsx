@@ -7,11 +7,11 @@ import Logger from "../logger/Logger";
 export interface SelectorProps<T> {
 	title: string;
 	titleDontHave: string;
-	items: T[];
+	items: any[];
 	onChange: (value: T | null) => void;
 }
 
-function Selector<T extends { name?: string } | string>({ title, titleDontHave, items, onChange }: SelectorProps<T>) {
+function Selector<T extends { name?: string } | string>({ title, titleDontHave, items, onChange }: SelectorProps<any>) {
 	const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
 	useEffect(() => {

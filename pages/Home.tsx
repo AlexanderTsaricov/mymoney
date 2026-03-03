@@ -21,6 +21,7 @@ type WalletsProps = {
 };
 
 type TimeType = "year" | "month" | "day" | "hour" | "minutes";
+const timeTypes: TimeType[] = ["day", "year", "month", "hour", "minutes"];
 
 function getSumMoney(moneyMoovments: MoneyType[]) {
 	const result = moneyMoovments.reduce((sum, item) => {
@@ -185,11 +186,10 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			timeChangePropsStringArr.push(element.toString());
 		});
 
-
 		setGraphicLabels(timeChangePropsStringArr);
 
 		dataset = {
-			data: moneyChangedProps
+			data: moneyChangedProps,
 		};
 		setGraphicDatasets([dataset]);
 	};
@@ -236,14 +236,19 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	}, [graphicDatasets]);
 
 	// поочередная загрузка ---------- конец
-
+	const rusDaysweek = ["День", "Год", "Месяц", "Час", "Минута"];
 	const selectorTimeTypeProps: SelectorProps<TimeType> = {
 		title: "Выбор интервала для графика",
 		titleDontHave: "Ошибка",
-		items: ["day", "year", "month", "hour", "minutes"],
+		items: rusDaysweek,
 		onChange: (v) => {
-			console.log(v);
-			setSelectTimeType(v);
+			if (v) {
+				const index = rusDaysweek.indexOf(v);
+				console.log(timeTypes[index]);
+				setSelectTimeType(timeTypes[index]);
+			} else {
+				setSelectTimeType(null);
+			}
 		},
 	};
 
