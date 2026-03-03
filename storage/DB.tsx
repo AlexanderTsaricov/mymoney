@@ -374,15 +374,12 @@ export class DB {
             for (const table of tables) {
                 const tableName = table.name;
                 try {
-                    // console.log(`Deleting table: "${tableName}"`);
                     await this.set(`DROP TABLE IF EXISTS "${tableName}";`);
                 } catch (innerError) {
-                    // console.error(`Failed to drop table "${tableName}":`, innerError);
                     throw innerError; // пробрасываем дальше
                 }
             }
 
-            // console.log('All tables deleted successfully.');
         } catch (error) {
             console.error('Error while dropping tables:', error);
             throw error; // пробрасываем дальше

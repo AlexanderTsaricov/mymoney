@@ -99,7 +99,6 @@ export default function IncomePage({ money }: IncomeProps) {
 		inputs: inputsNewIncome,
 		submitTextButton: "Добавить доход",
 		submitOnPress: async () => {
-			// console.log(`Добавляется доход: ${sum} ${selectCurrency?.short_name}. Коммент: ${comment}`);
 			if (sum.length == 0) return;
 			if (comment.length == 0) return;
 			if (selectIncomeType == null) return;

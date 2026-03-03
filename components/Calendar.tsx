@@ -274,8 +274,6 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	const selectedMonth = (back: boolean = false) => {
 		switch (selectMonth) {
 			case 0:
-				// console.log("case 0");
-				// console.log(back);
 				if (back) {
 					setSelectMonth(11);
 				} else {
@@ -361,9 +359,9 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 			isVisible={showCalendar}
 			swipeDirection="down"
 			onSwipeComplete={() => setShowCalendar(false)}
-			style={{ maxHeight: 400 }}
+			style={{ maxHeight: 500 }}
 		>
-			<View style={[pageStyles.headContainer, {borderRadius: 15, borderWidth: 3}]}>
+			<View style={[pageStyles.headContainer, {borderRadius: 15, borderWidth: 3, marginTop: 100}]}>
 				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
 					<TouchableOpacity
 						style={pageStyles.button}
@@ -439,7 +437,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 							keyboardType="number-pad"
 							style={[pageStyles.inputText, pageStyles.inputTextShort]}
 						/>
-						<Text>:</Text>
+						<Text style={pageStyles.text}>:</Text>
 						<TextInput
 							value={getStringMinutes(selectStartMinutes)}
 							onChangeText={(value) => setSelectStartMinutes(parseInt(value))}
@@ -455,7 +453,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 							keyboardType="number-pad"
 							style={[pageStyles.inputText, pageStyles.inputTextShort]}
 						/>
-						<Text>:</Text>
+						<Text style={pageStyles.text}>:</Text>
 						<TextInput
 							value={getStringMinutes(selectEndMinutes)}
 							onChangeText={(value) => setSelectEndMinutes(parseInt(value))}

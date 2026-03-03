@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import RNPickerSelect, { Item } from "react-native-picker-select";
 import { pageStyles } from "../Styles/page";
+import Logger from "../logger/Logger";
 
 export interface SelectorProps<T> {
 	title: string;
@@ -11,8 +12,7 @@ export interface SelectorProps<T> {
 }
 
 function Selector<T extends { name?: string } | string>({ title, titleDontHave, items, onChange }: SelectorProps<T>) {
-	const initialIndex = items?.length > 0 ? 0 : null;
-	const [selectedIndex, setSelectedIndex] = useState<number | null>(initialIndex);
+	const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
 	useEffect(() => {
 		if (items && items.length > 0 && selectedIndex === null) {

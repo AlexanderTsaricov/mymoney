@@ -159,8 +159,6 @@ export class Money {
 		}
 
 		if (wallet.currency_id == income.currency_id) {
-			//TODO: debug
-			// console.log("income", income);
 			await this.income.addIncome(income);
 			return await this.wallet.changeMoney(wallet.id, wallet.moneyCount + income.money);
 		}

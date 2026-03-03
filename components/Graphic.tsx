@@ -14,12 +14,14 @@ export type GraphicProps = {
 
 function checkData({ labels, data }: GraphicProps) {
 	if (!data || !labels) {
-		// console.log("checkData: data or labels falsy");
+		console.error("data или labels undefined или null");
 		return true;
 	}
 
 	if (data.length < 1 || labels.length < 1) {
-		// console.log("checkData: empty arrays", { dataLength: data.length, labelsLength: labels.length });
+		console.log("длинна data или/и labels меньше 1");
+		console.log("data length: ", data.length);
+		console.log("labels length: ", labels.length);
 		return true;
 	}
 
@@ -27,26 +29,18 @@ function checkData({ labels, data }: GraphicProps) {
 		const element = data[i];
 
 		if (!element) {
-			// console.log("checkData: dataset null/undefined", i);
 			return true;
 		}
 
 		if (!element.data) {
-			// console.log("checkData: dataset invalid", i);
 			return true;
 		}
 
 		if (element.data.length === 0) {
-			// console.log("checkData: dataset empty", i);
 			return true;
 		}
 
 		if (element.data.length !== labels.length) {
-			// console.log("checkData: length mismatch", {
-			//	datasetIndex: i,
-			//	dataLength: element.data.length,
-			//	labelsLength: labels.length,
-			// });
 			return true;
 		}
 
