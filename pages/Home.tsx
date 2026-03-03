@@ -123,74 +123,59 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		const moneyChangedProps: number[] = [startMoney];
 		const timeChangedProps: number[] = [];
 		let money = startMoney;
-
-		moneyMoovmentsFromStart.forEach((moneyMoovment) => {
-			switch (moneyMoovment.moneyMovmentType) {
-				case "income":
-					money += moneyMoovment.money;
-					moneyChangedProps.push(money);
-					break;
-				case "expences":
-					money -= moneyMoovment.money;
-					moneyChangedProps.push(money);
-					break;
-			}
-		});
 		let dataset: Dataset = {
 			data: [],
 		};
-		try {
-			dataset = {
-				data: moneyChangedProps,
-			};
-		} catch (e) {
-			console.error(e);
+
+		const getGraphicChagedMoney = (moneyMoovment: MoneyType) => {
+			let moneyChanged = 0;
+			switch (moneyMoovment.moneyMovmentType) {
+				case "income":
+					money += moneyMoovment.money;
+					moneyChanged = money;
+					break;
+				case "expences":
+					money -= moneyMoovment.money;
+					moneyChanged = money;
+					break;
+			}
+
+			return moneyChanged;
+		};
+
+		const sortedMoneyMoovments = [...moneyMoovments].sort((a: MoneyType, b: MoneyType) => {
+			return new Date(a.time_data).getTime() - new Date(b.time_data).getTime();
+		});
+
+		const timeExtractors: Record<string, (date: Date) => number> = {
+			day: (date: Date) => date.getDate(),
+			month: (date: Date) => date.getMonth(),
+			year: (date: Date) => date.getFullYear(),
+			minutes: (date: Date) => date.getMinutes(),
+			hour: (date: Date) => date.getHours(),
+		};
+
+		if (!selectTimeType) {
+			return;
 		}
 
-		let datasets: Dataset[] = [];
+		const extract = timeExtractors[selectTimeType];
 
-		try {
-			datasets.push(dataset);
-		} catch (e) {
-			console.error(e);
-		}
-		setGraphicDatasets(datasets);
-
-		switch (selectTimeType) {
-			case "day":
-				timeChangedProps.push(startTime.getDate());
-				break;
-			case "month":
-				timeChangedProps.push(startTime.getMonth());
-				break;
-			case "year":
-				timeChangedProps.push(startTime.getFullYear());
-				break;
-			case "minutes":
-				timeChangedProps.push(startTime.getMinutes());
-				break;
-			case "hour":
-				timeChangedProps.push(startTime.getHours());
-				break;
+		if (!extract) {
+			throw new Error("Unknown time type: " + selectTimeType);
 		}
 
-		moneyMoovmentsFromStart.forEach((moneyMoovment) => {
-			switch (selectTimeType) {
-				case "day":
-					timeChangedProps.push(new Date(moneyMoovment.time_data).getDate());
-					break;
-				case "month":
-					timeChangedProps.push(new Date(moneyMoovment.time_data).getMonth());
-					break;
-				case "year":
-					timeChangedProps.push(new Date(moneyMoovment.time_data).getFullYear());
-					break;
-				case "minutes":
-					timeChangedProps.push(new Date(moneyMoovment.time_data).getMinutes());
-					break;
-				case "hour":
-					timeChangedProps.push(new Date(moneyMoovment.time_data).getHours());
-					break;
+		timeChangedProps.push(extract(startTime));
+
+		sortedMoneyMoovments.forEach((moneyMoovment) => {
+			const date = new Date(moneyMoovment.time_data);
+			const current = extract(date);
+
+			if (!timeChangedProps.includes(current)) {
+				moneyChangedProps.push(getGraphicChagedMoney(moneyMoovment));
+				timeChangedProps.push(current);
+			} else {
+				moneyChangedProps[moneyChangedProps.length - 1] = getGraphicChagedMoney(moneyMoovment);
 			}
 		});
 
@@ -201,6 +186,11 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		});
 
 		setGraphicLabels(timeChangePropsStringArr);
+
+		dataset = {
+			data: moneyChangedProps
+		};
+		setGraphicDatasets([dataset]);
 	};
 
 	const loadAllWallets = async () => {
@@ -289,9 +279,9 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		return (
 			<View style={pageStyles.headContainer}>
 				<View style={pageStyles.block}>
-					<Text style={[pageStyles.text, {marginBottom: 10, fontWeight: "800", fontSize: 24}]}>Балансы кошельков</Text>
+					<Text style={[pageStyles.text, { marginBottom: 10, fontWeight: "800", fontSize: 24 }]}>Балансы кошельков</Text>
 					<Wallets money={money} wallets={wallets} setWallets={setWallets} showButton={false} />
-					<TouchableOpacity style={[pageStyles.button, {marginTop: 10}]} onPress={async () => await money.deleteDatabase()}>
+					<TouchableOpacity style={[pageStyles.button, { marginTop: 10 }]} onPress={async () => await money.deleteDatabase()}>
 						<Text style={pageStyles.buttonText}>Удалить все данные</Text>
 					</TouchableOpacity>
 				</View>
