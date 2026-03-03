@@ -72,45 +72,62 @@ function checkData({ labels, data }: GraphicProps) {
 	return false;
 }
 
-export default memo(function Graphic({ labels, data }: GraphicProps) {
-	if (checkData({ labels, data })) {
-		return (
-			<View>
-				<Text style={pageStyles.text}>Нет данных</Text>
-			</View>
-		);
-	} else {
-		const safeData =
-			data?.map((d) => ({
-				data: Array.isArray(d.data) ? d.data : [],
-			})) ?? [];
-		try {
-			return (
-				<View>
-					<LineChart
-						data={{ labels: labels, datasets: data }}
-						width={Dimensions.get("window").width}
-						height={220}
-						chartConfig={{
-							backgroundGradientFromOpacity: 0,
-							backgroundGradientToOpacity: 0,
-							color: () => "#000000",
-						}}
-					/>
-				</View>
-			);
-		} catch (e) {
-			console.error("LineChart render error caught:", e);
+export default memo(
+	function Graphic({ labels, data }: GraphicProps) {
+		if (checkData({ labels, data })) {
 			return (
 				<View>
 					<Text style={pageStyles.text}>Нет данных</Text>
 				</View>
 			);
+		} else {
+			const safeData =
+				data?.map((d) => ({
+					data: Array.isArray(d.data) ? d.data : [],
+				})) ?? [];
+			try {
+				return (
+					<View>
+						<LineChart
+							data={{ labels, datasets: data }}
+							width={Dimensions.get("window").width}
+							height={220}
+							chartConfig={{
+								backgroundGradientFromOpacity: 0,
+								backgroundGradientToOpacity: 0,
+								color: (opacity = 1) => `rgba(15, 107, 43, ${opacity})`, // линия
+								labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // оси
+								propsForLabels: {
+									fontWeight: "700",
+								},
+								propsForBackgroundLines: {
+									stroke: "rgba(255, 255, 255, 0.5)",
+									strokeDasharray: "4,4",
+								},
+								propsForDots: {
+									r: "3",
+									strokeWidth: "2",
+									stroke: "#0f6b2b", // цвет точек
+								},
+							}}
+						/>
+					</View>
+				);
+			} catch (e) {
+				console.error("LineChart render error caught:", e);
+				return (
+					<View>
+						<Text style={pageStyles.text}>Нет данных</Text>
+					</View>
+				);
+			}
 		}
-	}
-}, (prev, next) => {
-	// Мемоизация: true означает что пропсы равны и рендер не нужен
-	const labelsEqual = prev.labels === next.labels || (Array.isArray(prev.labels) && Array.isArray(next.labels) && prev.labels.length === next.labels.length);
-	const dataEqual = prev.data === next.data || (Array.isArray(prev.data) && Array.isArray(next.data) && prev.data.length === next.data.length);
-	return labelsEqual && dataEqual;
-});
+	},
+	(prev, next) => {
+		// Мемоизация: true означает что пропсы равны и рендер не нужен
+		const labelsEqual =
+			prev.labels === next.labels || (Array.isArray(prev.labels) && Array.isArray(next.labels) && prev.labels.length === next.labels.length);
+		const dataEqual = prev.data === next.data || (Array.isArray(prev.data) && Array.isArray(next.data) && prev.data.length === next.data.length);
+		return labelsEqual && dataEqual;
+	},
+);
