@@ -4,8 +4,8 @@ import { StorageHandle, Currency, CurrencyChangeProp, HeadCurrencyChangeProp } f
 export class Currencies {
     storage: StorageHandle;
 
-    constructor(dbName: string) {
-        this.storage = new StorageHandle(dbName);
+    constructor(storage: StorageHandle) {
+        this.storage = storage;
     }
 
     /**

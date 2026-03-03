@@ -8,15 +8,17 @@ export type Storages = {
 };
 
 export type MoneyType = {
-    id: number;
+    id?: number;
     money: number;
     time_data: string;
     comment: string | null;
     type: number,
     wallet_id: number,
-    moneyMovementType: 'income' | 'expences',
+    moneyMovmentType: 'income' | 'expences',
     currency_id: number
 };
+
+export type MoneyTypeProp = 'id' | 'money' | 'time_data' | 'comment' | 'wallet_id' | MoneyMoovmentType | 'currency_id';
 
 export type RowType = {
     name: string;
@@ -170,7 +172,6 @@ export class StorageHandle {
                 case 'incomeType':
                 case 'expenceType':
                     const tableName = storageType + 's';
-                    console.log("createStorage, tableName: ", tableName);
                     result.result = await this.db.setToTable(tableName, [{ name: 'name', value: storageName }]);
                     break;
                 default:
@@ -266,7 +267,7 @@ export class StorageHandle {
      */
     async setMoneyToStorage(data: MoneyType) {
         if (!await this.isStorageExist("moneyMovement")) throw new DBException('table moneyMovement not exist');
-        const entries = Object.entries(data) as [keyof MoneyType, MoneyType[keyof MoneyType]][];
+        const entries = Object.entries(data).filter(([key]) => key !== "id") as [keyof MoneyType, MoneyType[keyof MoneyType]][];
         const setData = []
         for (const [key, value] of entries) {
             setData.push({ name: key, value: value });
@@ -348,6 +349,17 @@ export class StorageHandle {
      */
     async getDataFromStorageByName(tableName: tableNameType, storageName: string) {
         return await this.db.getFromTableByProp(tableName, 'name', storageName, '=');
+    }
+
+    /**
+     * Возвращает массив объектов, поле prop, которого соответствует value
+     * @param tableName имя таблицы
+     * @param prop имя поля
+     * @param value значение поля
+     * @returns 
+     */
+    async getDataFromStorageByProp(tableName: tableNameType, prop: MoneyTypeProp, value: any) {
+        return await this.db.getFromTableByProp(tableName, prop as string, value, '=');
     }
 
     /**

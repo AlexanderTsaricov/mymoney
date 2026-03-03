@@ -1,12 +1,14 @@
 {
   "expo": {
+    "sdkVersion": "48.0.18",
     "name": "mymoney",
     "slug": "mymoney",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "jsEngine": "hermes",
+    "newArchEnabled": true,
+    "jsEngine": "jsc",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -17,18 +19,19 @@
       "bundleIdentifier": "com.alexvin.mymoney"
     },
     "android": {
-      "package": "com.alexvin.mymoney",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.alexvin.mymoney"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-sqlite",
-      "expo-asset"
+      "expo-sqlite"
     ],
     "extra": {
       "eas": {

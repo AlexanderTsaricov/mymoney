@@ -1,4 +1,4 @@
-import { MoneyMoovmentType, MoneyType, WalletType } from "../storage/StorageHandle";
+import { MoneyMoovmentType, MoneyType, StorageHandle, WalletType } from "../storage/StorageHandle";
 import { Expence } from "./modelsClasses/Expence";
 import { Income } from "./modelsClasses/Income";
 import { Wallet } from "./modelsClasses/Wallet";
@@ -7,16 +7,18 @@ import { Currencies } from "./modelsClasses/Currencies";
 
 export class Money {
 	allMoney: number = 0;
+	storage: StorageHandle;
 	expence: Expence;
 	income: Income;
 	wallet: Wallet;
 	currencies: Currencies;
 
 	constructor(dbName: string) {
-		this.expence = new Expence(dbName);
-		this.income = new Income(dbName);
-		this.wallet = new Wallet(dbName);
-		this.currencies = new Currencies(dbName);
+		this.storage = new StorageHandle(dbName);
+		this.expence = new Expence(this.storage);
+		this.income = new Income(this.storage);
+		this.wallet = new Wallet(this.storage);
+		this.currencies = new Currencies(this.storage);
 	}
 
 	async init() {
@@ -66,10 +68,10 @@ export class Money {
 			};
 		}
 
-		if (expences.moneyMovementType !== 'expences') {
+		if (expences.moneyMovmentType !== "expences") {
 			return {
 				result: false,
-				message: "Некорректный тип - income"
+				message: "Некорректный тип - income",
 			};
 		}
 
@@ -87,6 +89,8 @@ export class Money {
 					message: "Не хватает денежных средств",
 				};
 			}
+
+			const resultAdd = await this.expence.addExpences(expences);
 
 			return await this.wallet.changeMoney(wallet.id, wallet.moneyCount - expences.money);
 		}
@@ -117,6 +121,8 @@ export class Money {
 			};
 		}
 
+		const resultAdd = await this.expence.addExpences(expences);
+
 		return await this.wallet.changeMoney(wallet.id, resultMoney);
 	}
 
@@ -138,10 +144,10 @@ export class Money {
 			};
 		}
 
-		if (income.moneyMovementType !== 'income') {
+		if (income.moneyMovmentType !== "income") {
 			return {
 				result: false,
-				message: "Некорректный тип - expences"
+				message: "Некорректный тип - expences",
 			};
 		}
 
@@ -153,6 +159,7 @@ export class Money {
 		}
 
 		if (wallet.currency_id == income.currency_id) {
+			await this.income.addIncome(income);
 			return await this.wallet.changeMoney(wallet.id, wallet.moneyCount + income.money);
 		}
 
@@ -174,7 +181,7 @@ export class Money {
 				message: "Некорректный результат расчёта",
 			};
 		}
-
+		await this.income.addIncome(income);
 		return await this.wallet.changeMoney(wallet.id, resultMoney);
 	}
 }

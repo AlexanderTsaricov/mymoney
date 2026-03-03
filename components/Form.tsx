@@ -123,8 +123,10 @@ export default function Form(formProps: FormProps) {
 						<TextInput
 							placeholder={input.placeholder}
 							keyboardType={input.keyboardType}
-							value={input.value}
-							onChangeText={input.onChangeText}
+							value={String(input.value ?? "")}
+							onChangeText={(value) => {
+								input.onChangeText(value)
+							}}
 							style={[
 								pageStyles.inputText,
 								errors[index] ? pageStyles.inputError : {},

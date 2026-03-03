@@ -99,7 +99,6 @@ export default function IncomePage({ money }: IncomeProps) {
 		inputs: inputsNewIncome,
 		submitTextButton: "Добавить доход",
 		submitOnPress: async () => {
-			console.log(`Добавляется доход: ${sum} ${selectCurrency?.short_name}. Коммент: ${comment}`);
 			if (sum.length == 0) return;
 			if (comment.length == 0) return;
 			if (selectIncomeType == null) return;
@@ -109,13 +108,12 @@ export default function IncomePage({ money }: IncomeProps) {
 			if (selectCurrency.id == null) return;
 
 			const newIncome: MoneyType = {
-				id: 1,
 				money: parseFloat(sum),
 				time_data: new Date().toString(),
 				comment: comment,
 				type: 0,
 				wallet_id: selectWallet.id,
-				moneyMovementType: "income",
+				moneyMovmentType: "income",
 				currency_id: selectCurrency.id,
 			};
 

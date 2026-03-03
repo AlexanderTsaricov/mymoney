@@ -1,116 +1,99 @@
 import { Dimensions, StyleSheet } from "react-native";
-const { height } = Dimensions.get("window");
 export const pageStyles = StyleSheet.create({
-	borderRedDebug: {
-		borderWidth: 1,
-		borderColor: "red",
+	headContainer: {
+		flex: 1,
+		backgroundColor: "#a68ebf",
 	},
 
 	text: {
-		color: "#fff", // белый цвет
-		fontSize: 19, // размер текста
-		fontWeight: "700", // жирный
-		letterSpacing: 1, // межбуквенный интервал
-		textShadowColor: "#000", // тень текста
-		textShadowOffset: { width: 1, height: 1 },
-		textShadowRadius: 3,
+		color: "#ffffff",
+		fontSize: 17,
+		fontWeight: "600",
+		letterSpacing: 0.3,
+		textShadowColor: "rgba(0,0,0,0.15)",
+		textShadowOffset: { width: 0, height: 1 },
+		textShadowRadius: 1,
 	},
 
 	block: {
-		display: "flex",
+		width: "100%",
+		paddingVertical: 14,
+		paddingHorizontal: 10,
 		alignItems: "center",
 		justifyContent: "center",
-		padding: 8,
-		width: "100%",
 		borderBottomWidth: 1,
-		borderBottomColor: "#5f348a",
-		borderStyle: "dashed",
-	},
-
-	headContainer: {
-		backgroundColor: "#a68ebf",
-		flex: 1,
+		borderBottomColor: "rgba(255,255,255,0.25)",
 	},
 
 	button: {
-		borderRadius: 8,
-		backgroundColor: "#5f348a",
-		paddingVertical: 5,
-		paddingHorizontal: 10,
+		borderRadius: 10,
+		paddingVertical: 10,
+		paddingHorizontal: 18,
+		backgroundColor: "#6d3fa8",
 
-		// для iOS
+		// лёгкая, аккуратная тень
 		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-
-		// для Android
-		elevation: 5,
-		alignContent: "center",
-		justifyContent: "center",
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.15,
+		shadowRadius: 2,
+		elevation: 2,
 	},
 
 	buttonText: {
-		color: "#fff",
-		fontSize: 18,
-		fontWeight: "700",
+		color: "#ffffff",
+		fontSize: 16,
+		fontWeight: "600",
 		textAlign: "center",
 	},
 
 	inputText: {
 		borderWidth: 1,
-		borderColor: "#ccc",
+		borderColor: "#cbb7e6",
 		borderRadius: 8,
 		paddingVertical: 8,
 		paddingHorizontal: 12,
-		fontSize: 16,
-		backgroundColor: "#fff",
+		fontSize: 15,
+		backgroundColor: "#ffffff",
 		width: "100%",
-		padding: 7,
 		marginVertical: 6,
 
-		// тень для iOS
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.1,
-		shadowRadius: 2,
-
-		// тень для Android
-		elevation: 2,
+		shadowOpacity: 0.08,
+		shadowRadius: 1,
+		elevation: 1,
 	},
 
 	inputTextFocus: {
-		borderColor: "#5f348a",
+		borderColor: "#7e57c2",
 	},
 
-	// Стили для селекторов
 	selectorContainer: {
 		width: "100%",
 		marginVertical: 8,
-		maxHeight: 70,
 	},
 
 	selectorTitle: {
-		fontSize: 18,
-		fontWeight: "700",
-		color: "#fff",
-		marginBottom: 5,
-		textShadowColor: "#000",
-		textShadowOffset: { width: 1, height: 1 },
-		textShadowRadius: 2,
+		fontSize: 16,
+		fontWeight: "600",
+		color: "#ffffff",
+		marginBottom: 4,
+		textShadowColor: "rgba(0,0,0,0.2)",
+		textShadowOffset: { width: 0, height: 1 },
+		textShadowRadius: 1,
 	},
 
 	selectorWrapper: {
 		borderRadius: 8,
-		backgroundColor: "#5f348a",
-		borderWidth: 2,
-		borderColor: "#7e57c2",
-		overflow: "hidden",
+		backgroundColor: "#6d3fa8",
+		borderWidth: 1,
+		borderColor: "#8c6ccf",
+
 		shadowColor: "#000",
 		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.2,
-		shadowRadius: 2,
-		elevation: 3, // для Android
+		shadowOpacity: 0.15,
+		shadowRadius: 1,
+		elevation: 2,
 	},
 
 	selectorInputInner: {
@@ -118,21 +101,18 @@ export const pageStyles = StyleSheet.create({
 	},
 
 	selectorPlaceholder: {
-		color: "#d1c0eb",
+		color: "#e0d4f5",
 	},
 
 	listWithButton: {
-		display: "flex",
-		gap: 10,
 		flexDirection: "row",
+		gap: 10,
 		alignItems: "center",
 		justifyContent: "center",
 	},
 
 	blockAtRow: {
-		display: "flex",
 		flexDirection: "row",
-		boxSizing: "border-box",
 		justifyContent: "center",
 		alignItems: "center",
 	},
@@ -142,11 +122,35 @@ export const pageStyles = StyleSheet.create({
 	},
 
 	inputError: {
-		borderColor: "#c25757ff",
+		borderColor: "#d66",
 	},
 
-    debugBorder: {
-        borderWidth: 2,
-		borderColor: "red",
-    }
+	calendarContainer: {
+		width: "100%",
+		alignItems: "center",
+		marginTop: 10,
+	},
+
+	gridCalendar: {
+		maxWidth: 260,
+		flexDirection: "row",
+		gap: 10,
+		flexWrap: "wrap",
+		alignItems: "center",
+		justifyContent: "center",
+	},
+
+	calendarDay: {
+		width: 35,
+	},
+
+	inputTextShort: {
+		maxWidth: 45,
+		padding: 3,
+	},
+	calendarWeekdayBox: {
+		flexDirection: "column",
+		justifyContent: "flex-start",
+		alignItems: "center",
+	},
 });

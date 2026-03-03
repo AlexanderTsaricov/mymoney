@@ -1,4 +1,4 @@
-import { StorageHandle } from '../../storage/StorageHandle';
+import { MoneyTypeProp, StorageHandle } from '../../storage/StorageHandle';
 import { MoneyType, MoneyMoovmentType } from '../../storage/StorageHandle';
 
 export type MoneyProp = 'money' | 'comment' | 'type'
@@ -7,8 +7,8 @@ export class Expence {
     storage: StorageHandle;
     allMoney: number = 0;
 
-    constructor(dbName: string) {
-        this.storage = new StorageHandle(dbName);
+    constructor(storage: StorageHandle) {
+        this.storage = storage;
     }
 
     async deleteExpences(id: number) {
@@ -20,7 +20,8 @@ export class Expence {
     }
 
     async addExpences(expences: MoneyType) {
-        return await this.storage.setMoneyToStorage(expences)
+        const result = await this.storage.setMoneyToStorage(expences);
+        return result
     }
 
     async addNewTypeExpences(name: string) {
@@ -35,11 +36,22 @@ export class Expence {
         return await this.storage.getDataFromStorage('moneyMovement', id);
     }
 
+    async getAllExpenceByProps(prop: MoneyTypeProp, value: any): Promise<MoneyType[]> {
+            const arrayMoneyMoovment = await this.storage.getDataFromStorageByProp('moneyMovement', prop, value)
+            const arrayExpence: MoneyType[] = [];
+            arrayMoneyMoovment.forEach(moneyMoovment => {
+                if (moneyMoovment.moneyMovmentType == 'expences') {
+                    arrayExpence.push(moneyMoovment);
+                }
+            });
+            return arrayExpence;
+        }
+
     async getAllExpences(): Promise<MoneyType[]> {
         const allData = await this.storage.getAllDataFromStorage('moneyMovement');
         const result: MoneyType[] = [];
         allData.forEach(data => {
-            if (data.moneyMovementType == "expences") {
+            if (data.moneyMovmentType == "expences") {
                 result.push(data);
             }
         });

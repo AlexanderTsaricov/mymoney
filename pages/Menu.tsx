@@ -27,7 +27,13 @@ export default function Menu({ navigation, screens }: MenuProps) {
                         borderRadius: 8,
                         marginBottom: 10,
                     }}
-                    onPress={() => navigation.navigate(screen.name)}
+                    onPress={() => {
+                        try {
+                            navigation.navigate(screen.name)
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }}
                 >
                     <Text style={{ color: '#fff', fontSize: 16 }}>{screen.name}</Text>
                 </TouchableOpacity>

@@ -62,7 +62,13 @@ export class DB {
         if (!this.db) throw new DBException('database not opened');
 
         try {
-            return await (await this.db).getAllAsync(sql, params);
+            // 30 секунд timeout для SQL запроса
+            return await Promise.race([
+                this.db.getAllAsync(sql, params),
+                new Promise<any[]>((_, reject) => 
+                    setTimeout(() => reject(new DBException('SQL query timeout (30s)')), 30000)
+                )
+            ]);
         } catch (err: any) {
             throw new DBException(`SQL error: ${err.message || err}`);
         }
@@ -80,8 +86,7 @@ export class DB {
     private async get(sqlRequest: string, sqlArguments: any[] = []): Promise<any[]> {
         await this.open();
         const result = await this.execute(sqlRequest, sqlArguments);
-        if (!Array.isArray(result)) { console.log("sql result is not array:", result); return []; }
-        console.log('sql result', result);
+        if (!Array.isArray(result)) { return []; }
         return result;
     }
 
@@ -92,7 +97,6 @@ export class DB {
      * @returns 
      */
     private async set(sqlRequest: string, sqlArguments: any[] = []): Promise<boolean> {
-        console.log("sql set: ", sqlRequest);
         await this.open();
         await this.execute(sqlRequest, sqlArguments);
         return true;
@@ -370,15 +374,12 @@ export class DB {
             for (const table of tables) {
                 const tableName = table.name;
                 try {
-                    console.log(`Deleting table: "${tableName}"`);
                     await this.set(`DROP TABLE IF EXISTS "${tableName}";`);
                 } catch (innerError) {
-                    console.error(`Failed to drop table "${tableName}":`, innerError);
                     throw innerError; // пробрасываем дальше
                 }
             }
 
-            console.log('All tables deleted successfully.');
         } catch (error) {
             console.error('Error while dropping tables:', error);
             throw error; // пробрасываем дальше

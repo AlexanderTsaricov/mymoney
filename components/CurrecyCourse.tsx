@@ -1,16 +1,15 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import { Currency, HeadCurrency } from "../storage/StorageHandle";
+import { Currency } from "../storage/StorageHandle";
 import { pageStyles } from "../Styles/page";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 export type CurrecyCourseProps = {
 	currency: Currency;
-	headCurrency: HeadCurrency;
 	deleteCurrency: React.Dispatch<React.SetStateAction<any>>;
 	navigation: NativeStackNavigationProp<any>;
 };
 
-export function CurrecyCourse({ currency, headCurrency, deleteCurrency, navigation }: CurrecyCourseProps) {
+export function CurrecyCourse({ currency, deleteCurrency, navigation }: CurrecyCourseProps) {
 	return (
 		<View style={{ flexDirection: "row", width: "100%", alignItems: "center" }}>
 			<TouchableOpacity
@@ -36,7 +35,7 @@ export function CurrecyCourse({ currency, headCurrency, deleteCurrency, navigati
 				>
 					{currency.course_to_head}
 				</Text>
-				<Text style={[pageStyles.text, { flex: 1, textAlign: "right", color: "green" }]}>{headCurrency.short_name}</Text>
+				<Text style={[pageStyles.text, { flex: 1, textAlign: "right", color: "green" }]}>{currency.short_name}</Text>
 			</TouchableOpacity>
 
 			<TouchableOpacity onPress={deleteCurrency} style={{ marginLeft: 8 }}>
