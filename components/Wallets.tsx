@@ -1,4 +1,4 @@
-import { View, Text, Button, TouchableOpacity, ViewStyle, StyleProp } from "react-native";
+import { View, Text, Button, TouchableOpacity, ViewStyle, StyleProp, TextStyle } from "react-native";
 import { Money } from "../models/Money";
 import { pageStyles } from "../Styles/page";
 import { Currency, WalletType } from "../storage/StorageHandle";
@@ -61,6 +61,17 @@ export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, sh
 		marginTop: 10
 	};
 
+	const walletTextBoxStyles: StyleProp<ViewStyle> = {width: 150};
+
+	const walletTextStyles: StyleProp<TextStyle> = [
+		pageStyles.text, { maxWidth: 150, flexShrink: 1 }
+	];
+
+	if (!showButton) {
+		walletTextStyles[1] = {maxWidth: "auto"}
+		walletTextBoxStyles.width = "100%";
+	};
+
 	return (
 		<View style={{ width: "100%" }}>
 			{wallets == null || wallets.length === 0 ? (
@@ -68,8 +79,8 @@ export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, sh
 			) : (
 				wallets.map((w, index) => (
 					<View key={index} style={walletBoxStyles}>
-						<View style={{width: 150}}>
-							<Text style={[pageStyles.text, { maxWidth: 150, flexShrink: 1 }]}>
+						<View style={walletTextBoxStyles}>
+							<Text style={walletTextStyles}>
 								{w.name}: 
 							</Text>
 							<Text style={pageStyles.text}>

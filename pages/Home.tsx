@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, Button, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { pageStyles } from "../Styles/page";
 import { Money } from "../models/Money";
 import { MoneyMoovmentType, MoneyType, WalletType } from "../storage/StorageHandle";
@@ -275,7 +275,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		);
 	} else {
 		return (
-			<View style={pageStyles.headContainer}>
+			<ScrollView style={pageStyles.headContainer}>
 				<View style={pageStyles.block}>
 					<Text style={[pageStyles.text, { marginBottom: 10, fontWeight: "800", fontSize: 24 }]}>Балансы кошельков</Text>
 					<Wallets money={money} wallets={wallets} setWallets={setWallets} showButton={false} />
@@ -311,7 +311,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 					<Selector {...selectorWalletsProps} />
 					<Selector {...selectorTimeTypeProps} />
 				</View>
-			</View>
+			</ScrollView>
 		);
 	}
 };

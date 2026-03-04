@@ -2,7 +2,7 @@ import { Dimensions, StyleSheet } from "react-native";
 export const pageStyles = StyleSheet.create({
 	headContainer: {
 		flex: 1,
-		backgroundColor: "#a68ebf",
+		backgroundColor: "#a68ebf"
 	},
 
 	text: {
