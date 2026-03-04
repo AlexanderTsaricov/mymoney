@@ -1,4 +1,4 @@
-import { View, Text, Button, TouchableOpacity } from "react-native";
+import { View, Text, Button, TouchableOpacity, ViewStyle, StyleProp } from "react-native";
 import { Money } from "../models/Money";
 import { pageStyles } from "../Styles/page";
 import { Currency, WalletType } from "../storage/StorageHandle";
@@ -51,16 +51,31 @@ export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, sh
 		);
 	}
 
+	const walletBoxStyles: StyleProp<ViewStyle> = {
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "center",
+		alignContent: "center",
+		alignItems: "center",
+		gap: 10,
+		marginTop: 10
+	};
+
 	return (
-		<View style={{width: "100%"}}>
+		<View style={{ width: "100%" }}>
 			{wallets == null || wallets.length === 0 ? (
 				<Text style={[pageStyles.text]}>У вас нет кошельков</Text>
 			) : (
 				wallets.map((w, index) => (
-					<View key={index} style={{display: "flex", flexDirection: "row", justifyContent: "center", alignContent: "center", alignItems: "center", gap: 10}}>
-						<Text style={pageStyles.text}>
-							{w.name}: {w.moneyCount}{" "} {w.id !== null && currenciesByWallets ? (currenciesByWallets as CurrencyByWallet)[w.id as number]?.short_name : ""}
-						</Text>
+					<View key={index} style={walletBoxStyles}>
+						<View style={{width: 150}}>
+							<Text style={[pageStyles.text, { maxWidth: 150, flexShrink: 1 }]}>
+								{w.name}: 
+							</Text>
+							<Text style={pageStyles.text}>
+								Баланс: {w.moneyCount}{" "} {w.id !== null && currenciesByWallets ? (currenciesByWallets as CurrencyByWallet)[w.id as number]?.short_name : ""}
+							</Text>
+						</View>
 						{showButton && (
 							<View>
 								<TouchableOpacity
