@@ -11,6 +11,8 @@ type MoneyMoovmentsPageProps = {
 };
 
 type SelectTimeType = "day" | "month" | "year" | "minutes" | "hours";
+const timeTypes: SelectTimeType[] = ["day", "year", "month", "hours", "minutes"];
+const rusDaysweek = ["День", "Год", "Месяц", "Час", "Минута"];
 
 type moneyMoovmentTypeType = "incomes" | "expences";
 
@@ -23,7 +25,7 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 	const [currencies, setCurrencies] = useState<Currency[]>([]);
 	const [moneyMoovmentTypesExpences, setMoneyMoovmentsTypesExpences] = useState<MoneyMoovmentType[]>([]);
 	const [moneyMoovmentTypesIncomes, setMoneyMoovmentsTypesIncomes] = useState<MoneyMoovmentType[]>([]);
-	const [graphicProps, setGraphicProps] = useState<GraphicProps>({labels: [], data: []});
+	const [graphicProps, setGraphicProps] = useState<GraphicProps>({ labels: [], data: [] });
 	const [selectMoneyMoovmentType, setSelectMoneyMoovmentType] = useState<moneyMoovmentTypeType>("expences");
 	const [selectTimeType, setSelectTimeType] = useState<SelectTimeType>("day");
 
@@ -119,8 +121,8 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 			labels: [],
 			data: [
 				{
-					data: []
-				}
+					data: [],
+				},
 			],
 		};
 
@@ -168,8 +170,8 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 
 	useEffect(() => {
 		const graphicProps: GraphicProps = loadGraphicData(moneyMoovmentsByWallet, selectTimeType, selectMoneyMoovmentType);
-		setGraphicProps(graphicProps); 
-	}, [moneyMoovmentsByWallet, selectTimeType, selectMoneyMoovmentType])
+		setGraphicProps(graphicProps);
+	}, [moneyMoovmentsByWallet, selectTimeType, selectMoneyMoovmentType]);
 
 	if (loading) {
 		return (
@@ -197,12 +199,43 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 		},
 	};
 
+	const selectMoneyMoovmentTypeProp: SelectorProps<string> = {
+		title: "Тип денежных потоков на графике",
+		titleDontHave: "Ошибка",
+		items: ["Доходы", "Расходы"],
+		onChange: function (value: string): void {
+			if (value == "Доходы") {
+				setSelectMoneyMoovmentType("incomes");
+			} else {
+				setSelectMoneyMoovmentType("expences");
+			}
+		},
+	};
+
+	const selectTimeTypeProp: SelectorProps<string> = {
+		title: "Тип временных промежутков на графике",
+		titleDontHave: "Ошибка",
+		items: rusDaysweek,
+		onChange: function (value: string): void {
+			const index = rusDaysweek.indexOf(value);
+			setSelectTimeType(timeTypes[index]);
+		},
+	};
+
 	return (
-		<View style={[pageStyles.headContainer, { paddingHorizontal: 10, paddingBottom: 50 }]}>
+		<ScrollView style={[pageStyles.headContainer, { paddingHorizontal: 10, paddingBottom: 50 }]}>
 			<Selector {...walletSelectorProps} />
+			<Selector {...selectMoneyMoovmentTypeProp} />
+			<Selector {...selectTimeTypeProp} />
+			<View style={{marginHorizontal: 20}}>
+				<Text style={[pageStyles.text, { textAlign: "center" }]}>График</Text>
+			</View>
 			<Graphic labels={graphicProps.labels} data={graphicProps.data} />
+			<View style={{marginHorizontal: 20}}>
+				<Text style={[pageStyles.text, { textAlign: "center" }]}>Список денежных потоков</Text>
+			</View>
 			{selectWallet && (
-				<ScrollView style={{ paddingVertical: 10 }}>
+				<View style={{ paddingVertical: 10 }}>
 					{moneyMoovmentsByWallet.map((moneyMoovment: MoneyType, key) => (
 						<View style={[pageStyles.block, { alignItems: "flex-start" }]} key={key}>
 							{moneyMoovment.moneyMovmentType == "expences" ? (
@@ -224,8 +257,8 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 							)}
 						</View>
 					))}
-				</ScrollView>
+				</View>
 			)}
-		</View>
+		</ScrollView>
 	);
 }
