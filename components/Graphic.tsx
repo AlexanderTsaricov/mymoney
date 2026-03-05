@@ -77,7 +77,7 @@ export default memo(
 		if (checkData({ labels, data })) {
 			return (
 				<View>
-					<Text style={pageStyles.text}>Нет данных</Text>
+					<Text style={[pageStyles.text, {color: "black", textAlign: "center"}]}>Нет данных</Text>
 				</View>
 			);
 		} else {
