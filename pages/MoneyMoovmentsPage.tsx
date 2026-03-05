@@ -4,10 +4,13 @@ import { Currency, MoneyMoovmentType, MoneyType, WalletType } from "../storage/S
 import { View, Text, ScrollView } from "react-native";
 import { pageStyles } from "../Styles/page";
 import Selector, { SelectorProps } from "../components/Selector";
+import Graphic, { GraphicProps } from "../components/Graphic";
 
 type MoneyMoovmentsPageProps = {
 	money: Money;
 };
+
+type SelectTimeType = "day" | "month" | "year" | "minutes" | "hours";
 
 type moneyMoovmentTypeType = "incomes" | "expences";
 
@@ -20,6 +23,9 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 	const [currencies, setCurrencies] = useState<Currency[]>([]);
 	const [moneyMoovmentTypesExpences, setMoneyMoovmentsTypesExpences] = useState<MoneyMoovmentType[]>([]);
 	const [moneyMoovmentTypesIncomes, setMoneyMoovmentsTypesIncomes] = useState<MoneyMoovmentType[]>([]);
+	const [graphicProps, setGraphicProps] = useState<GraphicProps>({labels: [], data: []});
+	const [selectMoneyMoovmentType, setSelectMoneyMoovmentType] = useState<moneyMoovmentTypeType>("expences");
+	const [selectTimeType, setSelectTimeType] = useState<SelectTimeType>("day");
 
 	async function loadWallets(money: Money): Promise<WalletType[]> {
 		setLoading(true);
@@ -56,10 +62,10 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 			if (type == "expences") {
 				return moneyMoovmentTypesExpences[id].name;
 			} else if (type == "incomes") {
-                return moneyMoovmentTypesIncomes[id].name;
-            } else {
-                return "";
-            }
+				return moneyMoovmentTypesIncomes[id].name;
+			} else {
+				return "";
+			}
 		} catch (e) {
 			console.log(e);
 			return "";
@@ -108,6 +114,50 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 		return currencies[index].short_name;
 	}
 
+	function loadGraphicData(moneyMoovments: MoneyType[], selectTimeType: SelectTimeType, selectMoneyMoovmentType: moneyMoovmentTypeType) {
+		const graphicProps: GraphicProps = {
+			labels: [],
+			data: [
+				{
+					data: []
+				}
+			],
+		};
+
+		moneyMoovments.forEach((moneyMoovment) => {
+			let time = 0;
+			const date = new Date(moneyMoovment.time_data);
+
+			switch (selectTimeType) {
+				case "day":
+					time = date.getDate();
+					break;
+				case "month":
+					time = date.getMonth();
+					break;
+				case "year":
+					time = date.getFullYear();
+					break;
+				case "minutes":
+					time = date.getMinutes();
+					break;
+				case "hours":
+					time = date.getHours();
+					break;
+			}
+			if (moneyMoovment.moneyMovmentType == selectMoneyMoovmentType) {
+				if (graphicProps.labels[graphicProps.labels.length - 1] == time.toString()) {
+					graphicProps.data[0].data[graphicProps.data[0].data.length - 1] += moneyMoovment.money;
+				} else {
+					graphicProps.labels.push(time.toString());
+					graphicProps.data[0].data.push(moneyMoovment.money);
+				}
+			}
+		});
+
+		return graphicProps;
+	}
+
 	useEffect(() => {
 		if (selectWallet) {
 			loadMoneyMoovmentByWallet(selectWallet).then((moovments: MoneyType[]) => {
@@ -115,6 +165,11 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 			});
 		}
 	}, [selectWallet]);
+
+	useEffect(() => {
+		const graphicProps: GraphicProps = loadGraphicData(moneyMoovmentsByWallet, selectTimeType, selectMoneyMoovmentType);
+		setGraphicProps(graphicProps); 
+	}, [moneyMoovmentsByWallet, selectTimeType, selectMoneyMoovmentType])
 
 	if (loading) {
 		return (
@@ -145,7 +200,7 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 	return (
 		<View style={[pageStyles.headContainer, { paddingHorizontal: 10, paddingBottom: 50 }]}>
 			<Selector {...walletSelectorProps} />
-
+			<Graphic labels={graphicProps.labels} data={graphicProps.data} />
 			{selectWallet && (
 				<ScrollView style={{ paddingVertical: 10 }}>
 					{moneyMoovmentsByWallet.map((moneyMoovment: MoneyType, key) => (
