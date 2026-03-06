@@ -4,6 +4,7 @@ import { Income } from "./modelsClasses/Income";
 import { Wallet } from "./modelsClasses/Wallet";
 import { returnOjb } from "../storage/StorageHandle";
 import { Currencies } from "./modelsClasses/Currencies";
+import ModelParamsExeption from "../exeptions/ModelExeprion";
 
 export class Money {
 	allMoney: number = 0;
@@ -51,6 +52,32 @@ export class Money {
 	}
 
 	/**
+	 * Конвертирует сумму из одной валюты в другую.
+	 * @param amount Сумма для конвертации
+	 * @param fromCurrencyId ID исходной валюты
+	 * @param toCurrencyId ID целевой валюты (валюта кошелька)
+	 * @returns Конвертированная сумма
+	 */
+	private async convertAmount(amount: number, fromCurrencyId: number, toCurrencyId: number): Promise<number> {
+		if (fromCurrencyId === toCurrencyId) {
+			return amount;
+		}
+
+		const fromCurrency = await this.currencies.getCurrecy(fromCurrencyId);
+		const toCurrency = await this.currencies.getCurrecy(toCurrencyId);
+
+		// Переводим сумму в базовую (head) валюту, а затем в целевую
+		const amountInHeadCurrency = amount * fromCurrency.course_to_head;
+		const convertedAmount = amountInHeadCurrency / toCurrency.course_to_head;
+
+		if (!Number.isFinite(convertedAmount)) {
+			throw new Error("Некорректный результат расчёта валют");
+		}
+
+		return convertedAmount;
+	}
+
+	/**
 	 * Списывает расход с кошелька.
 	 *
 	 * @param expences Объект расхода MoneyType
@@ -95,24 +122,16 @@ export class Money {
 			return await this.wallet.changeMoney(wallet.id, wallet.moneyCount - expences.money);
 		}
 
-		const walletCurrency = await this.currencies.getCurrecy(wallet.currency_id);
-		const expenceCurrency = await this.currencies.getCurrecy(expences.currency_id);
+		const convertedMoneyMoovment = await this.convertAmount(expences.money, expences.currency_id, wallet.currency_id);
 
-		let walletMoneyOnHeadCurrency = 0;
-		let expenceMoneyOnHeadCurency = 0;
-
-		walletMoneyOnHeadCurrency = wallet.moneyCount * walletCurrency.course_to_head;
-		expenceMoneyOnHeadCurency = expences.money * expenceCurrency.course_to_head;
-
-		if (walletMoneyOnHeadCurrency < expenceMoneyOnHeadCurency) {
+		if (wallet.moneyCount < convertedMoneyMoovment) {
 			return {
 				result: false,
 				message: "Не хватает денежных средств",
 			};
 		}
 
-		const newMoneyOnHeadCurrency = walletMoneyOnHeadCurrency - expenceMoneyOnHeadCurency;
-		const resultMoney = newMoneyOnHeadCurrency / walletCurrency.course_to_head;
+		const resultMoney = wallet.moneyCount - convertedMoneyMoovment;
 
 		if (!Number.isFinite(resultMoney)) {
 			return {
@@ -123,7 +142,18 @@ export class Money {
 
 		const resultAdd = await this.expence.addExpences(expences);
 
-		return await this.wallet.changeMoney(wallet.id, resultMoney);
+		if (resultAdd) {
+			return {
+				result: await this.wallet.changeMoney(wallet.id, resultMoney),
+				message: "Изменение средств кошелька с id: " + wallet.id
+			}
+		} else {
+			return {
+				result: false,
+				message: "Неизвестная ошибка: не удалось добавить расход",
+			};
+		}
+		
 	}
 
 	/**
@@ -163,17 +193,8 @@ export class Money {
 			return await this.wallet.changeMoney(wallet.id, wallet.moneyCount + income.money);
 		}
 
-		const walletCurrency = await this.currencies.getCurrecy(wallet.currency_id);
-		const incomeCurrency = await this.currencies.getCurrecy(income.currency_id);
-
-		let walletMoneyOnHeadCurrency = 0;
-		let incomeMoneyOnHeadCurency = 0;
-
-		walletMoneyOnHeadCurrency = wallet.moneyCount * walletCurrency.course_to_head;
-		incomeMoneyOnHeadCurency = income.money * incomeCurrency.course_to_head;
-
-		const newMoneyOnHeadCurrency = walletMoneyOnHeadCurrency + incomeMoneyOnHeadCurency;
-		const resultMoney = newMoneyOnHeadCurrency / walletCurrency.course_to_head;
+		const convertedMoneyMoovment = await this.convertAmount(income.money, income.currency_id, wallet.currency_id);
+		const resultMoney = wallet.moneyCount + convertedMoneyMoovment;
 
 		if (!Number.isFinite(resultMoney)) {
 			return {
@@ -183,6 +204,45 @@ export class Money {
 		}
 		await this.income.addIncome(income);
 		return await this.wallet.changeMoney(wallet.id, resultMoney);
+	}
+
+	/**
+	 * Удаляет денежный поток
+	 * @param moneyMovment - удаляемый денежный поток
+	 * @returns true, если денежный поток удалось удалить
+	 */
+	async deleteMoneyMoovment(moneyMovment: MoneyType): Promise<boolean> {
+		if (!moneyMovment.id) {
+			throw new ModelParamsExeption("ID не может быть null у moneyMoovment при удалении");
+		}
+
+		let resDelete = false;
+		const wallet = (await this.wallet.getWalletByID(moneyMovment.wallet_id)).value as WalletType;
+
+		let moneyMoovmentCount = 0;
+
+		if (moneyMovment.currency_id == wallet.currency_id) {
+			moneyMoovmentCount = moneyMovment.money;
+		} else {
+			moneyMoovmentCount = await this.convertAmount(moneyMovment.money, moneyMovment.currency_id, wallet.currency_id);
+		}
+		
+		switch (moneyMovment.moneyMovmentType) {
+			case "income":
+				resDelete = await this.income.deleteIncome(moneyMovment.id);
+				if (resDelete) {
+					await this.wallet.changeMoney(moneyMovment.wallet_id, wallet.moneyCount - moneyMoovmentCount);
+				}
+				break;
+			case "expences":
+				resDelete = await this.expence.deleteExpences(moneyMovment.id);
+				if (resDelete) {
+					await this.wallet.changeMoney(moneyMovment.wallet_id, wallet.moneyCount + moneyMoovmentCount);
+				}
+				break;
+		}
+
+		return resDelete;
 	}
 
 	async getAllMoneyMoovmentTypesExpences(): Promise<MoneyMoovmentType[]> {
