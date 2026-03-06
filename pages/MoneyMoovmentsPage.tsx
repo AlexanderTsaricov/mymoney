@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Money } from "../models/Money";
 import { Currency, MoneyMoovmentType, MoneyType, WalletType } from "../storage/StorageHandle";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { pageStyles } from "../Styles/page";
 import Selector, { SelectorProps } from "../components/Selector";
 import Graphic, { GraphicProps } from "../components/Graphic";
@@ -15,6 +15,14 @@ const timeTypes: SelectTimeType[] = ["day", "year", "month", "hours", "minutes"]
 const rusDaysweek = ["День", "Год", "Месяц", "Час", "Минута"];
 
 type moneyMoovmentTypeType = "incomes" | "expences";
+
+const formatterDate = new Intl.DateTimeFormat("ru-RU", {
+	day: "2-digit",
+	month: "2-digit",
+	year: "numeric",
+	hour: "2-digit",
+	minute: "2-digit",
+});
 
 export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 	const [loading, setLoading] = useState<boolean>(true);
@@ -160,6 +168,18 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 		return graphicProps;
 	}
 
+	async function deleteMoneyMoovment(moneyMoovment: MoneyType) {
+		const resDelete = await money.deleteMoneyMoovment(moneyMoovment);
+
+		if (resDelete) {
+			// Создаем НОВЫЙ массив, в который попадут все элементы, КРОМЕ удаляемого
+			const updatedList = moneyMoovmentsByWallet.filter((item) => item.id !== moneyMoovment.id);
+
+			// Обновляем состояние новым массивом
+			setMoneyMoovmentsByWallet(updatedList);
+		}
+	}
+
 	useEffect(() => {
 		if (selectWallet) {
 			loadMoneyMoovmentByWallet(selectWallet).then((moovments: MoneyType[]) => {
@@ -227,33 +247,77 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 			<Selector {...walletSelectorProps} />
 			<Selector {...selectMoneyMoovmentTypeProp} />
 			<Selector {...selectTimeTypeProp} />
-			<View style={{marginHorizontal: 20}}>
+			<View style={{ marginHorizontal: 20 }}>
 				<Text style={[pageStyles.text, { textAlign: "center" }]}>График</Text>
 			</View>
 			<Graphic labels={graphicProps.labels} data={graphicProps.data} />
-			<View style={{marginHorizontal: 20}}>
+			<View style={{ marginHorizontal: 20 }}>
 				<Text style={[pageStyles.text, { textAlign: "center" }]}>Список денежных потоков</Text>
 			</View>
 			{selectWallet && (
-				<View style={{ paddingVertical: 10 }}>
+				<View style={{ paddingVertical: 10, display: "flex", flexDirection: "column-reverse" }}>
 					{moneyMoovmentsByWallet.map((moneyMoovment: MoneyType, key) => (
-						<View style={[pageStyles.block, { alignItems: "flex-start" }]} key={key}>
+						<View key={key}>
 							{moneyMoovment.moneyMovmentType == "expences" ? (
-								<>
-									<Text style={[pageStyles.text, { color: "#9e1414", textAlign: "left" }]}>
-										Расход: {moneyMoovment.money} {getCurrencyShortNameById(moneyMoovment.currency_id)}
-									</Text>
-									<Text style={pageStyles.text}>Комментарий: {moneyMoovment.comment}</Text>
-									<Text style={pageStyles.text}>Тип: {getMoovmentTypeNameById(moneyMoovment.type, "expences")}</Text>
-								</>
+								<View
+									style={[
+										pageStyles.block,
+										{
+											display: "flex",
+											flexDirection: "row",
+											justifyContent: "space-between",
+											width: "100%",
+											alignItems: "center",
+										},
+									]}
+								>
+									<View style={[{ alignItems: "flex-start", width: "auto" }]}>
+										<Text style={[pageStyles.text, { color: "#9e1414", textAlign: "left" }]}>
+											Расход: {moneyMoovment.money} {getCurrencyShortNameById(moneyMoovment.currency_id)}
+										</Text>
+										<Text style={pageStyles.text}>Комментарий: {moneyMoovment.comment}</Text>
+										<Text style={pageStyles.text}>Тип: {getMoovmentTypeNameById(moneyMoovment.type, "expences")}</Text>
+										<Text style={pageStyles.text}>{formatterDate.format(new Date(moneyMoovment.time_data))}</Text>
+									</View>
+									<TouchableOpacity
+										style={pageStyles.button}
+										onPress={async () => {
+											deleteMoneyMoovment(moneyMoovment);
+										}}
+									>
+										<Text style={pageStyles.buttonText}>Удалить</Text>
+									</TouchableOpacity>
+								</View>
 							) : (
-								<>
-									<Text style={[pageStyles.text, { color: "#0e721e", textAlign: "left" }]}>
-										Доход: {moneyMoovment.money} {getCurrencyShortNameById(moneyMoovment.currency_id)}
-									</Text>
-									<Text style={pageStyles.text}>Комментарий: {moneyMoovment.comment}</Text>
-									<Text style={pageStyles.text}>Тип: {getMoovmentTypeNameById(moneyMoovment.type, "incomes")}</Text>
-								</>
+								<View
+									style={[
+										pageStyles.block,
+										{
+											display: "flex",
+											flexDirection: "row",
+											justifyContent: "space-between",
+											width: "100%",
+											alignItems: "center",
+										},
+									]}
+								>
+									<View style={[{ alignItems: "flex-start", width: "auto" }]}>
+										<Text style={[pageStyles.text, { color: "#0e721e", textAlign: "left" }]}>
+											Доход: {moneyMoovment.money} {getCurrencyShortNameById(moneyMoovment.currency_id)}
+										</Text>
+										<Text style={pageStyles.text}>Комментарий: {moneyMoovment.comment}</Text>
+										<Text style={pageStyles.text}>Тип: {getMoovmentTypeNameById(moneyMoovment.type, "incomes")}</Text>
+										<Text style={pageStyles.text}>{formatterDate.format(new Date(moneyMoovment.time_data))}</Text>
+									</View>
+									<TouchableOpacity
+										style={pageStyles.button}
+										onPress={async () => {
+											deleteMoneyMoovment(moneyMoovment);
+										}}
+									>
+										<Text style={pageStyles.buttonText}>Удалить</Text>
+									</TouchableOpacity>
+								</View>
 							)}
 						</View>
 					))}

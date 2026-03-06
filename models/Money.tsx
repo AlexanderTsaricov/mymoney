@@ -5,6 +5,7 @@ import { Wallet } from "./modelsClasses/Wallet";
 import { returnOjb } from "../storage/StorageHandle";
 import { Currencies } from "./modelsClasses/Currencies";
 import ModelParamsExeption from "../exeptions/ModelExeprion";
+import Logger from "../logger/Logger";
 
 export class Money {
 	allMoney: number = 0;
@@ -64,7 +65,11 @@ export class Money {
 		}
 
 		const fromCurrency = await this.currencies.getCurrecy(fromCurrencyId);
+		console.log("fromCurrency", fromCurrency);
+		console.log("fromCurrencyId", fromCurrencyId);
 		const toCurrency = await this.currencies.getCurrecy(toCurrencyId);
+		console.log("toCurrency", toCurrency);
+		console.log("toCurrencyId", toCurrencyId);
 
 		// Переводим сумму в базовую (head) валюту, а затем в целевую
 		const amountInHeadCurrency = amount * fromCurrency.course_to_head;
@@ -217,7 +222,7 @@ export class Money {
 		}
 
 		let resDelete = false;
-		const wallet = (await this.wallet.getWalletByID(moneyMovment.wallet_id)).value as WalletType;
+		const wallet = ((await this.wallet.getWalletByID(moneyMovment.wallet_id)).value as WalletType[])[0];
 
 		let moneyMoovmentCount = 0;
 

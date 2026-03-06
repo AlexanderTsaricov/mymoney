@@ -153,4 +153,9 @@ export const pageStyles = StyleSheet.create({
 		justifyContent: "flex-start",
 		alignItems: "center",
 	},
+
+	debugMod: {
+		borderColor: "red",
+		borderWidth: 2
+	}
 });
