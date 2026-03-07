@@ -20,8 +20,8 @@ type WalletsProps = {
 	money: Money;
 };
 
-type TimeType = "year" | "month" | "day" | "hour" | "minutes";
-const timeTypes: TimeType[] = ["day", "year", "month", "hour", "minutes"];
+type TimeType = "year" | "month" | "day" | "time";
+const timeTypes: TimeType[] = ["day", "year", "month", "time"];
 
 function getSumMoney(moneyMoovments: MoneyType[]) {
 	const result = moneyMoovments.reduce((sum, item) => {
@@ -35,6 +35,16 @@ function getSumMoney(moneyMoovments: MoneyType[]) {
 	}, 0);
 
 	return result;
+}
+
+function getMinutesFromDate(date: Date): string {
+	const minutes = date.getMinutes();
+
+	if (minutes < 10) {
+		return `0${minutes}`;
+	} else {
+		return `${minutes}`;
+	}
 }
 
 const Home: React.FC<HomeProps> = ({ money }) => {
@@ -122,7 +132,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		const startMoney = wallet.moneyCount - fromStartSum;
 
 		const moneyChangedProps: number[] = [startMoney];
-		const timeChangedProps: number[] = [];
+		const timeChangedProps: string[] = [];
 		let money = startMoney;
 		let dataset: Dataset = {
 			data: [],
@@ -146,12 +156,11 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			return new Date(a.time_data).getTime() - new Date(b.time_data).getTime();
 		});
 
-		const timeExtractors: Record<string, (date: Date) => number> = {
-			day: (date: Date) => date.getDate(),
-			month: (date: Date) => date.getMonth(),
-			year: (date: Date) => date.getFullYear(),
-			minutes: (date: Date) => date.getMinutes(),
-			hour: (date: Date) => date.getHours(),
+		const timeExtractors: Record<string, (date: Date) => string> = {
+			day: (date: Date) => date.getDate().toString(),
+			month: (date: Date) => date.getMonth().toString(),
+			year: (date: Date) => date.getFullYear().toString(),
+			time: (date: Date) => `${date.getHours()}:${getMinutesFromDate(date)}`
 		};
 
 		if (!selectTimeType) {
@@ -176,14 +185,8 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 				moneyChangedProps[moneyChangedProps.length - 1] = getGraphicChagedMoney(moneyMoovment);
 			}
 		});
-		
-		const timeChangePropsStringArr: string[] = [];
 
-		timeChangedProps.forEach((element) => {
-			timeChangePropsStringArr.push(element.toString());
-		});
-
-		setGraphicLabels(timeChangePropsStringArr);
+		setGraphicLabels(timeChangedProps);
 
 		dataset = {
 			data: moneyChangedProps,
@@ -233,7 +236,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	}, [graphicDatasets]);
 
 	// поочередная загрузка ---------- конец
-	const rusDaysweek = ["День", "Год", "Месяц", "Час", "Минута"];
+	const rusDaysweek = ["День", "Год", "Месяц", "Время"];
 	const selectorTimeTypeProps: SelectorProps<TimeType> = {
 		title: "Выбор интервала для графика",
 		titleDontHave: "Ошибка",
