@@ -79,7 +79,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	// Устанавливает максимальное и минимальное значения календаря
 	const loadCalendarData = (moneyMoovments: MoneyType[]) => {
 		if (moneyMoovments.length > 0) {
-			setMinTimeCalendar(new Date(moneyMoovments[0].time_data).getTime());
+			setMinTimeCalendar(new Date(moneyMoovments[0].time_data).getTime() - 48 * 60 * 60 * 1000);
 			setMaxTimeCalendar(new Date(moneyMoovments[moneyMoovments.length - 1].time_data).getTime());
 		}
 	};
@@ -127,7 +127,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		let dataset: Dataset = {
 			data: [],
 		};
-
 		const getGraphicChagedMoney = (moneyMoovment: MoneyType) => {
 			let moneyChanged = 0;
 			switch (moneyMoovment.moneyMovmentType) {
@@ -140,7 +139,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 					moneyChanged = money;
 					break;
 			}
-
 			return moneyChanged;
 		};
 
@@ -171,7 +169,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		sortedMoneyMoovments.forEach((moneyMoovment) => {
 			const date = new Date(moneyMoovment.time_data);
 			const current = extract(date);
-
 			if (!timeChangedProps.includes(current)) {
 				moneyChangedProps.push(getGraphicChagedMoney(moneyMoovment));
 				timeChangedProps.push(current);
@@ -179,7 +176,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 				moneyChangedProps[moneyChangedProps.length - 1] = getGraphicChagedMoney(moneyMoovment);
 			}
 		});
-
+		
 		const timeChangePropsStringArr: string[] = [];
 
 		timeChangedProps.forEach((element) => {
