@@ -83,3 +83,5 @@ yarn-error.*
 # @end expo-cli
 
 logcat_detailed.log
+
+*.backup

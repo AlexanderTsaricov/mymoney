@@ -38,7 +38,7 @@ function getSumMoney(moneyMoovments: MoneyType[]) {
 }
 
 function getMinutesFromDate(date: Date): string {
-	const minutes = date.getMinutes();
+	const minutes = date.getUTCMinutes();
 
 	if (minutes < 10) {
 		return `0${minutes}`;
@@ -58,6 +58,8 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	const [minTimeCalendar, setMinTimeCalendar] = useState<number>(0);
 	const [maxTimeCalendar, setMaxTimeCalendar] = useState<number>(0);
 	const [showCalendar, setShowCalendar] = useState<boolean>(false);
+	const [selectStartCalendarDate, setSelectStartCalendarDate] = useState<number>(0);
+	const [selectEndCalendarDate, setSelectEndCalendarDate] = useState<number>(0);
 
 	const emptyWalletsProps: SelectorProps<WalletType> = {
 		title: "Выбор кошелька для графика",
@@ -152,15 +154,15 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			return moneyChanged;
 		};
 
-		const sortedMoneyMoovments = [...moneyMoovments].sort((a: MoneyType, b: MoneyType) => {
+		const sortedMoneyMoovments = moneyMoovmentsFromStart.sort((a: MoneyType, b: MoneyType) => {
 			return new Date(a.time_data).getTime() - new Date(b.time_data).getTime();
 		});
 
 		const timeExtractors: Record<string, (date: Date) => string> = {
-			day: (date: Date) => date.getDate().toString(),
-			month: (date: Date) => date.getMonth().toString(),
-			year: (date: Date) => date.getFullYear().toString(),
-			time: (date: Date) => `${date.getHours()}:${getMinutesFromDate(date)}`
+			day: (date: Date) => date.getUTCDate().toString(),
+			month: (date: Date) => date.getUTCMonth().toString(),
+			year: (date: Date) => date.getUTCFullYear().toString(),
+			time: (date: Date) => `${date.getUTCHours()}:${getMinutesFromDate(date)}`,
 		};
 
 		if (!selectTimeType) {
@@ -229,6 +231,12 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			setterGraphicProps(moneyMoovments, selectWallet, startTimeData);
 		}
 	}, [selectTimeType, moneyMoovments]);
+
+	useEffect(() => {
+		if (selectStartCalendarDate != 0 && selectEndCalendarDate != 0 && selectWallet && selectTimeType && moneyMoovments.length > 0) {
+			setterGraphicProps(moneyMoovments, selectWallet, new Date(selectStartCalendarDate), new Date(selectEndCalendarDate));
+		}
+	}, [selectTimeType, moneyMoovments, selectStartCalendarDate, selectEndCalendarDate]);
 	//[selectWallet, selectTimeType, moneyMoovments]
 
 	useEffect(() => {
@@ -252,8 +260,15 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	};
 
 	const selectDatasCollbackCalendar = (result: number[]) => {
-		const selectedStartDate: Date = new Date(result[0]);
-		const selectedEndDate: Date = new Date(result[1]);
+		setSelectStartCalendarDate(result[0]);
+		setSelectEndCalendarDate(result[1]);
+
+		const selectedStartDate = new Date(result[0]);
+		const selectedEndDate = new Date(result[1]);
+
+		console.log("selectStartCalendarDate ISO:", selectedStartDate.toISOString());
+		console.log("selectEndCalendarDate ISO:", selectedEndDate.toISOString());
+
 		if (selectWallet) {
 			setterGraphicProps(moneyMoovments, selectWallet, selectedStartDate, selectedEndDate);
 		}
