@@ -361,7 +361,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	};
 
 	return (
-		<Modal isVisible={showCalendar} swipeDirection="down" onSwipeComplete={() => setShowCalendar(false)} style={{ maxHeight: 516 }}>
+		<Modal isVisible={showCalendar} swipeDirection="down" onSwipeComplete={() => setShowCalendar(false)} style={{ maxHeight: 538 }}>
 			<View style={[pageStyles.headContainer, { borderRadius: 15, borderWidth: 3, marginTop: 100 }]}>
 				<View style={[pageStyles.block, pageStyles.blockAtRow]}>
 					<TouchableOpacity
@@ -479,6 +479,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 						submitDate();
 						setShowCalendar(false);
 					}}
+					disabled={!selectStartDay || !selectEndDay}
 				>
 					<Text style={pageStyles.buttonText}>Применить</Text>
 				</TouchableOpacity>
