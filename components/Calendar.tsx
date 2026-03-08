@@ -334,6 +334,8 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	};
 
 	const formatTimePart = (val: string, max: number): string => {
+		if (val == "0") return "00";
+
 		if (/\D/.test(val)) {
 			return "00";
 		}
