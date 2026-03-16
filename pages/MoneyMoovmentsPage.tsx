@@ -247,12 +247,12 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 			<Selector {...walletSelectorProps} />
 			<Selector {...selectMoneyMoovmentTypeProp} />
 			<Selector {...selectTimeTypeProp} />
-			<View style={{ marginHorizontal: 20 }}>
-				<Text style={[pageStyles.text, { textAlign: "center" }]}>График</Text>
+			<View style={{ marginHorizontal: 20,  }}>
+				<Text style={[pageStyles.text, { textAlign: "center", margin: 10, fontSize: 20 }]}>График</Text>
 			</View>
 			<Graphic labels={graphicProps.labels} data={graphicProps.data} />
 			<View style={{ marginHorizontal: 20 }}>
-				<Text style={[pageStyles.text, { textAlign: "center" }]}>Список денежных потоков</Text>
+				<Text style={[pageStyles.text, { textAlign: "center", margin: 10, fontSize: 20 }]}>Список денежных потоков</Text>
 			</View>
 			{selectWallet && (
 				<View style={{ paddingVertical: 10, display: "flex", flexDirection: "column-reverse" }}>

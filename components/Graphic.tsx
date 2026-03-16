@@ -77,7 +77,7 @@ export default memo(
 		if (checkData({ labels, data })) {
 			return (
 				<View>
-					<Text style={[pageStyles.text, {textAlign: "center"}]}>Нет данных</Text>
+					<Text style={[pageStyles.text, {textAlign: "center"}]}>Нет данных для графика</Text>
 				</View>
 			);
 		} else {
@@ -117,7 +117,7 @@ export default memo(
 				console.error("LineChart render error caught:", e);
 				return (
 					<View>
-						<Text style={[pageStyles.text, {textAlign: "center"}]}>Нет данных</Text>
+						<Text style={[pageStyles.text, {textAlign: "center"}]}>Нет данных для графика</Text>
 					</View>
 				);
 			}
