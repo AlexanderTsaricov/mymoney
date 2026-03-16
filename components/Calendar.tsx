@@ -98,12 +98,12 @@ function getDaysInMonths(month: Month, year: number): Array<number> {
  */
 function getCurrentMonthRange(minTime: number, maxTime: number): [number, number] {
 	const now = new Date();
-	const year = now.getUTCFullYear();
-	const month = now.getUTCMonth();
+	const year = now.getFullYear();
+	const month = now.getMonth();
 
-	// Создаем начало и конец месяца строго в UTC
-	const startOfMonth = Date.UTC(year, month, 1, 0, 0, 0, 0);
-	const endOfMonth = Date.UTC(year, month + 1, 0, 23, 59, 59, 999);
+	// Создаем начало и конец месяца строго
+	const startOfMonth = new Date(year, month, 1, 0, 0, 0, 0).getTime();
+	const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999).getTime();
 
 	const start = Math.max(startOfMonth, minTime);
 	const end = Math.min(endOfMonth, maxTime);
@@ -273,7 +273,7 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 
 	const isInSelectedDays = (day: number) => {
 		if (!selectStartDay || !selectEndDay) return false;
-		const date = new Date(Date.UTC(selectYear, selectMonth, day));
+		const date = new Date(selectYear, selectMonth, day);
 		if (!selectStartDate || !selectEndDate) return false;
 		if (date >= selectStartDate && date <= selectEndDate) {
 			return true;
@@ -284,12 +284,12 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 		if (!selectStartDate) {
 			return false;
 		}
-		const date = new Date(Date.UTC(selectYear, selectMonth, day));
+		const date = new Date(selectYear, selectMonth, day);
 		return date.getTime() == selectStartDate.getTime();
 	};
 
 	const isAfterStartWallet = (day: number) => {
-		const time = new Date(Date.UTC(selectYear, selectMonth, day));
+		const time = new Date(selectYear, selectMonth, day);
 
 		if (time.getTime() >= minTime) {
 			return true;
@@ -301,32 +301,34 @@ export default function Calendar<T>({ callbackSelect, showCalendar, setShowCalen
 	const selectingData = (day: number) => {
 		if (selectStartDay && !selectEndDay) {
 			setSelectEndDay(day);
-			setSelectEndDate(new Date(Date.UTC(selectYear, selectMonth, day, selectEndHours, selectEndMinutes)));
+			setSelectEndDate(new Date(selectYear, selectMonth, day, selectEndHours, selectEndMinutes));
 		} else if (selectStartDay && selectEndDay) {
 			setSelectEndDay(null);
 			setSelectEndDate(null);
 			setSelectStartDay(day);
-			setSelectStartDate(new Date(Date.UTC(selectYear, selectMonth, day, selectStartHour, selectStartMinutes)));
+			setSelectStartDate(new Date(selectYear, selectMonth, day, selectStartHour, selectStartMinutes));
 		} else {
 			setSelectStartDay(day);
-			setSelectStartDate(new Date(Date.UTC(selectYear, selectMonth, day, selectStartHour, selectStartMinutes)));
+			setSelectStartDate(new Date(selectYear, selectMonth, day, selectStartHour, selectStartMinutes));
 		}
 	};
 
 	const submitDate = () => {
 		if (selectStartDate && selectEndDate) {
 			const startDate = new Date(
-				Date.UTC(
-					selectStartDate.getUTCFullYear(),
-					selectStartDate.getUTCMonth(),
-					selectStartDate.getUTCDate(),
-					selectStartHour,
-					selectStartMinutes,
-				),
+				selectStartDate.getFullYear(),
+				selectStartDate.getMonth(),
+				selectStartDate.getDate(),
+				selectStartHour,
+				selectStartMinutes,
 			);
 
 			const endDate = new Date(
-				Date.UTC(selectEndDate.getUTCFullYear(), selectEndDate.getUTCMonth(), selectEndDate.getUTCDate(), selectEndHours, selectEndMinutes),
+				selectEndDate.getFullYear(),
+				selectEndDate.getMonth(),
+				selectEndDate.getDate(),
+				selectEndHours,
+				selectEndMinutes,
 			);
 
 			callbackSelect([startDate.getTime(), endDate.getTime()]);
