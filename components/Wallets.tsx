@@ -75,7 +75,7 @@ export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, sh
 	return (
 		<View style={{ width: "100%" }}>
 			{wallets == null || wallets.length === 0 ? (
-				<Text style={[pageStyles.text]}>У вас нет кошельков</Text>
+				<Text style={[pageStyles.text, {textAlign: "center"}]}>У вас нет кошельков</Text>
 			) : (
 				wallets.map((w, index) => (
 					<View key={index} style={walletBoxStyles}>

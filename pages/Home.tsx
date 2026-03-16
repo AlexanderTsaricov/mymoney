@@ -159,10 +159,10 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		});
 
 		const timeExtractors: Record<string, (date: Date) => string> = {
-			day: (date: Date) => date.getUTCDate().toString(),
-			month: (date: Date) => date.getUTCMonth().toString(),
-			year: (date: Date) => date.getUTCFullYear().toString(),
-			time: (date: Date) => `${date.getUTCHours()}:${getMinutesFromDate(date)}`,
+			day: (date: Date) => date.getDate().toString(),
+			month: (date: Date) => date.getMonth().toString(),
+			year: (date: Date) => date.getFullYear().toString(),
+			time: (date: Date) => `${date.getHours()}:${getMinutesFromDate(date)}`,
 		};
 
 		if (!selectTimeType) {
@@ -178,8 +178,14 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		timeChangedProps.push(extract(startTime));
 
 		sortedMoneyMoovments.forEach((moneyMoovment) => {
-			const date = new Date(moneyMoovment.time_data);
-			const current = extract(date);
+			let date = null;
+			if (moneyMoovment.time_data) {
+				date = new Date(moneyMoovment.time_data);
+			}
+			let current = "--:--";
+			if (date) {
+				current = extract(date);
+			}
 			if (!timeChangedProps.includes(current)) {
 				moneyChangedProps.push(getGraphicChagedMoney(moneyMoovment));
 				timeChangedProps.push(current);
@@ -187,7 +193,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 				moneyChangedProps[moneyChangedProps.length - 1] = getGraphicChagedMoney(moneyMoovment);
 			}
 		});
-
 		setGraphicLabels(timeChangedProps);
 
 		dataset = {
