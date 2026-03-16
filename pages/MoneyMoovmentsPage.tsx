@@ -204,7 +204,7 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 	if (wallets.length == 0) {
 		return (
 			<View style={pageStyles.headContainer}>
-				<Text style={pageStyles.text}>У вас нет кошельков</Text>
+				<Text style={[pageStyles.text, {textAlign: "center", marginTop: 100, fontSize: 25}]}>У вас нет кошельков</Text>
 			</View>
 		);
 	}
