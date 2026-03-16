@@ -91,7 +91,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	// Устанавливает максимальное и минимальное значения календаря
 	const loadCalendarData = (moneyMoovments: MoneyType[]) => {
 		if (moneyMoovments.length > 0) {
-			setMinTimeCalendar(new Date(moneyMoovments[0].time_data).getTime() - 48 * 60 * 60 * 1000);
+			setMinTimeCalendar(new Date(moneyMoovments[0].time_data).getTime() - 24 * 60 * 60 * 1000);
 			setMaxTimeCalendar(new Date(moneyMoovments[moneyMoovments.length - 1].time_data).getTime());
 		}
 	};
@@ -174,7 +174,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 		if (!extract) {
 			throw new Error("Unknown time type: " + selectTimeType);
 		}
-
+		
 		timeChangedProps.push(extract(startTime));
 
 		sortedMoneyMoovments.forEach((moneyMoovment) => {
