@@ -242,7 +242,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 			setterGraphicProps(moneyMoovments, selectWallet, new Date(selectStartCalendarDate), new Date(selectEndCalendarDate));
 		}
 	}, [selectTimeType, moneyMoovments, selectStartCalendarDate, selectEndCalendarDate]);
-	//[selectWallet, selectTimeType, moneyMoovments]
 
 	useEffect(() => {
 		setLoading(false);
@@ -270,9 +269,6 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 
 		const selectedStartDate = new Date(result[0]);
 		const selectedEndDate = new Date(result[1]);
-
-		console.log("selectStartCalendarDate ISO:", selectedStartDate.toISOString());
-		console.log("selectEndCalendarDate ISO:", selectedEndDate.toISOString());
 
 		if (selectWallet) {
 			setterGraphicProps(moneyMoovments, selectWallet, selectedStartDate, selectedEndDate);
