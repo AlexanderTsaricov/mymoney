@@ -156,11 +156,11 @@ export default function CurrenciesPage({ money }: CurrenciesPageProps) {
 								</TouchableOpacity>
 							</View>
 							<View style={pageStyles.block}>
-								<Text style={pageStyles.text}>Дополнительные валюты</Text>
+								<Text style={[pageStyles.text, {fontSize: 20}]}>Валюты</Text>
 								<Form {...formNewCurrencyProps} />
-								<View>
+								<View style={{marginTop: 20}}>
 									{currencies.length == 0 ? (
-										<Text style={[pageStyles.text, { color: "red" }]}>У вас нет дополнительных валют</Text>
+										<Text style={[pageStyles.text, { color: "red" }]}>У вас нет валют</Text>
 									) : (
 										currencies.map((currency) => (
 											<CurrecyCourse
