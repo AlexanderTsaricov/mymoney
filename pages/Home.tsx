@@ -116,7 +116,7 @@ const Home: React.FC<HomeProps> = ({ money }) => {
 	};
 
 	const setterGraphicProps = async (moneyMoovments: MoneyType[], wallet: WalletType, startTime: Date, endTime: Date | null = null) => {
-		console.log("startTime", startTime);
+		
 		let moneyMoovmentsFromStart = moneyMoovments.filter((moneyMoovment) => {
 			const moneyMoovmentDate = new Date(moneyMoovment.time_data).getTime();
 

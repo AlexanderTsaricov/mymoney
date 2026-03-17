@@ -16,6 +16,7 @@ import CurrencyManage from "./pages/CurrencyManage";
 import HeadCurrencyManage from "./pages/HeadCurrencyManage";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import MoneyMoovmentsPage from "./pages/MoneyMoovmentsPage";
+import ReceiptScanner from "./pages/ReceiptScanner";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,7 +26,8 @@ const screens = [
 	{ name: "Доходы", component: IncomePage },
 	{ name: "Расходы", component: ExpencesPage },
 	{ name: "Валюты", component: CurrenciesPage },
-	{ name: "Потоки денег", component: MoneyMoovmentsPage }
+	{ name: "Потоки денег", component: MoneyMoovmentsPage },
+	{ name: "Сканер чеков", component: ReceiptScanner },
 ];
 
 function ErrorFallback({ error }: FallbackProps) {
@@ -44,16 +46,35 @@ export default function App() {
 			<View>
 				<Text>Загрузка...</Text>
 			</View>
-		)
+		);
 	}
 	return (
-		<ErrorBoundary FallbackComponent={ErrorFallback}>
-			<NavigationContainer>
-				<Stack.Navigator>
-					{screens.map((screen) => (
+		<View style={{ flex: 1 }}>
+			<ErrorBoundary FallbackComponent={ErrorFallback}>
+				<NavigationContainer>
+					<Stack.Navigator>
+						{screens.map((screen) => (
+							<Stack.Screen
+								key={screen.name}
+								name={screen.name}
+								options={{
+									header: ({ navigation }) => (
+										<View style={headerStyles.container}>
+											<Text style={headerStyles.text}>MyMoney</Text>
+											<TouchableOpacity onPress={() => navigation.navigate("Меню")}>
+												<Image source={require("./storage/icons/menu.png")} style={{ width: 30, height: 30 }} />
+											</TouchableOpacity>
+										</View>
+									),
+								}}
+							>
+								{() => <screen.component money={money} />}
+							</Stack.Screen>
+						))}
+
+						{/* экран меню */}
 						<Stack.Screen
-							key={screen.name}
-							name={screen.name}
+							name="Меню"
 							options={{
 								header: ({ navigation }) => (
 									<View style={headerStyles.container}>
@@ -65,70 +86,53 @@ export default function App() {
 								),
 							}}
 						>
-							{() => <screen.component money={money} />}
+							{({ navigation }) => <Menu navigation={navigation} screens={screens} />}
 						</Stack.Screen>
-					))}
-
-					{/* экран меню */}
-					<Stack.Screen
-						name="Меню"
-						options={{
-							header: ({ navigation }) => (
-								<View style={headerStyles.container}>
-									<Text style={headerStyles.text}>MyMoney</Text>
-									<TouchableOpacity onPress={() => navigation.navigate("Меню")}>
-										<Image source={require("./storage/icons/menu.png")} style={{ width: 30, height: 30 }} />
-									</TouchableOpacity>
-								</View>
-							),
-						}}
-					>
-						{({ navigation }) => <Menu navigation={navigation} screens={screens} />}
-					</Stack.Screen>
-					<Stack.Screen
-						name="Управление валютой"
-						options={{
-							header: ({ navigation }) => (
-								<View style={headerStyles.container}>
-									<Text style={headerStyles.text}>MyMoney</Text>
-									<TouchableOpacity onPress={() => navigation.navigate("Меню")}>
-										<Image source={require("./storage/icons/menu.png")} style={{ width: 30, height: 30 }} />
-									</TouchableOpacity>
-								</View>
-							),
-						}}
-					>
-						{({ navigation, route }) => {
-							const currency = (route.params as { currency?: Currency } | undefined)?.currency;
-							if (!currency) {
-								return (
-									<View>
-										<Text>Нет данных для валюты</Text>
+						<Stack.Screen
+							name="Управление валютой"
+							options={{
+								header: ({ navigation }) => (
+									<View style={headerStyles.container}>
+										<Text style={headerStyles.text}>MyMoney</Text>
+										<TouchableOpacity onPress={() => navigation.navigate("Меню")}>
+											<Image source={require("./storage/icons/menu.png")} style={{ width: 30, height: 30 }} />
+										</TouchableOpacity>
 									</View>
-								);
-							}
-							return <CurrencyManage money={money} currency={currency} navigation={navigation} />;
-						}}
-					</Stack.Screen>
-					<Stack.Screen
-						name="Управление основной валютой"
-						options={{
-							header: ({ navigation }) => (
-								<View style={headerStyles.container}>
-									<Text style={headerStyles.text}>MyMoney</Text>
-									<TouchableOpacity onPress={() => navigation.navigate("Меню")}>
-										<Image source={require("./storage/icons/menu.png")} style={{ width: 30, height: 30 }} />
-									</TouchableOpacity>
-								</View>
-							),
-						}}
-					>
-						{({ navigation }) => {
-							return <HeadCurrencyManage money={money} navigation={navigation} />;
-						}}
-					</Stack.Screen>
-				</Stack.Navigator>
-			</NavigationContainer>
-		</ErrorBoundary>
+								),
+							}}
+						>
+							{({ navigation, route }) => {
+								const currency = (route.params as { currency?: Currency } | undefined)?.currency;
+								if (!currency) {
+									return (
+										<View>
+											<Text>Нет данных для валюты</Text>
+										</View>
+									);
+								}
+								return <CurrencyManage money={money} currency={currency} navigation={navigation} />;
+							}}
+						</Stack.Screen>
+						<Stack.Screen
+							name="Управление основной валютой"
+							options={{
+								header: ({ navigation }) => (
+									<View style={headerStyles.container}>
+										<Text style={headerStyles.text}>MyMoney</Text>
+										<TouchableOpacity onPress={() => navigation.navigate("Меню")}>
+											<Image source={require("./storage/icons/menu.png")} style={{ width: 30, height: 30 }} />
+										</TouchableOpacity>
+									</View>
+								),
+							}}
+						>
+							{({ navigation }) => {
+								return <HeadCurrencyManage money={money} navigation={navigation} />;
+							}}
+						</Stack.Screen>
+					</Stack.Navigator>
+				</NavigationContainer>
+			</ErrorBoundary>
+		</View>
 	);
 }

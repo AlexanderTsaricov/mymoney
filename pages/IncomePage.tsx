@@ -145,8 +145,8 @@ export default function IncomePage({ money }: IncomeProps) {
 	return (
 		<KeyboardAwareScrollView
 			style={pageStyles.headContainer}
-			contentContainerStyle={{ paddingBottom: 40 }}
-			extraScrollHeight={20}
+			contentContainerStyle={{ paddingBottom: 20 }}
+			extraScrollHeight={120}
 			enableOnAndroid={true}
 			keyboardShouldPersistTaps="handled"
 		>
