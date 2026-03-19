@@ -69,15 +69,22 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 
 	function getMoovmentTypeNameById(id: number, type: moneyMoovmentTypeType): string {
 		try {
+			console.log("moneyMoovmentsByWallet", moneyMoovmentsByWallet);
 			if (type == "expences") {
 				const typeMoovment = moneyMoovmentTypesExpences.find((type) => type.id == id);
+				console.log(moneyMoovmentTypesExpences);
+				console.log(id);
+				console.log(typeMoovment);
 				if (typeMoovment) {
 					return typeMoovment.name;
 				} else {
 					return "";
 				}
 			} else if (type == "incomes") {
+				console.log(moneyMoovmentTypesExpences);
+				console.log(id);
 				const typeMoovment = moneyMoovmentTypesIncomes.find((type) => type.id == id);
+				console.log(typeMoovment);
 				if (typeMoovment) {
 					return typeMoovment.name;
 				} else {

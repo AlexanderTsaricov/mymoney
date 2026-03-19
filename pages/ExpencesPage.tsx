@@ -122,7 +122,6 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 		submitTextButton: "Добавить расход",
 		submitOnPress: async () => {
 			if (sum.length == 0) return;
-			if (comment.length == 0) return;
 			if (selectExpenceType == null) return;
 			if (selectWallet == null) return;
 			if (selectWallet.id == null) return;
@@ -133,7 +132,7 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 				money: parseFloat(sum),
 				time_data: new Date().toString(),
 				comment: comment,
-				type: 0,
+				type: selectExpenceType.id,
 				wallet_id: selectWallet.id,
 				moneyMovmentType: "expences",
 				currency_id: selectCurrency.id,

@@ -100,7 +100,6 @@ export default function IncomePage({ money }: IncomeProps) {
 		submitTextButton: "Добавить доход",
 		submitOnPress: async () => {
 			if (sum.length == 0) return;
-			if (comment.length == 0) return;
 			if (selectIncomeType == null) return;
 			if (selectWallet == null) return;
 			if (selectWallet.id == null) return;
@@ -111,7 +110,7 @@ export default function IncomePage({ money }: IncomeProps) {
 				money: parseFloat(sum),
 				time_data: new Date().toString(),
 				comment: comment,
-				type: 0,
+				type: selectIncomeType.id,
 				wallet_id: selectWallet.id,
 				moneyMovmentType: "income",
 				currency_id: selectCurrency.id,
