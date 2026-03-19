@@ -70,16 +70,16 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 	function getMoovmentTypeNameById(id: number, type: moneyMoovmentTypeType): string {
 		try {
 			if (type == "expences") {
-				const type = moneyMoovmentTypesExpences.find((type) => type.id == id);
-				if (type) {
-					return type.name;
+				const typeMoovment = moneyMoovmentTypesExpences.find((type) => type.id == id);
+				if (typeMoovment) {
+					return typeMoovment.name;
 				} else {
 					return "";
 				}
 			} else if (type == "incomes") {
-				const type = moneyMoovmentTypesIncomes.find((type) => type.id == id);
-				if (type) {
-					return type.name;
+				const typeMoovment = moneyMoovmentTypesIncomes.find((type) => type.id == id);
+				if (typeMoovment) {
+					return typeMoovment.name;
 				} else {
 					return "";
 				}
