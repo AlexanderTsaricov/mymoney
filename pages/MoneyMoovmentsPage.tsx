@@ -70,9 +70,19 @@ export default function MoneyMoovmentsPage({ money }: MoneyMoovmentsPageProps) {
 	function getMoovmentTypeNameById(id: number, type: moneyMoovmentTypeType): string {
 		try {
 			if (type == "expences") {
-				return moneyMoovmentTypesExpences[id].name;
+				const type = moneyMoovmentTypesExpences.find((type) => type.id == id);
+				if (type) {
+					return type.name;
+				} else {
+					return "";
+				}
 			} else if (type == "incomes") {
-				return moneyMoovmentTypesIncomes[id].name;
+				const type = moneyMoovmentTypesIncomes.find((type) => type.id == id);
+				if (type) {
+					return type.name;
+				} else {
+					return "";
+				}
 			} else {
 				return "";
 			}
