@@ -7,12 +7,13 @@ type ModalMessageProp = {
     message: string;
     show: boolean;
     callbackIfOk?: () => void;
+    style?: object;
 }
 
 export default function ModalMessage (prop: ModalMessageProp) {
     const [show, setShow] = useState<boolean>(prop.show)
     return (
-        <Modal isVisible={show}>
+        <Modal isVisible={show} style={prop.style}>
             <Text style={pageStyles.text}>{prop.message}</Text>
             <TouchableOpacity style={pageStyles.button} onPress={() => {
                 if (prop.callbackIfOk) {
