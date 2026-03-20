@@ -8,6 +8,7 @@ import Selector, { SelectorProps } from "../components/Selector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { MoneyMoovmentTypes } from "../components/MoneyMoovmentTypes";
 import Form, { FormProps, InputBySelector, InputByText } from "../components/Form";
+import ModalMessage from "../components/ModalMessage";
 
 type moneyMoovmentProps = {
 	money: Money;
@@ -30,6 +31,7 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 	const [selectExpenceType, setSelectExpenceType] = useState<MoneyMoovmentType | null>(null);
 	const [currencies, setCurrencies] = useState<Currency[]>([]);
 	const [selectCurrency, setSelectCurrency] = useState<Currency | null>(null);
+	const [showModalMessage, setShowModalMessage] = useState<boolean>(false);
 
 	useEffect(() => {
 		const loadWallets = async () => {
@@ -144,6 +146,7 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 					console.error(result.message);
 				} else {
 					console.log(result.message);
+					setShowModalMessage(true);
 				}
 			} catch (error) {
 				console.error(error);
@@ -151,6 +154,11 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 		},
 	};
 	// Форма добавления расходов (конец) -----------------------------------------
+
+	const clearForm = () => {
+		onChangeSum("");
+		onChangeComment("");
+	};
 
 	return (
 		<KeyboardAwareScrollView
@@ -161,6 +169,14 @@ export default function ExpencesPage({ money }: moneyMoovmentProps) {
 			keyboardShouldPersistTaps="handled"
 		>
 			<ScrollView>
+				<ModalMessage
+					message="Расход добавлен"
+					show={showModalMessage}
+					setShow={setShowModalMessage}
+					style={pageStyles.messageModal}
+					callbackIfOk={clearForm}
+				/>
+
 				<View style={pageStyles.block}>
 					<Text style={pageStyles.text}>Расходы</Text>
 					<Form {...formProps} />

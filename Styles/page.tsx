@@ -157,5 +157,17 @@ export const pageStyles = StyleSheet.create({
 	debugMod: {
 		borderColor: "red",
 		borderWidth: 2
+	},
+
+	messageModal: {
+		backgroundColor: "#a68ebf",
+		padding: 10,
+		borderRadius: 5,
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: "center",
+		alignContent: "center",
+		alignItems: "center",
+		gap: 10
 	}
 });

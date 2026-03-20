@@ -8,6 +8,7 @@ import Selector, { SelectorProps } from "../components/Selector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { MoneyMoovmentTypes } from "../components/MoneyMoovmentTypes";
 import Form, { FormProps, InputBySelector, InputByText } from "../components/Form";
+import ModalMessage, { ModalMessageProp } from "../components/ModalMessage";
 
 type IncomeProps = {
 	money: Money;
@@ -29,6 +30,7 @@ export default function IncomePage({ money }: IncomeProps) {
 	const [selectIncomeType, setSelectIncomeType] = useState<MoneyMoovmentType | null>(null);
 	const [currencies, setCurrencies] = useState<Currency[]>([]);
 	const [selectCurrency, setSelectCurrency] = useState<Currency | null>(null);
+	const [showModalMessage, setShowModalMessage] = useState<boolean>(false);
 
 	const loadWallets = async () => {
 		const data = await money.wallet.getAllWallets();
@@ -122,6 +124,7 @@ export default function IncomePage({ money }: IncomeProps) {
 					console.error(result.message);
 				} else {
 					console.log(result.message);
+					setShowModalMessage(true);
 				}
 			} catch (error) {
 				console.error(error);
@@ -141,6 +144,11 @@ export default function IncomePage({ money }: IncomeProps) {
 		allLoading();
 	}, [money]);
 
+	const clearForm = () => {
+		onChangeSum("");
+		onChangeComment("");
+	};
+
 	return (
 		<KeyboardAwareScrollView
 			style={pageStyles.headContainer}
@@ -152,38 +160,47 @@ export default function IncomePage({ money }: IncomeProps) {
 			{loading ? (
 				<Text style={pageStyles.text}>Загрузка...</Text>
 			) : (
-				<ScrollView>
-					<View style={pageStyles.block}>
-						<Text style={pageStyles.text}>Доходы</Text>
-						<Form {...formNewIncomeProps} />
-					</View>
-					<View style={pageStyles.block}>
-						<Text style={pageStyles.text}>Типы доходов</Text>
-						<View style={pageStyles.blockAtRow}>
-							<TextInput
-								placeholder="Название типа"
-								value={newIncomeName}
-								onChangeText={setNewIncome}
-								style={[pageStyles.inputText, pageStyles.flexChild, isIncomeNameFocused && pageStyles.inputTextFocus]}
-								onFocus={() => setIncomeNameIsFocused(true)}
-								onBlur={() => setIncomeNameIsFocused(false)}
-								placeholderTextColor={"#a68ebf"}
-							/>
-							<TouchableOpacity
-								style={[pageStyles.button, pageStyles.flexChild, { maxWidth: 50, height: 38 }]}
-								onPress={async () => {
-									await money.income.addNewTypeIncome(newIncomeName);
-									const newIncomeTypes = await money.income.getIncomesTypes();
-
-									setIncomeTypes(newIncomeTypes);
-								}}
-							>
-								<Text style={pageStyles.buttonText}>✚</Text>
-							</TouchableOpacity>
+				<View>
+					<ModalMessage
+						message="Доход добавлен"
+						show={showModalMessage}
+						setShow={setShowModalMessage}
+						style={pageStyles.messageModal}
+						callbackIfOk={clearForm}
+					/>
+					<ScrollView>
+						<View style={pageStyles.block}>
+							<Text style={pageStyles.text}>Доходы</Text>
+							<Form {...formNewIncomeProps} />
 						</View>
-						<MoneyMoovmentTypes money={money} moov={incomeTypes} setMoovTypes={setIncomeTypes} showButton={true} type="income" />
-					</View>
-				</ScrollView>
+						<View style={pageStyles.block}>
+							<Text style={pageStyles.text}>Типы доходов</Text>
+							<View style={pageStyles.blockAtRow}>
+								<TextInput
+									placeholder="Название типа"
+									value={newIncomeName}
+									onChangeText={setNewIncome}
+									style={[pageStyles.inputText, pageStyles.flexChild, isIncomeNameFocused && pageStyles.inputTextFocus]}
+									onFocus={() => setIncomeNameIsFocused(true)}
+									onBlur={() => setIncomeNameIsFocused(false)}
+									placeholderTextColor={"#a68ebf"}
+								/>
+								<TouchableOpacity
+									style={[pageStyles.button, pageStyles.flexChild, { maxWidth: 50, height: 38 }]}
+									onPress={async () => {
+										await money.income.addNewTypeIncome(newIncomeName);
+										const newIncomeTypes = await money.income.getIncomesTypes();
+
+										setIncomeTypes(newIncomeTypes);
+									}}
+								>
+									<Text style={pageStyles.buttonText}>✚</Text>
+								</TouchableOpacity>
+							</View>
+							<MoneyMoovmentTypes money={money} moov={incomeTypes} setMoovTypes={setIncomeTypes} showButton={true} type="income" />
+						</View>
+					</ScrollView>
+				</View>
 			)}
 		</KeyboardAwareScrollView>
 	);
