@@ -8,6 +8,7 @@ import { Currency, MoneyMoovmentType, MoneyType, WalletType } from "../storage/S
 import { Money } from "../models/Money";
 import Selector, { SelectorProps } from "../components/Selector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import ModalMessage from "../components/ModalMessage";
 
 type TextBlock = {
 	text: string;
@@ -48,6 +49,7 @@ export default function ReceiptScanner({ money }: ReceiptScannerProps) {
 	const [selectCurrency, setSelectCurrency] = useState<Currency | null>(null);
 	const [currencies, setCurrencies] = useState<Currency[]>([]);
 	const [comment, onChangeComment] = useState("");
+	const [showModalMessage, setShowModalMessage] = useState<boolean>(false);
 
 	const loadIncomeTypes = async () => {
 		const data = await money.income.getIncomesTypes();
@@ -96,8 +98,29 @@ export default function ReceiptScanner({ money }: ReceiptScannerProps) {
 	}
 
 	const extractPrices = (text: string): string[] => {
-		const matches = text.match(/\d+[.,]\d{2}/g);
-		return matches ?? [];
+		const withoutDates = text.replace(/\b\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\b/g, "").replace(/\b\d{4}[./-]\d{1,2}[./-]\d{1,2}\b/g, "");
+
+		const priceRegex = /\b\d{1,4}(?:\s?\d{3})*[.,\s]\d{2}\b/g;
+
+		const matches = withoutDates.match(priceRegex) || [];
+
+		return matches
+			.map((raw) => {
+				let cleaned = raw.replace(/\s+/g, "");
+				cleaned = cleaned.replace(",", ".");
+
+				if (/^\d+\.\d{2}$/.test(cleaned)) return cleaned;
+
+				if (/^\d{3,}$/.test(cleaned)) {
+					const lastTwo = cleaned.slice(-2);
+					const rest = cleaned.slice(0, -2);
+					return `${rest}.${lastTwo}`;
+				}
+
+				return null;
+			})
+			.filter((v) => v !== null)
+			.filter((v) => parseFloat(v!) > 0) as string[];
 	};
 
 	const takePhoto = async (): Promise<void> => {
@@ -204,6 +227,8 @@ export default function ReceiptScanner({ money }: ReceiptScannerProps) {
 				console.error(result.message);
 			} else {
 				console.log(result.message);
+				setSum(0);
+				setShowModalMessage(true);
 			}
 		} catch (error) {
 			console.error(error);
@@ -218,6 +243,7 @@ export default function ReceiptScanner({ money }: ReceiptScannerProps) {
 			extraScrollHeight={320}
 			keyboardShouldPersistTaps="handled"
 		>
+			<ModalMessage message="Денежный поток добавлен" show={showModalMessage} setShow={setShowModalMessage} style={pageStyles.messageModal} />
 			{parsedText.map((line, index) => (
 				<View key={index} style={[pageStyles.blockAtRow, { justifyContent: "space-between", margin: 10 }]}>
 					<Text style={[pageStyles.text, { fontSize: 20 }]}>Сумма: {line.price}</Text>
@@ -240,11 +266,11 @@ export default function ReceiptScanner({ money }: ReceiptScannerProps) {
 				<Selector {...selectorCurrencyProps} />
 				<View style={pageStyles.blockAtRow}>
 					<Text style={[pageStyles.text, { fontSize: 20, marginRight: 5 }]}>Комментарий</Text>
-					<TextInput style={[pageStyles.inputText, { width: 200 }]} value={comment} onChangeText={onChangeComment}/>
+					<TextInput style={[pageStyles.inputText, { width: 200 }]} value={comment} onChangeText={onChangeComment} />
 				</View>
-				<TouchableOpacity style={[pageStyles.button, {marginBottom: 10, marginTop: 10}]} onPress={submitOnPress}>
-				<Text style={pageStyles.buttonText}>Добавить денежный поток</Text>
-			</TouchableOpacity>
+				<TouchableOpacity style={[pageStyles.button, { marginBottom: 10, marginTop: 10 }]} onPress={submitOnPress}>
+					<Text style={pageStyles.buttonText}>Добавить денежный поток</Text>
+				</TouchableOpacity>
 			</View>
 		</KeyboardAwareScrollView>
 	) : (
