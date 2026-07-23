@@ -3,6 +3,7 @@ import { Money } from "../models/Money";
 import { pageStyles } from "../Styles/page";
 import { Currency, WalletType } from "../storage/StorageHandle";
 import { useEffect, useState } from "react";
+import { moneyToStingIntepretator, floatMoneyInterpretator, moneyInterpretator } from "../system/fn";
 
 type WalletsProps = {
 	money: Money;
@@ -35,6 +36,7 @@ export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, sh
 
 	useEffect(() => {
 		loadCurrencies();
+		console.log("wallets", wallets);
 	}, [wallets]);
 
 	useEffect(() => {
@@ -58,33 +60,30 @@ export const Wallets: React.FC<WalletsProps> = ({ money, wallets, setWallets, sh
 		alignContent: "center",
 		alignItems: "center",
 		gap: 10,
-		marginTop: 10
+		marginTop: 10,
 	};
 
-	const walletTextBoxStyles: StyleProp<ViewStyle> = {width: 150};
+	const walletTextBoxStyles: StyleProp<ViewStyle> = { width: 150 };
 
-	const walletTextStyles: StyleProp<TextStyle> = [
-		pageStyles.text, { maxWidth: 150, flexShrink: 1 }
-	];
+	const walletTextStyles: StyleProp<TextStyle> = [pageStyles.text, { maxWidth: 150, flexShrink: 1 }];
 
 	if (!showButton) {
-		walletTextStyles[1] = {maxWidth: "auto"}
+		walletTextStyles[1] = { maxWidth: "auto" };
 		walletTextBoxStyles.width = "100%";
-	};
+	}
 
 	return (
 		<View style={{ width: "100%" }}>
 			{wallets == null || wallets.length === 0 ? (
-				<Text style={[pageStyles.text, {textAlign: "center"}]}>У вас нет кошельков</Text>
+				<Text style={[pageStyles.text, { textAlign: "center" }]}>У вас нет кошельков</Text>
 			) : (
 				wallets.map((w, index) => (
 					<View key={index} style={walletBoxStyles}>
 						<View style={walletTextBoxStyles}>
-							<Text style={walletTextStyles}>
-								{w.name}: 
-							</Text>
-							<Text style={pageStyles.text}>
-								Баланс: {w.moneyCount}{" "} {w.id !== null && currenciesByWallets ? (currenciesByWallets as CurrencyByWallet)[w.id as number]?.short_name : ""}
+							<Text style={walletTextStyles}>{w.name}:</Text>
+							<Text style={[pageStyles.text]}>
+								Баланс: <Text style={[pageStyles.text, w.moneyCount > 0 ? pageStyles.greenText : pageStyles.redText]}>{moneyInterpretator(w.moneyCount)}{" "}</Text>
+								{w.id !== null && currenciesByWallets ? (currenciesByWallets as CurrencyByWallet)[w.id as number]?.short_name : ""}
 							</Text>
 						</View>
 						{showButton && (

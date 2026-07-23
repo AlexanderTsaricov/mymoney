@@ -15,6 +15,14 @@ export const pageStyles = StyleSheet.create({
 		textShadowRadius: 1,
 	},
 
+	redText: {
+		color: "#f07474"
+	},
+
+	greenText: {
+		color: "#6df37a"
+	},
+
 	block: {
 		width: "100%",
 		paddingVertical: 14,
